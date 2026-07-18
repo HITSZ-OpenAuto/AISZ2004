@@ -1,97 +1,108 @@
 # 课程名称
-course_name = "课程中文名称"
+course_name = "信息论"
 
 # 仓库类型: normal | multi-project
 repo_type = "normal"
 
 # 课程代码 (用于检索)
-course_code = "CODE1234"
+course_code = "AISZ2004"
 
 # 课程简介
 description = """
-在这里填写课程的简要介绍。
-可以换行。
+信息论（Information Theory），2 学分，理论课，总学时 32。开课单位：信息科学与技术学院。面向人工智能院士班。讲授信息度量、信源编码、信道编码与率失真等经典内容。
 """
 
 # ===== 章节列表 =====
 [[sections]]
+title = "基本信息"
+
+[[sections.items]]
+content = """
+【学分】：2
+【学时构成】：理论学时 32
+【成绩构成】：平时 30% | 期末考试 70%
+"""
+
+[[sections]]
 title = "考核方式"
 
-# 第一条内容
 [[sections.items]]
 content = """
-• 平时成绩: 30%
-• 期中考试: 30%
-• 期末考试: 40%
-"""
-# author 是可选的
-author = { name = "昵称A", date = "2025-03" }
+本课程与其他集群开设的「信息论导论」不同。
 
-# 第二条内容（同一章节下多条）
+- 平时成绩：30%（点名 + 作业）
+- 期末考试：70%（闭卷）
+- 期末侧重概念关系与思路；课堂曾强调噪声信道编码定理、Kraft / Huffman / Hamming、马尔可夫熵率、信道容量与高斯信道等
+"""
+author = { name = "aqua", link = "https://github.com/marine-aqua", date = "2026-07" }
+
+[[sections]]
+title = "教材与参考书"
+
 [[sections.items]]
 content = """
-• 2024年: 期末 60% + 平时 40%
+本课内容脉络与常见信息论教材相近，但更重要的学习材料是**教师课件**——作业与期末题均出自课件，老师在课件上投入很大；也没有另行发放纸质讲义。课件因版权原因不上传本仓库。
+
+公开参考材料（据课堂整理，供拓展阅读）：
+
+- 课程要点脉络：Duke 信息论相关 PPT
+- 前期（至噪声信道编码定理）：David MacKay, *Information Theory, Inference, and Learning Algorithms*
+- 后期：Stanford 信息论课程讲义
 """
-author = { name = "昵称B", date = "2024-01" }
+author = { name = "aqua", link = "https://github.com/marine-aqua", date = "2026-07" }
 
 [[sections]]
 title = "学习资料"
 
 [[sections.items]]
 content = """
-• 教材: 《书名》
-• 参考资料链接
+- 本仓库：考试笔记、分章节习题集（`notes/`）；期末回忆卷（`exams/`）
+- 复习网站与章节测试（外链，非本仓维护）：[MukioXun/AISZ-23-CS-Review-Materials](https://github.com/MukioXun/AISZ-23-CS-Review-Materials)
 """
+author = { name = "aqua", link = "https://github.com/marine-aqua", date = "2026-07" }
 
-# ===== 教师评价 (新 schema) =====
-# 顺序: lecturers.intro → lecturers.items → lecturers.summary
+[[sections]]
+title = "课程内容"
+
+[[sections.items]]
+content = """
+大致覆盖（按照 2026 春实际授课情况总结，供参考）：
+
+- 信息度量：熵、条件熵、互信息、KL 散度、交叉熵
+- 不等式与凹凸性：Jensen、log-sum、Gibbs；熵与互信息的凹凸性
+- 信源编码：AEP（IID / 平稳遍历）、熵率与马尔可夫、Kraft、变长编码、Huffman
+- 信道编码：数据处理不等式与 Fano、信道容量与联合典型性、噪声信道编码定理、高斯信道与水填充、Hamming 码
+- 有损压缩与综合：率失真、信源–信道分离；略及 VAE 与信息论的联系
+"""
+author = { name = "aqua", link = "https://github.com/marine-aqua", date = "2026-07" }
+
+[[sections]]
+title = "课程建议"
+
+[[sections.items]]
+content = """
+- 更重要的是概念和思路要清楚，而不是死记公式；按往年题型，证明比重并不大
+- 复习以课件与作业为主；本仓库笔记、分章节习题集与期末回忆卷可作补充
+- 教师课件因版权问题，不上传至仓库
+"""
+author = { name = "aqua", link = "https://github.com/marine-aqua", date = "2026-07" }
+
+# ===== 教师评价 =====
 [lecturers]
 
-# 教师简介 (在教师列表之前，可以多条)
 [[lecturers.intro]]
 content = """
-教师团队总体介绍。
-人数: 3人
+白方，哈尔滨工业大学（深圳）教授、博士生导师。研究方向包括几何优化、3D 感知、医疗影像导航与空间计算等。
 """
-author = { name = "管理员", date = "2025-01" }
-
-[[lecturers.intro]]
-content = """
-研究方向: 机器学习、计算机视觉
-"""
-author = { name = "管理员", date = "2025-01" }
-
-# 教师列表
-[[lecturers.items]]
-name = "教师A"
-
-[[lecturers.items.reviews]]
-content = """
-教师评价内容。
-可以多行。
-"""
-author = { name = "昵称", link = "https://github.com/xxx", date = "2025-03" }
-
-[[lecturers.items.reviews]]
-content = "另一条评价"
-author = { name = "匿名", date = "2025-01" }
+author = { name = "aqua", link = "https://github.com/marine-aqua", date = "2026-07" }
 
 [[lecturers.items]]
-name = "教师B"
+name = "白方"
 
 [[lecturers.items.reviews]]
-content = "教师B的评价"
-author = { name = "学生", date = "2024-12" }
-
-# 教师总结 (在教师列表之后，可以多条)
-[[lecturers.summary]]
 content = """
-教师团队总结。
-整体教学水平较高。
-"""
-author = { name = "管理员", date = "2025-01" }
+2025 年底入职哈工深后首开本课，课业与科研任务都重，状态上能感觉到比较辛苦。
 
-[[lecturers.summary]]
-content = """
-建议: 尽早选课，晚了好老师就没了
+老师学习与消化新课的能力很强：此前主要方向并非通信 / 压缩，备课周期据了解也很短，但仍能很快把内容吃透，课堂主线清楚、insight 突出。语速偏快。课堂上常提醒更应抓住思路与直觉，而不必过度纠结数学形式的绝对严谨。
 """
+author = { name = "aqua", link = "https://github.com/marine-aqua", date = "2026-07" }
