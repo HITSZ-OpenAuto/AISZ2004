@@ -1,0 +1,2215 @@
+\documentclass[12pt,a4paper]{ctexart}
+
+% ==== 页面设置 ====
+\usepackage[top=2cm, bottom=2cm, left=2.2cm, right=2.2cm]{geometry}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{enumitem}
+\usepackage[table]{xcolor}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{hyperref}
+\usepackage{multicol}
+\usepackage{bm}
+\usepackage{tcolorbox}
+
+\setlength{\headheight}{14pt}
+
+\tcbuselibrary{breakable, skins}
+
+% ==== 页眉页脚 ====
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small 信息论考试笔记}
+\fancyhead[R]{\small 哈工深 · 人工智能院士班}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% ==== 自定义环境 ====
+\newtheorem{theorem}{定理}[section]
+\newtheorem{lemma}[theorem]{引理}
+\newtheorem{property}[theorem]{性质}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{定义}
+
+\newtcolorbox{keybox}[1][]{
+  breakable,
+  colback=red!5!white,
+  colframe=red!75!black,
+  title={\heiti #1},
+  fonttitle=\bfseries,
+  left=2mm, right=2mm, top=1mm, bottom=1mm
+}
+
+\newtcolorbox{proofbox}{
+  breakable,
+  colback=blue!3!white,
+  colframe=blue!40!black,
+  title={\heiti 证明要点},
+  fonttitle=\bfseries,
+  left=2mm, right=2mm, top=1mm, bottom=1mm
+}
+
+\newtcolorbox{noteskipped}{
+  breakable,
+  colback=gray!5!white,
+  colframe=gray!50!black,
+  title={\heiti 不考内容},
+  fonttitle=\bfseries,
+  left=2mm, right=2mm, top=1mm, bottom=1mm
+}
+
+% ==== 快捷命令 ====
+\newcommand{\EE}{\mathbb{E}}
+\newcommand{\PP}{\mathbb{P}}
+\newcommand{\XX}{\mathcal{X}}
+\newcommand{\YY}{\mathcal{Y}}
+\newcommand{\RR}{\mathbb{R}}
+\newcommand{\DKL}{D_{\mathrm{KL}}}
+\newcommand{\indep}{\perp\!\!\!\perp}
+\newcommand{\iid}{\overset{\text{i.i.d.}}{\sim}}
+
+\title{\Huge\heiti 信息论考试笔记}
+\author{\large 哈工深 · 人工智能院士班 \\[2mm] 授课教师：白方（教授）}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+\thispagestyle{empty}
+\vfill
+\begin{center}
+  \large\heiti 核心参考教材：Cover \& Thomas, \textit{Elements of Information Theory}, 2nd ed.
+\end{center}
+\newpage
+
+\tableofcontents
+\newpage
+
+% ============================================================
+\section{信息度量}
+% ============================================================
+
+\subsection{自信息量}
+
+\begin{definition}[自信息量的公理化推导]
+$I(x) = f(p(x))$ 需满足：
+\begin{enumerate}[label=(\arabic*)]
+  \item $f(p)$ 单调递减——事件概率越小，信息量越大；
+  \item 独立事件：$f(p_1p_2) = f(p_1) + f(p_2)$；
+  \item 连续性：$|p_1-p_2| \to 0 \Rightarrow |f(p_1)-f(p_2)| \to 0$。
+\end{enumerate}
+唯一解：$I(x) = k\log p(x)$，其中 $k < 0$。
+\end{definition}
+
+常用底数对应单位：
+\begin{itemize}[nosep]
+  \item $-\log_2 p(x)$：比特 (bit)
+  \item $-\ln p(x)$：奈特 (nat)
+  \item $-\lg p(x)$：哈特 (hart)
+\end{itemize}
+
+\subsection{熵}
+
+\begin{definition}[信息熵]
+\[
+H(X) = \mathbb{E}_X\left[\log\frac{1}{p(X)}\right] = \sum_X p(x)\log\frac{1}{p(x)} = H(p)
+\]
+\end{definition}
+
+\begin{property}
+\begin{enumerate}[label=(\arabic*),nosep]
+  \item 熵由分布 $p$ 完全确定，与 $X$ 具体取值无关；
+  \item 非负性：$H(p) \geq 0$；
+  \item 顺序无关性：$H(p_1,\ldots,p_i,\ldots,p_j,\ldots,p_q) = H(p_1,\ldots,p_j,\ldots,p_i,\ldots,p_q)$。
+\end{enumerate}
+\end{property}
+
+\begin{keybox}[均匀分布熵最大]
+$H(p) \leq \log|\XX|$，等号当且仅当 $p$ 为均匀分布。
+\end{keybox}
+
+典型值：0-1分布 $H(p) = p\log\frac{1}{p} + (1-p)\log\frac{1}{1-p}$；N等分均匀分布 $H = \log N$。
+
+\subsection{条件熵与联合熵}
+
+\begin{definition}[条件熵]
+\[
+H(X|Y) = \mathbb{E}_{XY}\left[\log\frac{1}{p(X|Y)}\right] = \sum_Y p(y)H(X|Y=y)
+\]
+\end{definition}
+
+充分观测 $Y$ 后 $X$ 剩余的不可预测性。$H(X|Y) \leq H(X)$。
+
+\begin{definition}[联合熵]
+\[
+H(X,Y) = \mathbb{E}_{XY}\left[\log\frac{1}{p(X,Y)}\right]
+\]
+\end{definition}
+
+\begin{theorem}[链式法则]
+\begin{align*}
+H(X,Y) &= H(X) + H(Y|X) = H(Y) + H(X|Y) \\
+H(X,Y|Z) &= H(X|Z) + H(Y|X,Z) \\
+H(X_1,\ldots,X_N) &= \sum_{i=1}^{N} H(X_i | X_{i-1},\ldots,X_1)
+\end{align*}
+\end{theorem}
+
+\subsection{互信息}
+
+\begin{definition}[互信息]
+\[
+I(X;Y) = \sum_{XY} p(x,y) \log\frac{p(x,y)}{p(x)p(y)} = H(X) - H(X|Y) = H(Y) - H(Y|X)
+\]
+\end{definition}
+
+信息增益 = 之前的熵 $-$ 之后的熵 = 不可预测性减少量。
+
+\begin{property}
+\begin{enumerate}[label=(\arabic*),nosep]
+  \item 对称性：$I(X;Y) = I(Y;X)$；
+  \item 非负性：$I(X;Y) \geq 0$，等号当且仅当 $X \indep Y$；
+  \item $I(X;X) = H(X)$；
+  \item $I(X;Y) \leq H(X)$，$I(X;Y) \leq H(Y)$；
+  \item $I(X;Y) = H(X) + H(Y) - H(X,Y)$。
+\end{enumerate}
+\end{property}
+
+\subsection{KL 散度与交叉熵}
+
+\begin{definition}[KL散度]
+\[
+\DKL(p\|q) = \sum_X p(x) \log\frac{p(x)}{q(x)}
+\]
+\end{definition}
+
+非负性：$\DKL(p\|q) \geq 0$（Gibbs不等式），等号当且仅当 $p=q$。KL散度不对称也不满足三角不等式，不是严格的距离。
+
+\begin{keybox}[互信息与KL散度的关系]
+$I(X;Y) = \DKL(p(X,Y) \| p(X)p(Y)) \geq 0$
+\end{keybox}
+
+\begin{definition}[交叉熵]
+\[
+\mathrm{CE}(p\|q) = H(p) + \DKL(p\|q) = \sum_X p(x) \log\frac{1}{q(x)}
+\]
+\end{definition}
+
+用 $q$ 近似 $p$ 时的总编码开销。$\min_q \mathrm{CE}(p\|q) \Leftrightarrow \min_q \DKL(p\|q)$。
+
+\begin{keybox}[Venn图核心关系]
+\begin{align*}
+I(X;Y) &= H(X) + H(Y) - H(X,Y) \\
+&= H(X) - H(X|Y) = H(Y) - H(Y|X)
+\end{align*}
+\end{keybox}
+
+\subsection{多元拓展与链式法则}
+
+以下拓展形式在后面章节中反复出现，必须熟练掌握。
+
+\subsubsection{条件互信息}
+
+\begin{definition}[条件互信息]
+给定 $Z$ 的条件下，$X$ 与 $Y$ 的互信息：
+\[
+I(X;Y \mid Z) = H(X|Z) - H(X|Y,Z)
+= \sum_{z} p(z) \cdot I(X;Y \mid Z=z)
+\]
+\end{definition}
+
+\begin{property}
+\begin{enumerate}[label=(\arabic*),nosep]
+  \item 非负性：$I(X;Y|Z) \geq 0$，等号当且仅当 $X \to Z \to Y$（$X$ 与 $Y$ 在给定 $Z$ 下条件独立）
+  \item 对称性：$I(X;Y|Z) = I(Y;X|Z)$
+  \item $I(X;Y|Z) = 0 \iff X \indep Y \mid Z$
+\end{enumerate}
+\end{property}
+
+\subsubsection{互信息的链式法则}
+
+\begin{theorem}[互信息的链式法则]
+\[
+I(X; Y_1, Y_2, \ldots, Y_n) = \sum_{i=1}^{n} I(X; Y_i \mid Y_1, \ldots, Y_{i-1})
+\]
+
+最常用的两变量情形：
+\[
+I(X; Y, Z) = I(X; Z) + I(X; Y \mid Z) = I(X; Y) + I(X; Z \mid Y)
+\]
+\end{theorem}
+
+\begin{proofbox}[DPI 证明的核心一步]
+利用链式法则的两种展开方式：
+\[
+I(X; Y, Z) = \underbrace{I(X; Z)}_{\text{先抽 Z}} + \underbrace{I(X; Y|Z)}_{\text{再抽 Y}}
+           = \underbrace{I(X; Y)}_{\text{先抽 Y}} + \underbrace{I(X; Z|Y)}_{\text{再抽 Z}}
+\]
+当 $X \to Y \to Z$ 是马尔可夫链时，$I(X; Z|Y) = 0$，从而 $I(X;Y) = I(X;Z) + I(X;Y|Z) \geq I(X;Z)$。
+这就是 DPI 的证明本质。
+\end{proofbox}
+
+\subsubsection{多元条件熵}
+
+\begin{definition}[多元条件熵]
+\[
+H(X \mid Y_1, Y_2, \ldots, Y_n) = \mathbb{E}_{X,Y^n}\!\left[\log\frac{1}{p(X \mid Y_1,\ldots,Y_n)}\right]
+\]
+\end{definition}
+
+\begin{property}[熵率中用到的关键性质]
+\begin{enumerate}[label=(\arabic*),nosep]
+  \item 条件增多，熵不增：$H(X|Y_1) \geq H(X|Y_1,Y_2) \geq \cdots \geq H(X|Y_1,\ldots,Y_n)$
+  \item $H(X|Y^n) \leq H(X|Y^{n-1}) \leq \cdots \leq H(X)$
+  \item 平稳过程中：$b_n = H(X_n|X_{n-1},\ldots,X_1)$ 单调递减有下界，故极限存在（熵率定义的基础）
+\end{enumerate}
+\end{property}
+
+\subsubsection{联合熵的链式法则（多元形式）}
+
+\[
+H(X_1, X_2, \ldots, X_n) = \sum_{i=1}^{n} H(X_i \mid X_1, \ldots, X_{i-1})
+\]
+
+联合熵的两种展开方式都常用：
+\begin{align*}
+H(X, Y, Z) &= H(X) + H(Y|X) + H(Z|X, Y) \\
+           &= H(Z) + H(Y|Z) + H(X|Y, Z)
+\end{align*}
+
+\subsubsection{互信息与熵的完整关系图}
+
+\begin{keybox}[多变量关系速查]
+\begin{align*}
+I(X;Y|Z) &= H(X|Z) - H(X|Y,Z) \\
+         &= H(Y|Z) - H(Y|X,Z) \\
+         &= H(X|Z) + H(Y|Z) - H(X,Y|Z) \\[4pt]
+I(X;Y,Z) &= I(X;Z) + I(X;Y|Z) \\
+         &= I(X;Y) + I(X;Z|Y) \\[4pt]
+H(X|Y) &\geq H(X|Y,Z) \quad \text{（条件越多，不确定性越小）} \\[4pt]
+I(X;Y) &\leq I(X;Y,Z) \quad \text{（更多的观测提供更多的信息）}
+\end{align*}
+\end{keybox}
+
+\subsubsection{条件 KL 散度}
+
+\begin{definition}[条件KL散度]
+\[
+\DKL(p(y|x) \| q(y|x) \mid p(x)) \triangleq \sum_x p(x) \sum_y p(y|x) \log\frac{p(y|x)}{q(y|x)}
+= \sum_x p(x) \cdot \DKL(p(Y|X=x) \| q(Y|X=x))
+\]
+
+即：先对每个 $x$ 算 KL 散度，再用 $p(x)$ 加权平均。
+\end{definition}
+
+非负性仍成立：$\DKL(p\|q \mid p(x)) \geq 0$，等号当且仅当 $p(y|x) = q(y|x)$ 对所有 $x$（$p(x)>0$）成立。
+
+\textbf{应用场景：} 信道容量 KKT 条件中，$\frac{\partial I}{\partial p_i} = \DKL(p(Y|X=x_i) \| p(Y)) - 1$ 就使用了 KL 散度的条件形式。
+
+% ============================================================
+\section{不等式与凹凸性}
+% ============================================================
+
+\subsection{Jensen 不等式}
+
+若 $f$ 为凸函数：$\EE[f(X)] \geq f(\EE[X])$。若 $f$ 严格凸，等号当且仅当 $X$ 为常数。
+
+\begin{keybox}[常用函数]
+\begin{center}
+\begin{tabular}{c|c|c}
+\toprule
+$f(x)$ & 凹凸性 & Jensen结论 \\
+\midrule
+$x^2$ & 凸 & $\EE[X^2] \geq (\EE[X])^2$ \\
+$\log x$ & 凹 & $\EE[\log X] \leq \log \EE[X]$ \\
+$x\log x$ & 凸 & $\EE[X\log X] \geq \EE[X]\log\EE[X]$ \\
+$e^x$ & 凸 & $\EE[e^X] \geq e^{\EE[X]}$ \\
+$-\log x$ & 凸 & $\EE[-\log X] \geq -\log\EE[X]$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{keybox}
+
+Jensen证明要点：凸函数总在其任一切平面上方，取 $\bm{x}_0 = \EE[X]$ 处切平面，两边取期望即得。
+
+\subsection{Log-sum 不等式}
+
+\[
+\sum_i a_i \log\frac{a_i}{b_i} \geq \left(\sum_i a_i\right) \log\frac{\sum_i a_i}{\sum_i b_i}
+\]
+
+等号当且仅当 $\frac{a_i}{b_i} = \mathrm{constant}$。
+
+两种证明方式：用 $\log x$（凹）或 $x\log x$（凸）配合Jensen不等式。
+
+\subsection{KL 散度非负性（Gibbs 不等式）}
+
+$\DKL(p\|q) \geq 0$，等号当且仅当 $p=q$。
+
+证明方法：(1) Log-sum不等式，直接代入 $a_x=p(x), b_x=q(x)$；
+(2) Jensen不等式，利用 $-\log x$ 的凸性：
+\[
+\DKL(p\|q) = \EE_{p}\left[-\log\frac{q}{p}\right] \geq -\log\EE_p\left[\frac{q}{p}\right] = -\log 1 = 0
+\]
+
+\subsection{重要推论}
+
+\begin{itemize}[nosep]
+  \item 均匀分布熵最大：$H(p) \leq \log|\XX|$，证明 $H(p) = \log|\XX| - \DKL(p\|u)$
+  \item 互信息非负：$I(X;Y) = \DKL(p_{XY}\|p_X p_Y) \geq 0$
+  \item 条件熵不大于原熵：$H(X|Y) \leq H(X)$
+  \item $H(X) + H(Y) \geq H(X,Y)$
+  \item 混合分布增加熵：$H(\lambda p_1 + (1-\lambda)p_2) \geq \lambda H(p_1) + (1-\lambda)H(p_2)$
+\end{itemize}
+
+\subsection{凹凸性总结}
+
+\begin{keybox}[凹凸性速查]
+\begin{center}
+\begin{tabular}{c|c}
+\toprule
+函数 & 凹凸性 \\
+\midrule
+$\DKL(p\|q)$ & 关于 $(p,q)$ 为\textbf{凸函数} \\
+$H(p)$ (熵) & 关于 $p$ 为\textbf{凹函数} \\
+$I(X;Y)$ 给定 $p(Y|X)$ & 关于 $p(X)$ 为\textbf{凹函数} \\
+$I(X;Y)$ 给定 $p(X)$ & 关于 $p(Y|X)$ 为\textbf{凸函数} \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{keybox}
+
+证明方法：
+\begin{itemize}[nosep]
+  \item KL散度凸性 → Log-sum不等式；
+  \item 熵的凹性 → Log-sum/Jensen/条件熵三种证法；
+  \item 互信息关于 $p(X)$ 凹 → $H(Y)$ 是 $p(X)$ 的凹函数（$p(y)$ 是 $p(x)$ 的线性组合 + 凹函数与线性函数的复合仍为凹）；
+  \item 互信息关于 $p(Y|X)$ 凸 → 利用KL散度的凸性。
+\end{itemize}
+
+% ============================================================
+\section{渐进均分性（AEP）—— 独立同分布}
+% ============================================================
+
+\subsection{理论准备}
+
+\noindent\textbf{大数定理}：$X_i \iid p(x)$，$\frac{1}{n}\sum X_i \xrightarrow{p} \EE[X]$。
+
+\noindent\textbf{切比雪夫不等式}：$P(|X-\mu| \geq \epsilon) < \frac{\sigma^2}{n\epsilon^2}$。
+
+\subsection{AEP 与典型集}
+
+\begin{definition}[AEP]
+\[
+-\frac{1}{n}\log p(X^n) = \frac{1}{n}\sum_{i=1}^{n} -\log p(X_i) \xrightarrow{p} H(X)
+\]
+\end{definition}
+
+\begin{definition}[$\epsilon$-典型集]
+\[
+A_\epsilon^{(n)} \triangleq \left\{x^n \in \XX^n: \left|\frac{1}{n}\log\frac{1}{p(x^n)} - H(X)\right| \leq \epsilon\right\}
+\]
+\end{definition}
+
+\begin{theorem}[典型集性质]
+当 $n \to \infty$：
+\begin{enumerate}[label=(\arabic*),nosep]
+  \item $p(X^n \in A_\epsilon^{(n)}) \to 1$
+  \item $(1-\epsilon)2^{n(H(X)-\epsilon)} \leq |A_\epsilon^{(n)}| \leq 2^{n(H(X)+\epsilon)}$
+  \item $\forall x^n \in A_\epsilon^{(n)}: 2^{-n(H(X)+\epsilon)} \leq p(x^n) \leq 2^{-n(H(X)-\epsilon)}$
+\end{enumerate}
+\end{theorem}
+
+\begin{proofbox}
+性质(2)的证明——注意上下界的不对称性：
+\begin{align*}
+\underline{\text{上界（对所有 }n\text{ 成立）：}}\quad
+1 \geq \sum_{x^n \in A} p(x^n) &\geq |A| \cdot 2^{-n(H+\epsilon)}
+\;\Rightarrow\; |A| \leq 2^{n(H+\epsilon)} \\[4pt]
+\underline{\text{下界（需 }n\text{ 充分大）：}}\quad
+1-\epsilon \leq \sum_{x^n \in A} p(x^n) &\leq |A| \cdot 2^{-n(H-\epsilon)}
+\;\Rightarrow\; |A| \geq (1-\epsilon)2^{n(H-\epsilon)}
+\end{align*}
+\textbf{关键区别：} 上界推导只用 $1 \geq \sum_A p$，始终成立；下界需要 $P(A) \geq 1-\epsilon$，依赖于 AEP 收敛（$n$ 充分大）。
+定理中常用同一个 $\epsilon$ 书写，但下界的 $(1-\epsilon)$ 实际是概率松弛量，与典型集定义中的熵容差 $\epsilon$ 来源不同。
+\end{proofbox}
+
+典型集占总序列比例：$\dfrac{|A_\epsilon^{(n)}|}{|\XX^n|} \approx \dfrac{2^{nH(X)}}{2^{n\log|\XX|}} = \dfrac{1}{2^{n \DKL(p_X\|u_X)}}$
+
+\begin{keybox}[$\DKL(p\|u)$ 的直观含义]
+\begin{itemize}[nosep]
+  \item $H(X)$：数据的\textbf{不可压缩性}——熵越大，无损压缩越困难
+  \item $\DKL(p_X\|u_X)$：数据的\textbf{可压缩性}——KL散度越大（分布越不均匀），典型集在总序列中的占比指数级缩小，\textbf{可压缩空间越大}
+  \item 极端情形：当 $p_X = u_X$（均匀分布）时，$\DKL=0$，$A_\epsilon^{(n)} = \XX^n$（所有序列都典型），\textbf{无法压缩}
+\end{itemize}
+\end{keybox}
+
+\subsubsection{典型集的最小性}
+
+\begin{theorem}[典型集是渐近最小的"高概率集合"]
+设 $B_n \subseteq \XX^n$ 满足 $|B_n| \leq 2^{n(H(X)-\delta)}$（$\delta > 0$），则当 $n \to \infty$ 时：
+\[
+P(X^n \in B_n) \to 0
+\]
+即：任何大小严格小于 $2^{nH(X)}$ 的集合，其概率必趋于零。
+\end{theorem}
+
+\begin{proofbox}
+取 $\epsilon < \delta$，将 $B_n$ 拆分为典型部分 + 非典型部分：
+\begin{align*}
+P(X^n \in B_n) &= P(X^n \in B_n \cap A_\epsilon^{(n)}) + P(X^n \in B_n \cap (A_\epsilon^{(n)})^c) \\
+&\leq \sum_{x^n \in B_n \cap A} p(x^n) + P(X^n \notin A_\epsilon^{(n)}) \\
+&\leq |B_n| \cdot 2^{-n(H-\epsilon)} + \underbrace{P(X^n \notin A_\epsilon^{(n)})}_{\to 0} \\
+&\leq 2^{n(H-\delta)} \cdot 2^{-n(H-\epsilon)} + \epsilon = 2^{-n(\delta-\epsilon)} + \epsilon \xrightarrow{n\to\infty} 0
+\end{align*}
+\textbf{推论：} 典型集 $A_\epsilon^{(n)}$ 在概率意义下是"最小"的高概率集合——任何概率接近1的集合，大小至少为 $(1-\epsilon)2^{n(H-\epsilon)}$。
+\end{proofbox}
+
+\subsubsection{典型集内概率真的"等分"吗？}
+
+\begin{keybox}[渐近等分不等于概率均等]
+典型集内最大概率与最小概率之比：
+\[
+\frac{p_{\max}}{p_{\min}} \approx \frac{2^{-n(H-\epsilon)}}{2^{-n(H+\epsilon)}} = 2^{2n\epsilon}
+\]
+\begin{itemize}[nosep]
+  \item 概率差距是\textbf{指数级}的（$2^{2n\epsilon}$，随 $n$ 急剧增长）
+  \item 但信息量 $-\log p(x^n)$ 的差距只是\textbf{线性}的（$2n\epsilon$）
+  \item "等分性"指的是\textbf{信息量}（$-\frac{1}{n}\log p$）趋近相等，而非概率本身相等
+\end{itemize}
+\end{keybox}
+
+\subsubsection{二项分布视角}
+
+对于 Bernoulli$(p)$ 信源，$n$ 次试验中 1 出现 $k$ 次的概率为 $\binom{n}{k}p^k(1-p)^{n-k}$。
+AEP 表明：当 $n$ 足够大时，概率质量集中在 $k \approx n \cdot \EE[X] = np$ 附近。
+AEP 将二项分布中观察到的"概率向期望集中"现象，推广到了\textbf{任意} i.i.d. 信源。
+
+\subsection{信源定长编码定理}
+
+\begin{theorem}[信源定长编码定理]
+记 $S_\delta \subseteq \XX^n$ 为误差在 $\delta$ 内（即 $P(X^n \in S_\delta) \geq 1-\delta$）的最小集合。
+对任意 $\epsilon > 0$ 和 $0 < \delta < 1$，存在 $n_0$，当 $n > n_0$ 时：
+\[
+\left|\frac{1}{n}\log_2 |S_\delta| - H(X)\right| < \epsilon
+\]
+即：编码长度 $\approx nH(X)$ bit，误差可任意小。
+\end{theorem}
+
+\begin{proofbox}[证明思路]
+\textbf{上界方向（编码长度 $\leq nH + n\epsilon$）：}
+
+取 $n_0$ 使 $\frac{\sigma^2}{n_0\epsilon^2} \leq \delta$（Chebyshev）。对典型集编码，需 $\log_2|A_\epsilon^{(n)}| \leq n(H+\epsilon)$ bit。
+因 $P(A_\epsilon^{(n)}) \geq 1-\delta$，$S_\delta$ 不比 $A_\epsilon^{(n)}$ 更大：
+\[
+\frac{1}{n}\log_2|S_\delta| \leq \frac{1}{n}\log_2|A_\epsilon^{(n)}| \leq H(X) + \epsilon
+\]
+
+\textbf{下界方向（编码长度 $\geq nH - n\epsilon$）：}
+
+若 $|S_\delta| < 2^{n(H-\epsilon)}$，则 $P(X^n \in S_\delta) \to 0$（由典型集最小性），与 $P(S_\delta) \geq 1-\delta > 0$ 矛盾。
+故 $|S_\delta| \geq 2^{n(H-\epsilon)}$，即 $\frac{1}{n}\log_2|S_\delta| \geq H(X) - \epsilon$。
+
+\textbf{编码方案：} 1位前缀区分典型/非典型 —— 前缀"1"+典型集索引（$nH+n\epsilon$ bit），前缀"0"+原始序列。误差概率 $\leq \delta$。
+\end{proofbox}
+
+% ============================================================
+\section{Kraft 不等式与变长编码}
+% ============================================================
+
+\subsection{编码分类与关系}
+
+\begin{center}
+\textbf{非奇异码} $\supset$ \textbf{唯一可译码} $\supset$ \textbf{即时码/前缀码}
+\end{center}
+
+\begin{itemize}[nosep]
+  \item 前缀码 $\Leftrightarrow$ 即时码（两概念等价）
+  \item 前缀码是唯一可译码
+  \item 任意唯一可译码都存在等优前缀码 → 符号编码只考虑前缀码
+\end{itemize}
+
+\subsection{Kraft-McMillan 不等式}
+
+\begin{theorem}[Kraft不等式]
+存在 $D$ 进制前缀码 $\iff \displaystyle\sum_{x\in\XX} D^{-l(x)} \leq 1$。
+\end{theorem}
+
+\begin{theorem}[McMillan不等式]
+任意唯一可译码 $\Rightarrow \displaystyle\sum_{x\in\XX} D^{-l(x)} \leq 1$。
+\end{theorem}
+
+\begin{keybox}[核心结论]
+前缀码已有的码长组合，任何唯一可译码都无法超越。\\
+符号编码只需考虑前缀码，不损失最优性。
+\end{keybox}
+
+\begin{proofbox}[Kraft充分性证明]
+构造概率 $p^*(x) = 2^{-l(x)}$，若 $\sum p^*(x) < 1$，补足缺失概率为二分分布，利用二分分布构造前缀树。
+\end{proofbox}
+
+\begin{proofbox}[Kraft必要性证明]
+考虑深度为 $l_{max}$ 的完全二叉树。码长为 $l_i$ 的叶节点独占 $2^{l_{max}-l_i}$ 个底层节点。各子树不相交：
+\[
+\sum_{i=1}^m 2^{l_{max}-l_i} \leq 2^{l_{max}} \Rightarrow \sum 2^{-l_i} \leq 1
+\]
+\end{proofbox}
+
+\subsection{最优编码长度}
+
+\begin{theorem}[最优编码长度——连续松弛]
+\[
+\min \sum p(x)l(x), \quad s.t. \; \sum D^{-l(x)} \leq 1
+\]
+最优解：$l^*(x) = -\log_D p(x)$，平均码长 $L^* = H_D(X)$。
+\end{theorem}
+
+两种证法：(1) Lagrange乘子法；(2) KL散度非负：
+\[
+\sum p_i l_i = \sum p_i \log_D \frac{1}{q_i} - \log_D z \geq \sum p_i \log_D \frac{1}{p_i} = H_D(X)
+\]
+其中 $q_i = D^{-l_i}/z$，$z = \sum D^{-l_i}$。
+
+\subsection{变长码编码定理与编码开销}
+
+\begin{theorem}[变长码编码定理]
+存在前缀码使得：
+\[
+H(X) \leq L < H(X) + 1
+\]
+取 $l(x) = \lceil -\log p(x) \rceil$ 即证存在性。
+\end{theorem}
+
+若用分布 $q$ 编码真实分布 $p$：$L_q = \DKL(p\|q) + H(p) = \DKL(p\|q) + L^*$。
+
+% ============================================================
+\section{Huffman 最优前缀码}
+% ============================================================
+
+\subsection{Huffman 算法}
+
+\begin{enumerate}[nosep]
+  \item 取概率最小的两个符号，赋予最后一位不同、其余位相同的码字；
+  \item 将两符号融合为概率和的新符号；
+  \item 重复直到只剩一个符号。
+\end{enumerate}
+
+\subsection{最优性证明}
+
+\begin{enumerate}[nosep]
+  \item 最优前缀码中，概率最小的两个符号 $l_{r-1} = l_r = l_{max}$（姊妹对）；
+  \item 融合→扩展关系：$L_U = L_V + p_{r-1} + p_r$；
+  \item 原问题 $U$ 的最优性 $\Leftrightarrow$ 子问题 $V$ 的最优性；
+  \item 递归至两个符号（基础情形：编码为0和1），得证。
+\end{enumerate}
+
+\begin{keybox}[整数约束优化]
+\[
+\min \sum p(x) l(x), \quad s.t. \; \sum 2^{-l(x)} \leq 1,\; l(x) \in \mathbb{Z}^+
+\]
+Huffman码 = 该整数规划的最优解；Shannon码 = 近似解。
+\end{keybox}
+
+\subsection{块编码}
+
+$N$ 次扩展信源：将长为 $N$ 的序列视为一个整体符号。
+\[
+\frac{1}{N}H(X^N) \leq L_{\mathrm{Huffman}} < \frac{1}{N}H(X^N) + \frac{1}{N}
+\]
+
+% ============================================================
+\section{AEP —— 平稳遍历过程}
+% ============================================================
+
+\subsection{平稳过程}
+
+\begin{definition}[平稳过程]
+\[
+p(X_1=x_1,\ldots,X_n=x_n) = p(X_k=x_1,\ldots,X_{n+k}=x_n)
+\]
+联合概率分布具有时间平移不变性。
+\end{definition}
+
+\subsection{熵率的存在性与等价性}
+
+令 $b_n = H(X_n | X_{n-1},\ldots,X_1)$。由平稳性，$b_n$ 单调递减且有下界0，故极限存在：
+\[
+H'(\XX) \triangleq \lim_{n\to\infty} H(X_n | X_{n-1},\ldots,X_1)
+\]
+
+由 Ces\`{a}ro 定理：若 $\lim b_n = b$，则 $\lim \frac{1}{n}\sum_{i=1}^n b_i = b$。
+
+\begin{theorem}[熵率的等价性]
+\[
+\lim_{n\to\infty} \frac{1}{n}H(X^n) = \lim_{n\to\infty} H(X_n | X_1^{n-1}) = H(X_0 | X_{-\infty}^{-1})
+\]
+\end{theorem}
+
+\begin{proofbox}
+\[
+\frac{1}{n}H(X^n) = \frac{1}{n}\sum_{i=1}^{n} \underbrace{H(X_i|X^{i-1})}_{=b_i} \xrightarrow{\text{Ces\`{a}ro}} H'(\XX)
+\]
+\end{proofbox}
+
+熵率含义：已知无限长历史的条件下，当前符号残存的不确定性。
+
+\subsection{平稳马尔可夫过程}
+
+平稳马尔可夫过程是\textbf{最简单的非独立信源模型}：平稳性保证时间不变性，马尔可夫性保证依赖关系仅向前回溯一步。
+
+\subsubsection{状态转移矩阵}
+
+\begin{definition}[状态转移矩阵]
+对状态空间 $\mathcal{S} = \{s_1,\ldots,s_m\}$（同时也是信源符号集 $\XX$），定义：
+\[
+P_{ij} \triangleq p(X_0 = s_j \mid X_{-1} = s_i), \quad P \in \mathbb{R}^{m \times m}
+\]
+\end{definition}
+
+\begin{property}[状态转移矩阵的性质]
+\begin{enumerate}[label=(\arabic*),nosep]
+  \item 所有元素非负：$P_{ij} \geq 0$
+  \item 每行之和为 1：$\sum_j P_{ij} = 1$（行随机矩阵）
+\end{enumerate}
+\end{property}
+
+\textbf{链式法则}（描述随机过程演化）：
+\[
+p(X_0) = p(X_{-1}) P
+\quad\Longleftrightarrow\quad
+p(X_0 = s_j) = \sum_{i=1}^{m} p(X_{-1}=s_i) \, P_{ij}
+\]
+
+\subsubsection{$k$ 步转移与 Chapman-Kolmogorov 方程}
+
+\begin{definition}[$k$ 步转移矩阵]
+$k$ 步转移矩阵 $P^{(k)}$ 的元素 $P^{(k)}_{ij} \triangleq p(X_k = s_j \mid X_0 = s_i)$，
+满足：
+\[
+P^{(k)} = P^k \quad\text{（矩阵 $k$ 次幂）}
+\]
+\end{definition}
+
+由马尔可夫性：
+\[
+p(X_k) = p(X_0) P^k
+\]
+即：初始分布右乘 $P^k$ 即得 $k$ 步后的分布。
+
+\begin{property}[Chapman-Kolmogorov 方程]
+\[
+P^{(m+n)}_{ij} = \sum_{k} P^{(m)}_{ik} P^{(n)}_{kj}
+\quad\Longleftrightarrow\quad
+P^{m+n} = P^m \cdot P^n
+\]
+（从 $i$ 出发经过 $m+n$ 步到达 $j$，等价于先走 $m$ 步到某个 $k$，再走 $n$ 步到 $j$。）
+\end{property}
+
+\subsubsection{稳态分布}
+
+\begin{definition}[稳态分布]
+若分布 $\mathbf{u} = (u_1,\ldots,u_m)$ 满足 $\mathbf{u} = \mathbf{u} P$（即 $\mathbf{u}$ 是 $P$ 关于特征值 1 的左特征向量），
+则称 $\mathbf{u}$ 为稳态分布。若初始分布 $p(X_0) = \mathbf{u}$，则对所有 $k$ 有 $p(X_k) = \mathbf{u}$。
+\end{definition}
+
+\begin{keybox}[Detailed Balancing（细致平衡）]
+\textbf{充分条件：} 若存在分布 $\mathbf{u}$ 满足对\textbf{所有} $i,j$：
+\[
+u_i P_{ij} = u_j P_{ji}
+\]
+则 $\mathbf{u}$ 是稳态分布。
+
+\textbf{验证：} $\sum_i u_i P_{ij} = \sum_i u_j P_{ji} = u_j \sum_i P_{ji} = u_j$，即 $\mathbf{u} = \mathbf{u}P$。
+\end{keybox}
+
+\subsubsection{平稳马尔可夫链的熵率}
+
+\begin{theorem}[马尔可夫链的熵率]
+对于稳态分布为 $\mathbf{u}$ 的平稳马尔可夫链：
+\begin{align*}
+H(\XX) &= H(X_0 \mid X_{-1})
+        = \sum_{i=1}^{m} u_i \cdot H(X_0 \mid X_{-1}=s_i) \\
+       &= \sum_{i=1}^{m} u_i \sum_{j=1}^{m} P_{ij} \log\frac{1}{P_{ij}}
+\end{align*}
+\end{theorem}
+
+\begin{proofbox}
+平稳马尔可夫性：$H(X_0|X_{-1},X_{-2},\ldots) = H(X_0|X_{-1})$（马尔可夫性使条件只回溯一步）。
+熵率 $H(\XX) = \lim H(X_n|X^{n-1}) = H(X_0|X_{-1})$（由平稳性）。
+\end{proofbox}
+
+\subsubsection{完整计算实例（4状态链）}
+
+课件中的两比特马尔可夫链实例：
+
+状态空间 $\mathcal{S} = \{00, 01, 10, 11\}$（4个状态），转移矩阵：
+\[
+P = \begin{bmatrix}
+0.8 & 0.2 & 0   & 0   \\
+0   & 0   & 0.5 & 0.5 \\
+0.5 & 0.5 & 0   & 0   \\
+0   & 0   & 0.2 & 0.8
+\end{bmatrix}
+\]
+
+稳态分布：$\mathbf{u} = (\frac{5}{14}, \frac{1}{7}, \frac{1}{7}, \frac{5}{14})$（解 $\mathbf{u}=\mathbf{u}P$）。
+
+熵率计算——对每个状态分别计算条件熵，再加权：
+\begin{align*}
+H(\XX) &= \frac{5}{14}H(0.8,0.2) + \frac{1}{7}H(0.5,0.5)
+        + \frac{1}{7}H(0.5,0.5) + \frac{5}{14}H(0.8,0.2) \\
+       &= \frac{5}{14}\times 0.722 + \frac{2}{7}\times 1.000 + \frac{5}{14}\times 0.722 \\
+       &\approx 0.80 \text{ bit/符号}
+\end{align*}
+
+\subsection{遍历性}
+
+\begin{definition}[遍历性条件]
+有限状态马尔可夫链：
+\[
+\text{不可约性 (Irreducibility)} + \text{非周期性 (Aperiodicity)} \Rightarrow \text{遍历性 (Ergodicity)}
+\]
+遍历性意味着：\textbf{时间平均 = 空间平均}（样本平均 $\xrightarrow{p}$ 概率期望）。
+\end{definition}
+
+\subsubsection{不可约性 (Irreducibility)}
+
+\begin{itemize}[nosep]
+  \item \textbf{定义：} 对任意 $i,j$，存在正整数 $N$ 使 $P^N_{ij} > 0$
+  \item \textbf{图解释：} 在状态转移图（若 $P_{ij}>0$ 则连边 $i\to j$）中，任意两节点间存在有向路径
+  \item \textbf{Perron-Frobenius 定理：} 对有限状态不可约矩阵：
+  \begin{itemize}[nosep]
+    \item 存在唯一稳态分布 $\mathbf{u}$
+    \item $\mathbf{u}$ 的所有元素严格大于 0
+  \end{itemize}
+\end{itemize}
+
+\subsubsection{非周期性 (Aperiodicity)}
+
+\begin{definition}[周期与非周期]
+状态 $s$ 的\textbf{周期} $d(s)$：从 $s$ 出发再回到 $s$ 的所有可能步数的最大公约数：
+\[
+d(s) = \gcd\{\,k \geq 1 : P^{(k)}_{ss} > 0\,\}
+\]
+若 $d(s) = 1$，称状态 $s$ 是\textbf{非周期}的。
+\end{definition}
+
+\begin{property}[不可约链的周期性质]
+在不可约链中，\textbf{所有状态具有相同的周期}。
+
+（证明思路：取 $i\to j$ 路径（长 $a$）和 $j\to i$ 路径（长 $b$），构造 $i\to i$ 回路（长 $a+b$），
+再取 $j\to j$ 的任意回路（长 $n$），构造 $i\to i$ 的另一回路（长 $a+n+b$）。
+两回路长度的差为 $n$，故 $d(i) \mid d(j)$。由对称性 $d(i)=d(j)$。）
+\end{property}
+
+\begin{keybox}[非周期性的实用判据]
+对不可约链，只需检查\textbf{一个状态}：
+\begin{itemize}[nosep]
+  \item 若 $P_{ii} > 0$（对角元 $>0$，即图中存在自环），则 $d(i)=1$，整个链非周期
+  \item 更一般地：若某个 $P^{(k)}_{ii} > 0$ 且 $P^{(k+1)}_{ii} > 0$，则周期必为 1
+\end{itemize}
+\end{keybox}
+
+\subsubsection{平稳遍历的层次关系}
+
+\begin{center}
+\fbox{\begin{minipage}{0.85\textwidth}
+\small
+\textbf{独立同分布 (i.i.d.)} $\subset$ \textbf{平稳遍历过程} $\subset$ \textbf{平稳过程}
+
+\begin{itemize}[nosep]
+  \item i.i.d.：最强假设 —— 大数定理 + AEP
+  \item 平稳遍历（含平稳遍历马尔可夫链）：Birkhoff 遍历定理 + SMB 定理
+  \item 一般的平稳过程：熵率存在但不一定有 AEP
+\end{itemize}
+\end{minipage}}
+\end{center}
+
+\subsection{Shannon–McMillan–Breiman 定理}
+
+\begin{theorem}[SMB定理]
+对平稳遍历过程，当 $n \to \infty$：
+\[
+\frac{1}{n}\log\frac{1}{p(X^n)} \xrightarrow{p} H(X_0 \mid X_{-\infty}^{-1}) = H(\XX)
+\]
+\end{theorem}
+
+\begin{proofbox}[证明思路]
+利用平稳性将 $-\frac{1}{n}\log p(X^n)$ 改写为条件信息量的 Ces\`{a}ro 平均：
+\[
+\frac{1}{n}\log\frac{1}{p(X^n)}
+= \frac{1}{n}\sum_{i=1}^{n} \log\frac{1}{p(X_0 \mid X_{1-i}^{-1})}
+\]
+由 Birkhoff 遍历定理（大数定理在平稳遍历过程的推广），
+当 $n \to \infty$ 时该 Ces\`{a}ro 平均收敛到期望 $H(X_0 \mid X_{-\infty}^{-1})$。
+\end{proofbox}
+
+\textbf{注：} 本节 SMB 定理仅需了解结论，不考证明。Birkhoff 遍历定理不考。
+
+% ============================================================
+\section{数据处理不等式与 Fano 不等式}
+% ============================================================
+
+\subsection{马尔可夫链}
+
+$X \to Y \to Z$：$p(x,y,z) = p(x)p(y|x)p(z|y)$。
+性质：(1) 给定现在，过去与未来条件独立；
+(2) 可逆：$X \to Y \to Z \iff Z \to Y \to X$。
+
+\subsection{数据处理不等式（DPI）}
+
+\begin{theorem}[数据处理不等式]
+若 $X \to Y \to Z$，则：
+\begin{align*}
+I(X;Y) &\geq I(X;Z) \quad\text{(DPI)}\\
+I(Y;Z) &\geq I(X;Z) \quad\text{(Reverse DPI)}
+\end{align*}
+\end{theorem}
+
+\begin{proofbox}[DPI证明]
+利用互信息的链式法则展开两种方式：
+\begin{align*}
+I(X;Y,Z) &= I(X;Z) + I(X;Y|Z) \\
+&= I(X;Y) + \underbrace{I(X;Z|Y)}_{=0\ (\text{Markov})} = I(X;Y)
+\end{align*}
+故 $I(X;Y) - I(X;Z) = I(X;Y|Z) \geq 0$。
+\end{proofbox}
+
+\textbf{含义：数据处理只会丢失信息，无法增加信息。}
+
+等号条件：DPI等号 $\iff I(X;Y|Z)=0 \iff X \to Z \to Y$ 也是马尔可夫链。
+
+\subsection{充分统计量}
+
+\subsubsection{因子分解定理（核心基础）}
+
+\begin{theorem}[Neyman-Fisher 因子分解定理]
+$T(X)$ 是参数 $\theta$ 的充分统计量的\textbf{充要条件}：联合概率密度可分解为
+\[
+f(x; \theta) = h(x) \cdot g(T(x); \theta)
+\]
+其中：
+\begin{itemize}[nosep]
+  \item $h(x)$：\textbf{与 $\theta$ 无关}（只依赖于数据本身的结构）
+  \item $g(T(x);\theta)$：可以依赖 $\theta$，但对数据的依赖\textbf{仅通过 $T(x)$}
+\end{itemize}
+即：$\theta$ 接触到数据的唯一"通道"就是 $T(x)$。
+\end{theorem}
+
+\textbf{因子分解 = 充分性的操作型定义。} 考试中判断一个统计量是否充分，最直接的方法就是做因子分解。
+
+\subsubsection{从因子分解到条件分布与 $\theta$ 无关}
+
+从因子分解出发，可以直接推导为什么 $p(X|T=t,\theta)$ 与 $\theta$ 无关。
+
+$T(X)$ 的边缘分布为（在曲面 $T(x)=t$ 上积分）：
+\[
+f_T(t; \theta) = \int_{x:\,T(x)=t} f(x;\theta)\,dx
+               = \int_{x:\,T(x)=t} h(x) \cdot g(t; \theta)\,dx
+               = g(t; \theta) \cdot \underbrace{\int_{x:\,T(x)=t} h(x)\,dx}_{\text{只与 }t\text{ 有关，与 }\theta\text{ 无关}}
+\]
+
+条件分布：
+\[
+p(X=x \mid T=t,\; \theta)
+= \frac{f(x;\theta)}{f_T(t;\theta)}
+= \frac{h(x) \cdot g(t;\theta)}{g(t;\theta) \cdot \int_{T(x)=t} h(x)\,dx}
+= \frac{h(x)}{\int_{T(x)=t} h(x)\,dx}
+\]
+
+\textbf{$g(t;\theta)$ 在分子分母中精确约掉了。} 条件分布退化为只依赖于 $h(x)$ 的形式，而 $h(x)$ 本就不含 $\theta$。
+这就是"条件分布与 $\theta$ 无关"的数学本质。
+
+\textbf{关键洞察：}$T(X)$ 本身当然可以依赖于 $\theta$（它的边际分布 $f_T(t;\theta)$ 包含 $g$），
+但一旦你固定了 $T(X)=t$，$(X \mid T=t)$ 的分布就不再给 $\theta$ 留下任何"额外通道"——
+数据关于 $\theta$ 的全部信息已经被 $T(X)$ 的值 $t$ 完全捕获。
+
+\subsubsection{高斯实例：走一遍完整推导}
+
+设 $X_1,\ldots,X_n \iid \mathcal{N}(\theta, 1)$，$T(X) = \bar{X} = \frac{1}{n}\sum_{i=1}^n X_i$。
+
+\textbf{Step 1：因子分解。} 利用 $\sum(x_i-\theta)^2 = \sum(x_i-\bar{x})^2 + n(\bar{x}-\theta)^2$：
+\[
+f(x;\theta)
+\propto \exp\!\Big(-\frac{1}{2}\sum_{i=1}^n(x_i-\theta)^2\Big)
+= \underbrace{\exp\!\Big(-\frac{1}{2}\sum_{i=1}^n(x_i-\bar{x})^2\Big)}_{h(x)}
+\cdot \underbrace{\exp\!\Big(-\frac{n}{2}(\bar{x}-\theta)^2\Big)}_{g(T(x);\;\theta)}
+\]
+$h(x)$ 只涉及"各数据点围绕自身均值的离散程度"，与 $\theta$ 完全无关。$\theta$ 只通过 $\bar{x}=T(x)$ 进入。
+
+\textbf{Step 2：确认 $T$ 是充分统计量。} 因子分解已直接给出——$\bar{X}$ 是 $\theta$ 的充分统计量。
+
+\textbf{Step 3：验证条件分布与 $\theta$ 无关。}
+$\bar{X} \sim \mathcal{N}(\theta, 1/n)$，$f_T(t;\theta) \propto \exp(-\frac{n}{2}(t-\theta)^2)$。
+条件分布：
+\[
+p(X=x \mid \bar{X}=t,\; \theta)
+= \frac{\exp(-\frac12\sum(x_i-\bar{x})^2) \cdot \exp(-\frac{n}{2}(t-\theta)^2)}
+       {\exp(-\frac{n}{2}(t-\theta)^2) \cdot \int_{\bar{x}=t} \exp(-\frac12\sum(x_i-\bar{x})^2)\,dx}
+\]
+$g(t;\theta)$ 约掉，结果与 $\theta$ 无关。
+
+\textbf{直观理解：} 一旦知道了样本均值 $\bar{x}=t$，各数据点围绕 $t$ 的残差分布是均值为 0 的纯噪声——
+这个纯噪声不包含任何关于 $\theta$ 的额外信息。$T(X)=\bar{X}$ 本身虽然是 $\theta$ 的带噪估计（方差 $1/n$），
+但它已经把 $X$ 中关于 $\theta$ 的信息榨干了。
+
+\subsubsection{三种等价表述}
+
+充分统计量有三种等价刻画，分别从不同视角描述同一件事：
+
+\begin{enumerate}[label=\arabic*., leftmargin=*]
+  \item \textbf{经典统计视角：}
+  $p(X \mid T(X)=t,\; \theta)$ 与 $\theta$ 无关。
+  给定 $T(X)=t$ 后，$X$ 的残差分布不包含 $\theta$——
+  $\theta$ 对 $X$ 的影响完全被 $T(X)$ 的值 $t$ 中介了。（上节已从因子分解推导。）
+
+  \item \textbf{贝叶斯视角：}
+  $p(\theta \mid T(X)) = p(\theta \mid X)$。
+  关于 $\theta$ 的后验分布，用 $T(X)$ 和用全部 $X$ 得到的结果完全一样。
+  换言之，只看压缩后的统计量就够了，看原始数据不会改变你对 $\theta$ 的任何信念。
+
+  \item \textbf{信息论视角：}
+  $I(\theta; T(X)) = I(\theta; X)$。
+  $T(X)$ 对 $X$ 做"无损压缩"——压缩后不丢失关于 $\theta$ 的任何信息。
+\end{enumerate}
+
+\textbf{贝叶斯视角 $\Rightarrow$ 信息论视角（最直观的推导）：}
+
+$p(\theta \mid X) = p(\theta \mid T)$ 等价于 $\theta \perp\!\!\!\perp X \mid T$，即 $I(\theta; X \mid T) = 0$。互信息的链式法则给出：
+\[
+I(\theta; X) = I(\theta; T) + \underbrace{I(\theta; X \mid T)}_{=0} = I(\theta; T)
+\]
+推导是双向的（互信息为零 $\iff$ 条件独立 $\iff$ 后验相等），所以三者完全等价。
+
+\textbf{考试操作：} 因子分解 $\to$ 条件分布与 $\theta$ 无关，这是判断充分性最直接的方法。后验等价提供最直观的理解（"看 $T$ 就够了，不用看原始数据"），信息论等式是 DPI 部分的自然语言。
+
+\subsubsection{指数族分布与充分统计量}
+
+\begin{definition}[指数族分布]
+概率密度/质量函数可写成如下形式的分布：
+\[
+p(x; \theta) = h(x) \cdot \exp\!\Big(\eta(\theta)^T \tau(x) - A(\theta)\Big)
+\]
+其中：
+\begin{itemize}[nosep]
+  \item $\tau(x)$：\textbf{自然充分统计量}（natural sufficient statistic）
+  \item $\eta(\theta)$：自然参数（natural parameter）
+  \item $A(\theta)$：对数配分函数（log-partition function），保证归一化
+  \item $h(x)$：底测度（base measure），与 $\theta$ 无关
+\end{itemize}
+\end{definition}
+
+\textbf{指数族天然满足因子分解：} 直接令 $h(x)$ 如上、$g(T;\theta) = \exp(\eta(\theta)^T T - A(\theta))$ 即可。
+因此，\textbf{对于指数族，$\tau(x)$ 可以直接读出，无需推导。}
+
+\begin{keybox}[指数族的充分统计量判断方法]
+对于 i.i.d.\ 样本 $X_1,\ldots,X_n \iid p(x;\theta)$，联合密度为：
+\[
+f(x_1,\ldots,x_n; \theta)
+= \underbrace{\textstyle\prod_{i=1}^{n} h(x_i)}_{h(x_1,\ldots,x_n)}
+\cdot \exp\!\Big(\eta(\theta)^T \underbrace{\textstyle\sum_{i=1}^{n} \tau(x_i)}_{T(X_1,\ldots,X_n)} - n A(\theta)\Big)
+\]
+
+\textbf{判断步骤：}
+\begin{enumerate}[nosep]
+  \item 将分布写成 $p(x;\theta) = h(x) \cdot \exp(\eta(\theta)^T \tau(x) - A(\theta))$ 形式；
+  \item 读出 $\tau(x)$——这就是单个样本的自然充分统计量；
+  \item 对于 $n$ 个 i.i.d.\ 样本：$T(X_1,\ldots,X_n) = \sum_{i=1}^{n} \tau(X_i)$。
+\end{enumerate}
+\textbf{关键结论：$\boldsymbol{\sum_{i=1}^{n} \tau(X_i)}$ 是指数族分布中参数 $\boldsymbol{\theta}$ 的充分统计量。}
+\end{keybox}
+
+\subsubsection{常见指数族分布的充分统计量}
+
+\begin{center}
+\begin{tabular}{c|c|c|c}
+\toprule
+分布 & 指数族形式 & $\tau(x)$ & i.i.d. 充分统计量 $T$ \\
+\midrule
+\textbf{Bernoulli} & $\exp\!\big(x\log\frac{\theta}{1-\theta} + \log(1-\theta)\big)$ & $x$ & $\sum X_i$ \\
+\textbf{Poisson} & $\frac{1}{x!}\exp(x\log\lambda - \lambda)$ & $x$ & $\sum X_i$ \\
+\textbf{Gaussian}（$\sigma^2$已知） & $\exp\!\big(\frac{\mu}{\sigma^2}x - \frac{x^2}{2\sigma^2} - \frac{\mu^2}{2\sigma^2} - \frac{1}{2}\log(2\pi\sigma^2)\big)$ & $x$ & $\sum X_i$ \\
+\textbf{Gaussian}（$\mu,\sigma^2$均未知） & 同上，$\eta = (\frac{\mu}{\sigma^2}, -\frac{1}{2\sigma^2})^T$ & $(x,\; x^2)^T$ & $(\sum X_i,\; \sum X_i^2)^T$ \\
+\textbf{Exponential} & $\lambda\exp(-\lambda x) = \exp(-\lambda x + \log\lambda)$ & $x$ & $\sum X_i$ \\
+\textbf{Beta} & $\exp((\alpha-1)\log x + (\beta-1)\log(1-x) - \log B(\alpha,\beta))$ & $(\log x,\; \log(1-x))^T$ & $(\sum\log X_i,\; \sum\log(1-X_i))^T$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsubsection{判断与证明方法总结}
+
+\begin{enumerate}[label=\arabic*., leftmargin=*]
+  \item \textbf{验证充分性（因子分解法）：}
+  将联合密度写成 $f(x;\theta) = h(x) \cdot g(T(x); \theta)$，其中 $g$ 只通过 $T(x)$ 依赖数据。
+  若成功分解，则 $T$ 充分。
+
+  \item \textbf{找指数族的充分统计量：}
+  将分布写成 $p(x;\theta) \propto \exp(\eta(\theta)^T\tau(x))$ 形式，$\tau(x)$ 即自然充分统计量。
+
+  \item \textbf{验证非充分性：}
+  若能找到两个不同 $\theta$ 值下、相同 $T$ 值的条件分布不同，或无法做因子分解，则 $T$ 不充分。
+
+  \item \textbf{互信息判定（信息论视角）：}
+  $T$ 充分 $\iff I(\theta; X) = I(\theta; T(X)) \iff \theta \to T(X) \to X$ 是马尔可夫链。
+\end{enumerate}
+
+\subsection{Fano 不等式}
+
+对马尔可夫链 $X \to Y \to \hat{X}$，定义误差 $E = \mathbf{1}[X \neq \hat{X}]$，$P_e = P(E=1)$。
+
+\begin{theorem}[Fano不等式]
+\[
+H(X|Y) \leq H(X|\hat{X}) \leq H(E) + P_e \cdot H(X) \leq 1 + P_e \cdot H(X)
+\]
+\end{theorem}
+
+\begin{keybox}[Fano不等式 —— 误差下界]
+\[
+P_e \geq \frac{H(X|Y) - 1}{H(X)} \geq \frac{H(X|Y) - 1}{\log|\XX|}
+\]
+\end{keybox}
+
+\begin{proofbox}[Fano不等式证明]
+利用联合熵的链式法则两次展开 $H(E,X|\hat{X})$：
+\[
+H(E,X|\hat{X}) = H(X|\hat{X}) + \underbrace{H(E|X,\hat{X})}_{=0}
+= H(E|\hat{X}) + H(X|E,\hat{X})
+\]
+展开 $H(X|E,\hat{X}) = (1-P_e)\underbrace{H(X|\hat{X},E=0)}_{=0} + P_e \cdot H(X|\hat{X},E=1)$，
+
+代入并利用 $H(E|\hat{X}) \leq H(E) \leq 1$ 和 $H(X|\hat{X},E=1) \leq H(X)$ 得证。
+\end{proofbox}
+
+% ============================================================
+% ============================================================
+\section{噪声信道编码定理与联合典型性}
+% ============================================================
+
+
+\subsection{通信系统模型}
+
+\begin{itemize}[nosep]
+  \item 离散无记忆信道 (DMC)：$P_{Y^n|X^n}(y^n|x^n) = \prod_{i=1}^n P_{Y|X}(y_i|x_i)$ \\
+  每次使用信道相互独立，输入 $X_i$ 仅影响对应的输出 $Y_i$
+  \item 编码方案 $C_n = (\text{编码器 } u \to x^n(u),\; \text{译码器 } y^n \to \hat{u})$ \\
+  编码器将 $M$ 个消息映射为 $n$ 长码字；译码器根据信道输出估计消息
+  \item 传输率：$R = \dfrac{\log_2 M}{n}$ (bits/channel use) \\
+  $n$ 越大则码字 $x^n$ 越长，传输率越低；$M$ 越大传输率越高
+  \item 传输错误概率：$P_e^{(n)} = P(\hat{U} \neq U \mid C_n)$，取决于编码方案的好坏
+  \item \textbf{核心问题：} 给定 DMC，最大可达传输率是多少？
+\end{itemize}
+
+\subsection{噪声信道编码定理}
+
+\begin{theorem}[Shannon 1948]
+对于离散无记忆噪声信道，最大可达传输率：
+\[
+R_{max} = \max_{P_X} I(X;Y) \triangleq C \quad\text{（信道容量）}
+\]
+\begin{itemize}[nosep]
+  \item \textbf{正向（可达性）：} 若 $R < C$，则存在编码方案 $C_n$ 使 $P_e^{(n)} \to 0$（$n \to \infty$）；
+  \item \textbf{反向（不可达性）：} 若 $R > C$，则任何编码方案都有 $P_e^{(n)} > 0$。
+\end{itemize}
+即：$\max_{P_X} I(X;Y)$ 既是理论上可计算的量，又是实际可操作的最大传输率。
+\end{theorem}
+
+\subsection{联合典型集}
+
+\subsubsection{定义与基本性质}
+
+\begin{definition}[联合典型集]
+\[
+A_\epsilon^{(n)}(X,Y) \triangleq \left\{
+(x^n,y^n): \begin{aligned}
+&\Bigl|\frac{1}{n}\log\frac{1}{p(x^n)} - H(X)\Bigr| \leq \epsilon \\
+&\Bigl|\frac{1}{n}\log\frac{1}{p(y^n)} - H(Y)\Bigr| \leq \epsilon \\
+&\Bigl|\frac{1}{n}\log\frac{1}{p(x^n,y^n)} - H(X,Y)\Bigr| \leq \epsilon
+\end{aligned}\right\}
+\]
+\end{definition}
+
+\textbf{解读：} 一个序列对 $(x^n,y^n)$ 是联合典型的，当且仅当：
+$x^n$ 自身是 $P_X$ 的典型序列 \textbf{且} $y^n$ 自身是 $P_Y$ 的典型序列
+\textbf{且} $(x^n,y^n)$ 联合是 $P_{XY}$ 的典型序列。
+
+\begin{property}
+\begin{enumerate}[label=(\arabic*),nosep]
+  \item 若 $(X^n,Y^n) \iid P_{XY}$（联合采样），则 $P((x^n,y^n) \in A_\epsilon^{(n)}) \xrightarrow{n\to\infty} 1$
+  \item 对所有 $n$：$|A_\epsilon^{(n)}| \leq 2^{n(H(X,Y)+\epsilon)}$
+\end{enumerate}
+\end{property}
+
+\subsubsection{联合典型引理（Joint Typicality Lemma）}
+
+\textbf{这是正向证明中控制错误概率的核心引理。}
+
+\begin{theorem}[Joint Typicality Lemma]
+设 $\tilde{X}^n \iid P_X$ 与 $\tilde{Y}^n \iid P_Y$ \textbf{相互独立}生成（$\tilde{X}^n \indep \tilde{Y}^n$），
+其中 $P_X, P_Y$ 分别是 $P_{XY}$ 的边缘分布。则：
+\[
+P\big((\tilde{x}^n,\tilde{y}^n) \in A_\epsilon^{(n)}(X,Y)\big) \leq 2^{-n(I(X;Y)-3\epsilon)}
+\]
+\end{theorem}
+
+\begin{proofbox}[联合典型引理证明]
+独立采样意味着 $p(\tilde{x}^n,\tilde{y}^n) = p(\tilde{x}^n) \cdot p(\tilde{y}^n)$。
+\begin{align*}
+P((\tilde{x}^n,\tilde{y}^n) \in A_\epsilon^{(n)})
+&= \sum_{(x^n,y^n) \in A_\epsilon^{(n)}} p(x^n) \cdot p(y^n) \\
+&\leq |A_\epsilon^{(n)}| \cdot \max_{x^n \in A} p(x^n) \cdot \max_{y^n \in A} p(y^n) \\
+&\leq 2^{n(H(X,Y)+\epsilon)} \cdot 2^{-n(H(X)-\epsilon)} \cdot 2^{-n(H(Y)-\epsilon)} \\
+&= 2^{-n(H(X)+H(Y)-H(X,Y)-3\epsilon)} \\
+&= 2^{-n(I(X;Y)-3\epsilon)}
+\end{align*}
+\textbf{含义：} 两个独立生成的序列"偶然"看起来像联合分布采样（即落在联合典型集中）的概率，
+随 $n$ 指数级衰减，衰减速率恰为互信息 $I(X;Y)$。
+\end{proofbox}
+
+\noindent\textbf{JTL 的关键对比（课件 p.9）：}
+\begin{itemize}[nosep]
+  \item \textbf{联合采样} $(X^n,Y^n) \iid P_{XY}$：落在联合典型集的概率 $\to 1$
+  \item \textbf{独立采样} $\tilde{X}^n \indep \tilde{Y}^n$：落在联合典型集的概率 $\leq 2^{-n(I-3\epsilon)} \to 0$（指数快）
+\end{itemize}
+这构成了译码的基础：\textbf{正确的码字}（与 $Y^n$ 联合采样）极大概率联合典型；
+\textbf{错误的码字}（与 $Y^n$ 独立）极大概率不联合典型。
+
+% ============================================================
+
+\subsection{正向证明（若 $R < C$，则存在编码方案使 $P_e \to 0$）}
+
+\textbf{总体策略：随机编码 + 联合典型译码。}
+
+\subsubsection{Step 1：香农的期望技巧}
+
+\textbf{问题：} 好的编码方案未知——不同的 $C_n$ 对应不同的 $P_e$，但我们不知道哪个好。
+
+\textbf{香农的思路（课件 p.13）：} 期望是最小元素的上界。
+\[
+\min_i f_i \leq \mathbb{E}[F] = \sum_i p_i f_i
+\]
+如果能在某个\textbf{随机编码方案集合}上证明\textbf{平均}误差 $\to 0$，
+则\textbf{至少存在一个}具体的编码方案，其误差 $\leq$ 平均误差 $\to 0$。
+
+\textbf{关键优势：} 计算平均误差时，\textbf{不需要知道}编码方案的分布 $P(C_n)$ 的具体形式——期望运算自动抹平了分布细节。
+
+\subsubsection{Step 2：随机码本构造}
+
+固定一个输入分布 $P_X$（先不指定是哪个，后面再取最优的）。
+
+从典型集 $A_\epsilon^{(n)}(X)$ 中，\textbf{独立、均匀地}随机抽取 $M = 2^{nR}$ 个序列作为码字：
+\[
+\text{码本：}\quad x^n(1),\; x^n(2),\; \ldots,\; x^n(M)
+\]
+
+每个码字对应一个消息。码本总共有 $|\XX|^{n \cdot M}$ 种可能——
+构成了随机编码方案的集合，每种码本等概率。
+
+\subsubsection{Step 3：联合典型译码规则}
+
+接收到 $y^n$ 后，在码本中搜索：
+
+\begin{center}
+\fbox{\begin{minipage}{0.9\textwidth}
+\textbf{译码成功（$\hat{u}=u$）} $\iff$
+\begin{itemize}[nosep]
+  \item $(x^n(u), y^n) \in A_\epsilon^{(n)}(X,Y)$（发送的码字与接收序列联合典型）
+  \item 对所有 $k \neq u$：$(x^n(k), y^n) \notin A_\epsilon^{(n)}(X,Y)$（其他码字都不联合典型）
+\end{itemize}
+
+\textbf{译码错误} $\iff$
+\begin{itemize}[nosep]
+  \item $(x^n(u), y^n) \notin A_\epsilon^{(n)}(X,Y)$，\textbf{或}
+  \item 存在 $k \neq u$ 使 $(x^n(k), y^n) \in A_\epsilon^{(n)}(X,Y)$
+\end{itemize}
+\end{minipage}}
+\end{center}
+
+即：译码器寻找\textbf{唯一}与 $y^n$ 联合典型的码字。找到且唯一则成功，否则宣布失败。
+
+\subsubsection{Step 4：误差概率分析（Union Bound）}
+
+假设消息 $U$ 均匀分布，由对称性只需分析 $U=1$ 的情况（所有消息地位等同）。
+
+\textbf{误差事件分解：}
+\begin{align*}
+P_e^{(n)} &= P(\text{译码错误} \mid U=1) \\
+&= P\Big((x^n(1),y^n) \notin A_\epsilon^{(n)}
+          \;\text{OR}\; \exists k \neq 1: (x^n(k),y^n) \in A_\epsilon^{(n)}\Big) \\
+&\leq \underbrace{P\big((x^n(1),y^n) \notin A_\epsilon^{(n)}\big)}_{\text{事件 }E_1:\ \text{正确码字不典型}}
+      + \sum_{k=2}^{M} \underbrace{P\big((x^n(k),y^n) \in A_\epsilon^{(n)}\big)}_{\text{事件 }E_2:\ \text{错误码字恰好典型}}
+\end{align*}
+
+\textbf{事件 $E_1$ 的控制（AEP）：}
+$(X^n(1), Y^n)$ 是联合采样的（$X^n(1) \iid P_X$，
+$Y^n$ 通过信道 $P_{Y|X}$ 由 $X^n(1)$ 产生），故由 AEP 性质：
+\[
+P((x^n(1), y^n) \notin A_\epsilon^{(n)}) \leq \epsilon \quad (\text{$n$ 足够大时})
+\]
+
+\textbf{事件 $E_2$ 的控制（联合典型引理）：}
+对 $k \neq 1$，$x^n(k)$ 是\textbf{独立于} $x^n(1)$、从而独立于 $y^n$ 随机生成的。
+$X^n(k) \iid P_X$ 与 $Y^n \iid P_Y$ 相互独立——这正是 JTL 的前提！因此：
+\[
+P((x^n(k), y^n) \in A_\epsilon^{(n)}) \leq 2^{-n(I(X;Y)-3\epsilon)}
+\]
+
+\textbf{合成：}
+\begin{align*}
+P_e^{(n)} &\leq \epsilon + (M-1) \cdot 2^{-n(I(X;Y)-3\epsilon)} \\
+          &\leq \epsilon + M \cdot 2^{-n(I(X;Y)-3\epsilon)} \\
+          &= \epsilon + 2^{nR} \cdot 2^{-n(I(X;Y)-3\epsilon)}
+            \quad (\because M = 2^{nR}) \\
+          &= \epsilon + 2^{-n(I(X;Y)-R-3\epsilon)}
+\end{align*}
+
+\subsubsection{Step 5：取极限与存在性}
+
+若 $R < I(X;Y) - 3\epsilon$，则指数 $I(X;Y)-R-3\epsilon > 0$，当 $n \to \infty$ 时：
+\[
+P_e^{(n)} \leq \epsilon + 2^{-n(\text{正数})} \to \epsilon
+\]
+$\epsilon$ 可取任意小，故 $P_e^{(n)} \to 0$。
+
+以上 $P_e^{(n)}$ 是\textbf{随机码本上的平均误差}。由香农的期望技巧：
+\[
+\mathbb{E}_{C_n}[P_e] \to 0 \quad\Longrightarrow\quad \exists\; C_n^* \text{ 使 } P_e(C_n^*) \to 0
+\]
+
+最后，取 $P_X = P_X^*$（容达分布，即使 $I(X;Y)=C$ 的输入分布），得：
+\[
+\text{任意 } R < C \text{ 均可达。}
+\]
+
+\subsubsection{正向证明小结}
+
+\begin{enumerate}[nosep]
+  \item 固定 $P_X$，随机生成 $M=2^{nR}$ 个码字
+  \item 联合典型译码：找唯一与 $y^n$ 联合典型的码字
+  \item Union Bound 拆误差：$E_1$（AEP 控制）+ $E_2$（JTL 控制）
+  \item 得到 $P_e \leq \epsilon + 2^{-n(I-R-3\epsilon)} \to 0$（若 $R < I$）
+  \item 取容达分布得 $R < C$；平均误差 $\to 0$ 则存在好码
+\end{enumerate}
+
+% ============================================================
+
+\subsection{反向证明（若 $R > C$，则任何编码方案都有 $P_e > 0$）}
+
+\textbf{策略：Fano 不等式 + 数据处理不等式 + DMC 性质。}
+
+反向证明要证明的是\textbf{任何}编码方案都无法超过 $C$，因此\textbf{不能}对编码器的输出 $X^n$ 或译码器的输入 $Y^n$ 做 i.i.d. 假设——
+我们不知道、也不该假设编码器是如何工作的。唯一可以依赖的是信道本身的性质：\textbf{离散无记忆信道 (DMC)。}
+
+\subsubsection{Step 1：Fano 不等式给出误差下界}
+
+消息 $U$ 均匀分布（不失一般性），$H(U) = \log M = nR$。
+考虑马尔可夫链 $U \to X^n \to Y^n \to \hat{U}$，Fano 不等式：
+\[
+H(U \mid Y^n) \leq 1 + P_e \cdot \log M = 1 + P_e \cdot nR
+\]
+
+将 $H(U \mid Y^n) = H(U) - I(U; Y^n) = nR - I(U; Y^n)$ 代入并整理：
+\[
+P_e \geq 1 - \frac{I(U; Y^n)}{nR} - \frac{1}{nR}
+\]
+
+\subsubsection{Step 2：DPI 消除编码器}
+
+$U \to X^n \to Y^n$ 是马尔可夫链（消息决定码字，信道决定输出），由 DPI：
+\[
+I(U; Y^n) \leq I(X^n; Y^n)
+\]
+
+\subsubsection{Step 3：用 DMC 放缩 $I(X^n; Y^n) \leq nC$}
+
+\textbf{这是反向证明最关键的一步。} 展开 $I(X^n; Y^n) = H(Y^n) - H(Y^n \mid X^n)$：
+
+\begin{itemize}[nosep]
+  \item $H(Y^n \mid X^n)$ 的处理——\textbf{可用 DMC}：信道无记忆性保证 $p(y^n|x^n) = \prod p(y_i|x_i)$，
+  因此 $H(Y^n \mid X^n) = \sum_{i=1}^n H(Y_i \mid X_i)$。这一步\textbf{不}需要 $X_i$ 之间独立。
+  \item $H(Y^n)$ 的处理——\textbf{不可假设 $Y_i$ 独立}（编码器可能使 $X_i$ 相关，进而 $Y_i$ 也相关）。
+  但联合熵有一个恒成立的上界：$H(Y^n) \leq \sum_{i=1}^n H(Y_i)$。
+\end{itemize}
+
+代入：
+\[
+I(X^n; Y^n) = H(Y^n) - \sum_{i=1}^n H(Y_i \mid X_i)
+            \leq \sum_{i=1}^n H(Y_i) - \sum_{i=1}^n H(Y_i \mid X_i)
+            = \sum_{i=1}^n I(X_i; Y_i)
+            \leq n \cdot \max_{P_X} I(X;Y) = nC
+\]
+
+\textbf{注意：}$H(Y^n) \leq \sum H(Y_i)$ 当 $Y_i$ 不独立时是\textbf{严格小于}号——
+这是反向证明之所以能成功的关键：不假设独立只让上界变松了（$\leq$），但方向正确，不影响最终结论。
+
+\subsubsection{Step 4：得出结论}
+
+将 $I(X^n;Y^n) \leq nC$ 和 DPI 的结果代入 Fano 下界：
+\[
+P_e \geq 1 - \frac{nC}{nR} - \frac{1}{nR}
+     = 1 - \frac{C}{R} - \frac{1}{nR}
+\]
+
+当 $R > C$ 时，$1 - \frac{C}{R} > 0$。取 $n$ 充分大使 $\frac{1}{nR}$ 任意小，则 $P_e > 0$。
+即：\textbf{任何编码方案下，传输错误概率都有正下界，不可能任意小。}
+
+\subsubsection{小结：正向 vs 反向的假设差异}
+
+\begin{center}
+\begin{tabular}{c|c|c}
+\toprule
+& 正向（$R<C$ 可达） & 反向（$R>C$ 不可达） \\
+\midrule
+要证明什么 & 存在一个好的编码方案 & 任何编码方案都做不到 \\
+能否假设 $X^n$ i.i.d. & \textbf{能}——在随机码本构造中自然成立 & \textbf{不能}——编码器可以任意 \\
+能否假设 $Y^n$ i.i.d. & \textbf{能}——DMC + $X^n$ i.i.d. 保证了 & \textbf{不能}——$X^n$ 不独立则 $Y^n$ 也不独立 \\
+能用什么 & AEP、联合典型引理 & 仅 DMC + $H(Y^n)\leq\sum H(Y_i)$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+% ============================================================
+
+\subsection{几何解释}
+
+\textbf{输出空间视角（课件 p.21-22）：}
+
+\begin{itemize}[nosep]
+  \item 输出端典型集总大小：$\approx 2^{nH(Y)}$（所有可能的典型输出序列数）
+  \item 每个码字在输出端形成一个"噪声球"：大小为 $\approx 2^{nH(Y|X)}$ \\
+  （给定发送码字 $x^n$，信道输出的不确定性范围）
+  \item 可区分的码字总数 $\leq$ 输出空间 / 噪声球大小：
+  \[
+  2^{nR} \cdot 2^{nH(Y|X)} \leq 2^{nH(Y)}
+  \quad\Longrightarrow\quad
+  R \leq H(Y) - H(Y|X) = I(X;Y) \leq C
+  \]
+  \item 当 $n \to \infty$ 时，\textbf{所有 DMC 都表现得像噪声打印机}（课件 p.23）—— \\
+  大数定理使得每个码字对应的输出分布集中在其条件典型集内
+\end{itemize}
+
+\subsection{平均误差到最大误差（Expurgation）}
+
+正向证明得到的是\textbf{平均误差} $\to 0$。但实际通信中，我们关心的是\textbf{每个消息}的误差是否都小。
+
+\textbf{Expurgation（删减）方法（课件 p.24）：}
+
+给定编码方案 $C_n$，平均误差为：
+\[
+P_e(C_n) = \frac{1}{M}\sum_{u=1}^{M} P_e(u)
+\]
+
+将 $M$ 个状态按 $P_e(u)$ 从大到小排列。去掉误差最大的一半状态（$M/2$ 个），
+剩余状态的最大误差 $\leq 2P_e(C_n)$（因为最差的一半的误差均值 $\geq$ 剩下一半的均值）。
+
+删减后的传输率：
+\[
+R' = \frac{\log(M/2)}{n} = \frac{\log M - 1}{n} = R - \frac{1}{n} \xrightarrow{n\to\infty} R
+\]
+
+\textbf{结论：} 当 $n \to \infty$ 时，可以在不损失传输率的前提下，
+将平均误差的可达性转化为最大误差的可达性。即：\textbf{存在编码方案使所有消息的误差都 $\to 0$}。
+
+% ============================================================
+% ============================================================
+\section{信道容量计算}
+% ============================================================
+
+\subsection{信道容量计算}
+
+$C = \max_{P_X} I(X;Y)$，目标函数 $I(X;Y)$ 关于 $P_X$ 为凹函数，约束为凸集，一阶最优即全局最优。
+
+KKT条件：
+\begin{align*}
+\frac{\partial I}{\partial p_i} &= \lambda, \quad p_i > 0 \\
+\frac{\partial I}{\partial p_i} &\leq \lambda, \quad p_i = 0
+\end{align*}
+其中 $\frac{\partial I}{\partial p_i} = \DKL(p(Y|X=x_i) \| p(Y)) - 1$。
+
+\begin{keybox}[对称信道 —— 必考]
+\textbf{Gallager (1968) 定义：} 离散无记忆信道 $P_{Y|X}$ 的信道矩阵，按输出集划分成若干子矩阵后，
+每个子矩阵满足：
+\begin{itemize}[nosep]
+  \item 每一行都是其他行的排列
+  \item 每一列都是其他列的排列
+\end{itemize}
+\textbf{核心性质：对称信道的最优输入分布 = 均匀分布。}
+
+\textbf{常见对称信道：} 二元对称信道(BSC)、二元删除信道(BEC)、噪声打印机。
+\end{keybox}
+
+\subsubsection{对称信道的判断方法}
+
+\begin{enumerate}[label=\textbf{方法\arabic*：}, leftmargin=*]
+  \item \textbf{行列检查法（强对称/简单情形）：}\\
+  若信道矩阵的每一行都是其他行的排列，\textbf{且}每一列也是其他列的排列，则为对称信道。
+
+  \item \textbf{Gallager 子矩阵法（广义情形）：}\\
+  将输出符号分组，每组的列构成一个子矩阵。若每个子矩阵内行列均可互换排列，则为对称信道。
+  \begin{itemize}[nosep]
+    \item 例：$P_{Y|X} = \begin{bmatrix} 0.7 & 0.2 & 0.1 \\ 0.1 & 0.2 & 0.7 \end{bmatrix}$，行可互换、列可分两组 $\{Y=0,Y=1\}$ 和 $\{Y=?\}$，前者是 $2\times2$ 行列可互换子矩阵。
+  \end{itemize}
+
+  \item \textbf{关键性质验证法：}\\
+  若每行 $H(Y|X=x)$ 都相同（即每行的概率集合是同一集合的排列），且均匀输入下 $H(Y)$ 容易算——则该信道极有可能是对称信道。
+\end{enumerate}
+
+\subsubsection{对称信道容量计算}
+
+对于对称信道，$p(x) = 1/|\XX|$（均匀分布）时达到容量：
+\[
+C = H(Y)\big|_{p(x)\text{均匀}} - H(Y|X=x_{\text{任意一行}})
+\]
+其中 $H(Y|X=x)$ 取任意一行计算即可（各行熵相同）。
+
+\subsubsection{对称信道实例（附容量推导）}
+
+\begin{enumerate}[label=(\arabic*), leftmargin=*]
+  \item \textbf{二元对称信道 (BSC)}：翻转概率 $f$
+  \[
+  P_{Y|X} = \begin{bmatrix} 1-f & f \\ f & 1-f \end{bmatrix}
+  \]
+  行 $\{1-f, f\}$ 互为排列，列也互为排列——对称信道，最优输入 $p(0)=p(1)=\frac12$。
+
+  \textbf{容量推导：}
+  \[
+  C = H(Y)|_{\text{均匀}} - H(Y|X=x_{\text{任意一行}})
+  \]
+  均匀输入下，$p_Y(0) = \frac12(1-f) + \frac12 f = \frac12$，$p_Y(1) = \frac12$，故 $H(Y)=1$。
+  每行的条件熵 $H(Y|X=x) = H_2(f) = -f\log f - (1-f)\log(1-f)$。
+  \[
+  \boxed{C = 1 - H_2(f)}
+  \]
+  当 $f=0$（无噪声）时 $C=1$ bit；$f=0.5$（完全随机）时 $C=0$。
+
+  \item \textbf{二元删除信道 (BEC)}：删除概率 $\alpha$
+  \[
+  P_{Y|X} = \begin{bmatrix} 1-\alpha & \alpha & 0 \\ 0 & \alpha & 1-\alpha \end{bmatrix}
+  \]
+  Gallager 分组：$\{Y=0, Y=1\}$ 为一组，$\{Y=\text{?}\}$ 单独——对称信道，最优输入均匀。
+
+  \textbf{容量推导（两种方法）：}
+
+  \textit{方法一（对称信道公式）：}
+  均匀输入下，$p_Y(0) = \frac{1-\alpha}{2}$，$p_Y(1) = \frac{1-\alpha}{2}$，$p_Y(\text{?}) = \alpha$。
+  $H(Y) = H_2(\alpha) + (1-\alpha) \cdot 1$（$\alpha$ 概率为 erasure + $1-\alpha$ 概率均匀分布在 $\{0,1\}$）。
+  $H(Y|X=x) = H_2(\alpha)$（每行都是 $\{1-\alpha, \alpha, 0\}$）。
+  $C = H(Y) - H(Y|X) = [H_2(\alpha) + (1-\alpha)] - H_2(\alpha) = 1-\alpha$。
+
+  \textit{方法二（互信息直接计算——更直观）：}
+  $I(X;Y) = H(X) - H(X|Y)$。均匀输入下 $H(X)=1$。
+  当 $Y=\text{?}$ 时 $H(X|Y=\text{?})=1$（erasure 不提供任何信息）；当 $Y=0$ 或 $Y=1$ 时 $H(X|Y)=0$（完美确定 $X$）。
+  $H(X|Y) = \alpha \cdot 1 + (1-\alpha) \cdot 0 = \alpha$。
+  \[
+  \boxed{C = I(X;Y) = 1 - \alpha}
+  \]
+  BEC 的容量有直观解释：$\alpha$ 比例的信息被删除，剩下 $1-\alpha$ 比例完美传输。
+
+  \item \textbf{噪声打印机}：每个键 $1/2$ 正确，$1/4$ 偏左，$1/4$ 偏右
+  \[
+  P_{Y|X} = \begin{bmatrix}
+  \frac12 & \frac14 & 0 & \cdots & 0 & \frac14 \\
+  \frac14 & \frac12 & \frac14 & \cdots & 0 & 0 \\
+  \vdots & \vdots & \vdots & \ddots & \vdots & \vdots
+  \end{bmatrix}
+  \]
+  行循环置换，列也循环置换——对称信道。容量：
+  \[
+  \boxed{C = \log|\YY| - H\!\left(\tfrac12,\tfrac14,\tfrac14,0,\ldots,0\right)}
+  \]
+  即 $\log|\YY|$ 减去每行条件熵。
+\end{enumerate}
+
+\subsubsection{非对称信道如何处理}
+
+若信道矩阵的\textbf{行}不互为排列（即 $H(Y|X=x)$ 随 $x$ 变化），则不是对称信道。
+需用 KKT 条件 / Blahut-Arimoto 算法数值求解 $C$ 和最优 $P_X$。
+注意：即使非对称，$I(X;Y)$ 关于 $P_X$ 仍是凹函数，$\max_{P_X} I(X;Y)$ 仍是良定义的凸优化问题。
+
+\section{Hamming 码}
+% ============================================================
+
+\begin{keybox}[考试范围]
+Hamming 码的\textbf{编码+译码全流程}必考。Viterbi 算法/HMM 不考。
+\end{keybox}
+
+\subsection{核心思想：数据流形}
+
+\begin{itemize}[nosep]
+  \item 合理数据满足特定结构（流形）：$Hx = 0$
+  \item 零空间编码：在 $Hx = 0$ 的流形上编码（码字 = 零空间中的向量）
+  \item 错误检测：接收 $y$，计算校验子 $\eta = Hy$
+  \begin{itemize}[nosep]
+    \item $\eta = 0$：$y$ 在零空间上，判定正确
+    \item $\eta \neq 0$：$y$ 不在零空间上，发生错误
+  \end{itemize}
+  \item 纠错：将错误数据投影回最近流形点（翻转出错位）
+\end{itemize}
+
+\subsection{GF(2) 算术与错误表示}
+
+\begin{itemize}[nosep]
+  \item GF(2) 加法 = XOR（异或），常记为 $\oplus$
+  \item 标准基向量 $e_k$：第 $k$ 位为 1、其余为 0 的列向量
+  \item 第 $k$ 位出现错误：$y = x + e_k$（对应位翻转）
+  \item 第 $i$ 位和第 $j$ 位同时出错：$y = x + e_i + e_j$
+  \item 关键性质：$He_k = H$ 的第 $k$ 列 $\triangleq \eta_k$（校验子直接指向错误位置！）
+\end{itemize}
+
+\subsection{汉明矩阵 $H$ 的结构}
+
+\begin{itemize}[nosep]
+  \item $H_{m \times n} \in \mathrm{GF}(2)^{m \times n}$，满秩
+  \item 列向量 = 位置编码：$H$ 的各列互不相同且非零
+  \item ${}\oplus{}$ 校验子 $\eta = Hy = He_k = H(:,k)$，由此定位错误位
+  \item 码长关系：$n = 2^m - 1$（以 Hamming(7,4) 为例，$m=3, n=7$）
+  \item 零空间维数：$n - \mathrm{rank}(H) = n - m = 2^m - m - 1$（可编码数据 bit 数）
+  \item 码字总个数：$2^{n-m}$
+\end{itemize}
+
+\subsection{编码流程（Hamming(7,4) 实例）}
+
+以经典 Hamming(7,4) 为例（$m=3$, $n=7$）：
+
+\[
+H = \begin{bmatrix}
+0 & 0 & 0 & 1 & 1 & 1 & 1 \\
+0 & 1 & 1 & 0 & 0 & 1 & 1 \\
+1 & 0 & 1 & 0 & 1 & 0 & 1
+\end{bmatrix}
+\]
+
+\begin{itemize}[nosep]
+  \item 校验位位置：$2^0, 2^1, 2^2$ 即第 1, 2, 4 位（$x_1, x_2, x_4$）
+  \item 数据位位置：其余位置 3, 5, 6, 7（$x_3, x_5, x_6, x_7$）
+  \item 零空间方程 $Hx = 0$：
+  \[
+  \begin{cases}
+  x_4 + x_5 + x_6 + x_7 = 0 \\
+  x_2 + x_3 + x_6 + x_7 = 0 \\
+  x_1 + x_3 + x_5 + x_7 = 0
+  \end{cases}
+  \]
+  \item \textbf{编码步骤：}
+  \begin{enumerate}[nosep]
+    \item 将 4 bit 数据放入数据位 $x_3, x_5, x_6, x_7$
+    \item 通过零空间方程解出校验位：
+    $\begin{cases}
+    x_4 = x_5 + x_6 + x_7 \\
+    x_2 = x_3 + x_6 + x_7 \\
+    x_1 = x_3 + x_5 + x_7
+    \end{cases}$（均为 GF(2) 加法 = XOR）
+    \item 组合得到 7 bit 码字 $(x_1, x_2, x_3, x_4, x_5, x_6, x_7)$
+  \end{enumerate}
+  \item 本质：分组奇偶校验——每个校验位负责 $H$ 中对应行非零元所在的数据位
+\end{itemize}
+
+\subsection{译码流程}
+
+\begin{enumerate}[nosep]
+  \item 接收 $y$（7 bit），计算校验子 $\eta = Hy$（GF(2) 矩阵乘法，逐行 XOR）
+  \item 判断：
+  \begin{itemize}[nosep]
+    \item $\eta = (0,0,0)^T$：无错误，直接取数据位输出
+    \item $\eta = \eta_k \neq 0$：第 $k$ 位出错（$\eta$ 等于 $H$ 的第 $k$ 列），翻转 $y_k$，纠正后取数据位输出
+  \end{itemize}
+  \item 若两位出错：$\eta = \eta_i + \eta_j \neq 0$（可检测，但无法确定是哪两位）
+  \item 纠错能力：\textbf{可检测一位或两位错误，可纠正一位错误}
+\end{enumerate}
+
+\subsection{Hamming 距离}
+
+\begin{definition}[Hamming 距离]
+$D_H(x^n, y^n) = \sum_{k=1}^{n} x_k \oplus y_k$（不同位的个数）
+\end{definition}
+
+\begin{property}
+\begin{enumerate}[label=(\arabic*),nosep]
+  \item 非负性：$D_H(x,y) \geq 0$
+  \item 对称性：$D_H(x,y) = D_H(y,x)$
+  \item 三角不等式：$D_H(x,y) + D_H(y,z) \geq D_H(x,z)$
+\end{enumerate}
+\end{property}
+
+\textbf{几何意义：} 实现两序列相等所需的最少 0-1 bit 翻转次数。
+
+\begin{keybox}[最小距离与纠错能力]
+码字空间中任意两个不同码字的最小 Hamming 距离 $d_{\min}$ 决定纠错能力：
+\[
+\text{可纠正 } t \text{ 位错} \iff d_{\min} \geq 2t + 1
+\]
+Hamming(7,4)：$d_{\min} = 3$，故可纠 1 位错（$2 \times 1 + 1 = 3$）。
+\end{keybox}
+
+\textbf{$d_{\min}=3$ 的证明：} $H$ 各列互不相同且非零，任意非零码字至少需 3 个不同的列相加才能得零向量。故码字空间（除全零元外）各向量非零元个数 $\geq 3$。不同码字 $x \neq y$，$z = x + y$ 也是码字（零空间是线性子空间），故 $D_H(x,y) = \|z\|_0 \geq 3$。
+
+% ============================================================
+\section*{（附）Viterbi 算法 —— 不考}
+% ============================================================
+
+\begin{noteskipped}
+\textbf{不考内容。} Viterbi 算法、HMM、卷积码均不在此次考试范围内。
+仅需了解：Viterbi 算法用于卷积码的最优译码，核心为动态规划/最短路径搜索。
+\end{noteskipped}
+
+% ============================================================
+\section{连续情况与高斯信道}
+% ============================================================
+
+\subsection{微分熵}
+
+\begin{definition}[微分熵]
+$h(X) = -\int f_X(x) \log f_X(x) \,dx$
+\end{definition}
+
+微分熵\textbf{可以为负数}。
+
+典型值：$X \sim U(a,b)$：$h(X) = \log(b-a)$（$b-a<1$ 时为负）。
+
+变量替换：$h(AX + c) = h(X) + \log|\det A|$。
+
+连续KL散度和互信息仍然非负：
+\begin{align*}
+\DKL(f\|g) &= \int f\log\frac{f}{g}\,dx \geq 0 \\
+I(X;Y) &= \DKL(f_{X,Y}\|f_X f_Y) = h(X) - h(X|Y) \geq 0
+\end{align*}
+
+\subsection{高斯分布——最大熵分布}
+
+\begin{theorem}[高斯分布微分熵]
+$X^n \sim \mathcal{N}(\bm{\mu}, \bm{\Sigma})$：
+\[
+h(X^n) = \frac{n}{2}\log(2\pi e) + \frac{1}{2}\log|\bm{\Sigma}|
+\]
+\end{theorem}
+
+\begin{theorem}[最大熵定理]
+给定协方差 $\bm{\Sigma}$ 的所有分布中，高斯分布熵最大：
+\[
+h(X^n) \leq \frac{n}{2}\log(2\pi e) + \frac{1}{2}\log|\bm{\Sigma}|
+\]
+\end{theorem}
+
+\begin{proofbox}
+$0 \leq \DKL(f\|g) = -h(X^n) - \int f(\bm{x})\log g(\bm{x}) d\bm{x}$，
+计算 $\int f \log g = -\frac{n}{2}\log(2\pi) - \frac{1}{2}\log|\bm{\Sigma}| - \frac{n}{2\ln 2}$，移项得证。
+\end{proofbox}
+
+\subsection{高斯信道}
+
+信道模型：$Y_i = X_i + W_i,\; W_i \sim \mathcal{N}(0,\sigma^2)$，功率约束：$\frac{1}{n}\sum X_i^2 \leq P$。
+
+\begin{theorem}[高斯信道容量]
+\[
+C = \frac{1}{2}\log\left(1 + \frac{P}{\sigma^2}\right)
+\]
+\end{theorem}
+
+\begin{proofbox}
+$I(X;Y) = h(Y) - h(Y|X) = h(Y) - h(W)$。
+$\EE[Y^2] = \EE[X^2] + \EE[W^2] \leq P + \sigma^2$。
+最大熵分布：$Y \sim \mathcal{N}(0, P+\sigma^2)$，$h(Y) \leq \frac{1}{2}\log(2\pi e(P+\sigma^2))$。
+$h(W) = \frac{1}{2}\log(2\pi e\sigma^2)$，代入得 $C = \frac{1}{2}\log(1+P/\sigma^2)$。
+\end{proofbox}
+
+\subsection{并行高斯信道——水填充（Water-Filling）}
+
+\begin{keybox}[水填充算法]
+\[
+\max_{\{P_i\}} \sum_{i=1}^{n} \frac{1}{2}\log\left(1+\frac{P_i}{N_i}\right), \quad s.t.\; \sum P_i = P,\; P_i \geq 0
+\]
+最优解：$P_i^* = (\mu - N_i)^+ = \max(\mu - N_i, 0)$。
+$\mu$ 由 $\sum P_i^* = P$ 确定。
+\end{keybox}
+
+KKT推导：$-\frac{1}{2}\frac{1}{N_i+P_i} + \lambda - \nu_i = 0$，$\nu_i P_i = 0$。
+若 $P_i > 0$，$P_i = \frac{1}{2\lambda} - N_i$；若 $P_i = 0$，$\frac{1}{2\lambda} \leq N_i$。
+令 $\mu = 1/(2\lambda)$ 即得。
+
+% ============================================================
+\section{率失真理论——有损压缩}
+% ============================================================
+
+\subsection{问题表述}
+
+有损压缩：$N$ 个符号压缩为 $m$ bit，压缩率 $R = m/N$，失真 $\EE[d(V,\hat{V})] \leq D$。
+
+对偶问题：
+\[
+\min R \text{ s.t. } \EE[d] \leq D \quad\Longleftrightarrow\quad \min \EE[d] \text{ s.t. } R \leq R_0
+\]
+
+\subsection{常用失真函数}
+
+\begin{itemize}[nosep]
+  \item Hamming失真：$d(x,y) = \mathbf{1}[x \neq y]$（二进制数据）
+  \item 平方误差：$d(x,y) = (x-y)^2$（图像/连续数据）
+  \item Itakura-Saito距离（语音信号）
+\end{itemize}
+
+\subsection{率失真函数}
+
+\begin{definition}[信息率失真函数]
+\[
+R_I(D) = \min_{p(\hat{V}|V):\; \EE[d(V,\hat{V})] \leq D} I(V; \hat{V})
+\]
+\end{definition}
+
+\begin{theorem}[率失真定理]
+$R(D) = R_I(D)$。若 $R > R_I(D)$ 则 $(R,D)$ 可达；若 $R < R_I(D)$ 则不可达。
+\end{theorem}
+
+\subsection{率失真函数性质}
+
+\begin{keybox}[$R(D)$ 的性质]
+\begin{enumerate}[label=(\arabic*),nosep]
+  \item \textbf{凸函数}：$R(\lambda D_1 + (1-\lambda)D_2) \leq \lambda R(D_1) + (1-\lambda)R(D_2)$
+  \item $R(0) = H(V)$（无损压缩时等于源熵）
+  \item 存在 $D_{max}$ 使得 $R(D_{max}) = 0$，$D \geq D_{max}$ 时 $R(D) = 0$
+  \item \textbf{单调递减}：$D_1 < D_2 \Rightarrow R(D_1) \geq R(D_2)$
+\end{enumerate}
+\end{keybox}
+
+\begin{proofbox}[凸性证明（Time-sharing）]
+对长为 $N$ 的序列，$\lambda N$ 部分用失真 $D_1$ 编码（压缩率 $R(D_1)$），
+$(1-\lambda)N$ 部分用失真 $D_2$ 编码（压缩率 $R(D_2)$）。
+整体：$R = \lambda R(D_1)+(1-\lambda)R(D_2)$，$\EE[d] = \lambda D_1+(1-\lambda)D_2$。
+该失真下的最优压缩率 $R(\lambda D_1+(1-\lambda)D_2) \leq$ 此方案的压缩率。
+\end{proofbox}
+
+\subsection{高斯信源的率失真函数}
+
+\begin{theorem}[高斯信源 RD]
+$V \sim \mathcal{N}(0,\sigma^2)$，平方误差失真：
+\[
+R(D) = \begin{cases}
+\displaystyle\frac{1}{2}\log\frac{\sigma^2}{D}, & 0 \leq D \leq \sigma^2 \\[8pt]
+0, & D > \sigma^2
+\end{cases}
+\]
+\end{theorem}
+
+\begin{proofbox}
+$I(V;\hat{V}) = h(V) - h(V|\hat{V}) \geq h(V) - h(V-\hat{V}) \geq
+\frac{1}{2}\log(2\pi e \sigma^2) - \frac{1}{2}\log(2\pi e D) = \frac{1}{2}\log(\sigma^2/D)$。
+等号条件：$V-\hat{V} \sim \mathcal{N}(0,D)$ 且与 $\hat{V}$ 独立，$\hat{V} \sim \mathcal{N}(0,\sigma^2-D)$。
+\end{proofbox}
+
+% ============================================================
+\section{率失真与信道编码的假设对比}
+% ============================================================
+
+\begin{keybox}[可达性证明中的独立同假设]
+\begin{center}
+\begin{tabular}{c|c|c}
+\toprule
+& 正向（可达） & 反向（不可达） \\
+\midrule
+信道编码 & 需假设 $X^n,Y^n$ i.i.d. & 不假设 i.i.d.（仅DMC） \\
+率失真 & 需假设 $V^N,\hat{V}^N$ i.i.d. & 不假设 $\hat{V}^N$ i.i.d. \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{keybox}
+
+% ============================================================
+\section{信源信道分离}
+% ============================================================
+
+\subsection{问题背景}
+
+我们已经分别建立了两个理论：
+
+\begin{itemize}[nosep]
+  \item \textbf{信源编码（数据压缩）：} $V^N$（$N$ 个 i.i.d. 符号）$\to$ 压缩为 $m$ bit。\\
+  率失真定理：若 $R \geq R_I(D)$，则存在压缩方案使失真 $\leq D$。
+  最小 bit 数：$m \geq N \cdot R_I(D)$。
+
+  \item \textbf{信道编码（可靠传输）：} $m$ bit 消息 $\to$ $n$ 次信道使用 $\to$ 解码。\\
+  噪声信道编码定理：若 $R \leq C_I$，则存在编码方案使 $P_e \to 0$。
+  最大可传 bit 数：$m \leq n \cdot C_I$。
+\end{itemize}
+
+\textbf{自然的问题：} 能不能把两个模块串起来——先压缩、再传——构成一个完整的通信系统？如果能，这个"分离"方案是不是最优的？有没有"联合编码"方案可以做得更好？
+
+\subsection{分离方案（Separation Scheme）}
+
+\begin{center}
+\fbox{\begin{minipage}{0.92\textwidth}
+\small
+\textbf{发送端：} $V^N \xrightarrow{\text{信源编码器}} m \text{ bit} \xrightarrow{\text{信道编码器}} X^n \xrightarrow{\text{信道 } P_{Y|X}} Y^n$
+
+\textbf{接收端：} $Y^n \xrightarrow{\text{信道译码器}} m \text{ bit} \xrightarrow{\text{信源译码器}} \hat{V}^N$
+\end{minipage}}
+\end{center}
+
+分离方案就是把两个独立的编码器级联：中间共享一个 $m$ bit 的消息。
+
+\begin{keybox}[分离方案的可行性条件]
+分离方案存在 $\iff$ 能找到一个 $m$ 同时满足两边的要求：
+\[
+\underbrace{N \cdot R_I(D)}_{\text{压缩所需最小 bit}} \;\leq\; \log_2 M = m \;\leq\; \underbrace{n \cdot C_I}_{\text{信道可传最大 bit}}
+\]
+即：
+\[
+\boxed{N \cdot R_I(D) \leq n \cdot C_I}
+\quad\text{或等价地}\quad
+\boxed{\frac{N}{n} \leq \frac{C_I}{R_I(D)}}
+\]
+\end{keybox}
+
+\textbf{解读：} 信源序列长 $N$，信道可用 $n$ 次。\\
+- 信源端至少需要 $N \cdot R_I(D)$ bit 来描述数据（失真 $\leq D$）；\\
+- 信道端最多能可靠传输 $n \cdot C_I$ bit。\\
+- 只要需求 $\leq$ 供给，分离方案就可行。
+
+\subsection{联合编码方案（Joint Coding Scheme）}
+
+联合方案不显式拆成"先压缩、再编码"两步——编码器直接把 $V^N$ 映射为 $X^n$，译码器直接把 $Y^n$ 映射为 $\hat{V}^N$。
+
+\begin{center}
+\fbox{\begin{minipage}{0.92\textwidth}
+\small
+\textbf{发送端：} $V^N \xrightarrow{\text{联合编码器}} X^n$
+
+\textbf{接收端：} $Y^n \xrightarrow{\text{联合译码器}} \hat{V}^N$
+\end{minipage}}
+\end{center}
+
+\textbf{核心问题：} 联合方案能不能超越分离方案？比如 $N \cdot R_I(D) > n \cdot C_I$ 时，分离方案不可行——联合方案有希望吗？
+
+\subsection{联合方案的必然约束（反向证明）}
+
+整个通信链路构成马尔可夫链：$V^N \to X^n \to Y^n \to \hat{V}^N$。
+
+对联合方案应用两个定理的\textbf{反向}部分：
+
+\begin{itemize}[nosep]
+  \item \textbf{率失真定理反向（需要 $V^N$ i.i.d.）：}
+  $I(V^N; \hat{V}^N) \geq \sum_{i=1}^N I(V_i; \hat{V}_i) \geq N \cdot R_I(D)$
+  \item \textbf{DPI（数据处理不等式）：}
+  $V^N \to X^n \to Y^n \to \hat{V}^N$ 是马尔可夫链，故
+  $I(V^N; \hat{V}^N) \leq I(X^n; Y^n)$
+  \item \textbf{信道编码定理反向（仅需 DMC）：}
+  $I(X^n; Y^n) \leq \sum_{i=1}^{n} I(X_i; Y_i) \leq n \cdot C_I$
+\end{itemize}
+
+三者串联得到\textbf{任何}联合方案都必然满足的不等式链：
+
+\begin{keybox}[联合编码的必要条件]
+\[
+\boxed{N \cdot R_I(D) \leq I(V^N; \hat{V}^N) \leq I(X^n; Y^n) \leq n \cdot C_I}
+\]
+
+因此，\textbf{任何}可靠通信方案都必须满足：
+\[
+\frac{N}{n} \leq \frac{C_I}{R_I(D)}
+\]
+\end{keybox}
+
+\textbf{这意味着：} 即使是最聪明的联合编码方案，也无法突破这个不等式。\\
+若 $N \cdot R_I(D) > n \cdot C_I$，不仅分离方案不可行——\textbf{任何方案都不可行}。
+
+\subsection{分离定理（Separation Theorem）}
+
+联合方案的必要条件和分离方案的可行性条件\textbf{完全相同}：
+
+\[
+N \cdot R_I(D) \leq n \cdot C_I
+\]
+
+\begin{theorem}[信源信道分离定理]
+若 $N \cdot R_I(D) \leq n \cdot C_I$，则存在分离编码方案（信源编码 + 信道编码独立设计）实现可靠通信。\\
+若 $N \cdot R_I(D) > n \cdot C_I$，则\textbf{任何}编码方案（包括联合编码）都无法实现可靠通信。
+
+分离方案不损失任何传输效率——在所有可达方案中就是最优的。
+\end{theorem}
+
+\begin{keybox}[分离定理的现实意义]
+\begin{itemize}[nosep]
+  \item \textbf{模块化设计：} 信源编码和信道编码可以分开设计、分开优化，互不干扰
+  \item \textbf{分工协作：} 做压缩的人只管压缩率，做通信的人只管信道容量，拼起来就是最优
+  \item \textbf{理论基础：} 整个通信系统的理论模型——信源 $\to$ 信源编码 $\to$ 信道编码 $\to$ 信道 $\to$ 信道译码 $\to$ 信源译码——正是建立在这个定理之上
+\end{itemize}
+\end{keybox}
+
+% ============================================================
+\section{变分自编码器（VAE）与率失真理论}
+% ============================================================
+
+\subsection{率失真问题的三种形式}
+
+课件 p.11 总结了率失真 trade-off 的三种等价表述，这也是理解 VAE 的入口：
+
+\begin{enumerate}[label=(\arabic*), leftmargin=*]
+  \item \textbf{率失真问题（Shannon）：}
+  $\displaystyle\min\; \text{rate}, \quad \text{s.t. } \text{distortion} \leq D$
+  \item \textbf{失真率问题（对偶）：}
+  $\displaystyle\min\; \text{distortion}, \quad \text{s.t. } \text{rate} \leq R$
+  \item \textbf{无约束形式（工程实用）：}
+  $\displaystyle\min\; \big(\text{Rate} + \beta \cdot \text{Distortion}\big)$
+\end{enumerate}
+
+前两种是理论分析用的（强约束），第三种把约束写成罚项——这正是 VAE 训练的形式。
+
+\subsection{VAE 的基本结构}
+
+\begin{center}
+\fbox{\begin{minipage}{0.9\textwidth}
+\small
+\textbf{编码器} $q_\phi(z|x)$：把数据 $x$ 映射到潜变量 $z$（概率化编码）。\\
+\textbf{解码器} $p_\theta(\hat{x}|z)$：把潜变量 $z$ 重建为 $\hat{x}$。
+
+\textbf{训练目标（Loss）：}
+\[
+\mathcal{L} = \underbrace{\mathbb{E}_{q_\phi(z|x)}\big[-\log p_\theta(\hat{x}|z)\big]}_{\text{重建误差 (Distortion)}}
+            + \underbrace{D_{\mathrm{KL}}\big(q_\phi(z|x) \,\|\, p(z)\big)}_{\text{KL 正则项 (Rate)}}
+\]
+\end{minipage}}
+\end{center}
+
+通常取先验 $p(z) = \mathcal{N}(0, I)$，编码器输出 $q_\phi(z|x) = \mathcal{N}(\mu_\phi(x), \sigma_\phi^2(x))$。
+
+\subsection{ELBO 的来源}
+
+对数似然 $\log p(x)$ 不可直接优化（需要积分 $z$）。引入编码器 $q_\phi(z|x)$：
+
+\begin{align*}
+\log p(x) &= \mathbb{E}_{q_\phi(z|x)}\!\left[\log\frac{p_\theta(x, z)}{q_\phi(z|x)}\right]
+           + D_{\mathrm{KL}}\big(q_\phi(z|x) \,\|\, p_\theta(z|x)\big) \\
+          &\geq \mathbb{E}_{q_\phi(z|x)}\!\left[\log\frac{p_\theta(x, z)}{q_\phi(z|x)}\right]
+           \triangleq \mathrm{ELBO}
+\end{align*}
+
+展开 ELBO：
+\[
+\mathrm{ELBO}
+= \mathbb{E}_{q_\phi(z|x)}[\log p_\theta(x|z)] - D_{\mathrm{KL}}(q_\phi(z|x) \,\|\, p(z))
+\]
+
+最大化 ELBO = 最小化负 ELBO = \textbf{重建误差 + KL 正则}。
+
+\subsection{从信息论角度看 VAE}
+
+\subsubsection{正则项 = 编码率（Rate）}
+
+将 KL 正则项对数据分布求期望并展开（课件 p.15）：
+\begin{align*}
+\mathbb{E}_{x\sim p_{\mathrm{data}}}\big[D_{\mathrm{KL}}(q_\phi(z|x)\,\|\,p(z))\big]
+&= \mathbb{E}_{x,z}\!\left[\log\frac{q_\phi(z|x)}{q_\phi(z)} \cdot \frac{q_\phi(z)}{p(z)}\right] \\
+&= I_{q_\phi}(X; Z) + D_{\mathrm{KL}}(q_\phi(z)\,\|\,p(z)) \\
+&\geq I_{q_\phi}(X; Z)
+\end{align*}
+
+\textbf{最小化 KL 正则项 $\Longleftrightarrow$ 最小化互信息 $I(X;Z)$。}
+
+而 $I(X;Z)$ 正是率失真理论中要最小化的量——编码率（Rate）的下界。
+
+\subsubsection{重建误差 = 失真度（Distortion）}
+
+在高斯解码器 $p_\theta(\hat{x}|z) = \mathcal{N}(\hat{x}, \sigma^2 I)$ 下：
+\[
+-\log p_\theta(x|z) = \frac{1}{2\sigma^2} \|x - \mathrm{Decoder}(z)\|^2 + \text{const}
+\]
+这恰好是平方误差失真 $d(x, \hat{x}) = \|x-\hat{x}\|^2$ 的形式。
+
+\subsubsection{VAE 就是在逼近率失真极限}
+
+\[
+\mathcal{L}_{\mathrm{VAE}}
+\approx \underbrace{\mathbb{E}[\text{distortion}]}_{\text{失真 } D}
+      + \underbrace{I(X; Z)}_{\text{编码率 } R}
+\]
+
+训练 VAE 本质上是在解：$\min\,(\text{Rate} + \text{Distortion})$——率失真问题的第三种形式。
+
+当训练收敛时，编码器 $q_\phi$ 找到了给定失真水平下使互信息最小的"测试信道"，
+解码器 $p_\theta$ 实现了该压缩率下的最优重建。这就是为什么说 VAE 在\textbf{逼近香农的率失真函数 $R(D)$}。
+
+\subsubsection{$\beta$-VAE}
+
+\[
+\mathcal{L}_\beta = \text{Distortion} + \beta \cdot \text{Rate}
+\]
+
+$\beta$ 控制 rate-distortion 的权衡：
+- $\beta > 1$：更强的压缩（更小的 $I(X;Z)$），更大的失真
+- $\beta < 1$：更好的重建质量，更多信息保留在 $Z$ 中
+
+这在信息论上完全对应率失真 trade-off 曲线上的不同工作点。
+
+\subsection{考试要点}
+
+\begin{itemize}[nosep]
+  \item VAE 的 loss = 重建误差 + KL 正则 $\approx$ Distortion + Rate
+  \item KL 正则项 $\geq I(X;Z)$，最小化它就是在压缩互信息
+  \item VAE 训练本质是在逼近香农率失真理论极限
+  \item $\beta$-VAE 的 $\beta$ 控制 rate-distortion 权衡
+  \item 不考 VAE 的具体架构细节和训练 trick，考的是它和信息论的联系
+\end{itemize}
+
+% ============================================================
+\section{核心公式速查}
+% ============================================================
+
+\renewcommand{\arraystretch}{1.7}
+\rowcolors{2}{gray!8}{white}
+\begin{longtable}{c|>{\raggedright\arraybackslash}p{10.5cm}}
+\caption{考试核心公式速查} \\[3pt]
+\toprule
+\rowcolor{red!15!white}\textbf{名称} & \textbf{公式} \\
+\midrule
+\endfirsthead
+\multicolumn{2}{c}{\small（续表）} \\[3pt]
+\toprule
+\rowcolor{red!15!white}\textbf{名称} & \textbf{公式} \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+\addlinespace[6pt]
+\rowcolor{red!10!white}
+\multicolumn{2}{c}{\textbf{基础度量与不等式}} \\
+\midrule
+熵 & $H(X) = -\sum_x p(x)\log p(x)$ \\
+条件熵 & $H(X|Y) = \sum_{y} p(y)H(X|Y=y)$ \\
+联合熵链式 & $H(X,Y) = H(X) + H(Y|X)$ \\
+互信息 & $I(X;Y) = H(X) - H(X|Y) = \DKL(p_{XY}\|p_X p_Y)$ \\
+KL散度 & $\DKL(p\|q) = \sum_x p(x)\log\frac{p(x)}{q(x)} \geq 0$ \\
+交叉熵 & $\mathrm{CE}(p\|q) = H(p) + \DKL(p\|q)$ \\
+Jensen（凸） & $\EE[f(X)] \geq f(\EE[X])$ \\
+Log-sum & $\sum a_i \log\frac{a_i}{b_i} \geq (\sum a_i)\log\frac{\sum a_i}{\sum b_i}$ \\
+Kraft & $\sum D^{-l(x)} \leq 1$（前缀码充要条件） \\
+最优码长 & $l^*(x) = -\log_D p(x)$ \\
+Fano & $P_e \geq \frac{H(X|Y)-1}{H(X)} \geq \frac{H(X|Y)-1}{\log|\XX|}$ \\
+DPI & $X \to Y \to Z \;\Rightarrow\; I(X;Y) \geq I(X;Z)$ \\
+\addlinespace[6pt]
+\rowcolor{red!10!white}
+\multicolumn{2}{c}{\textbf{信道与编码}} \\
+\midrule
+信道容量 & $C = \max_{P_X} I(X;Y)$ \\
+高斯信道容量 & $C = \frac{1}{2}\log\left(1+\frac{P}{\sigma^2}\right)$ \\
+水填充 & $P_i^* = (\mu - N_i)^+$ \\
+联合典型引理 & $P \leq 2^{-n(I(X;Y)-3\epsilon)}$（独立采样） \\
+率失真函数 & $R(D) = \min_{p(\hat{V}|V):\EE d \leq D} I(V;\hat{V})$ \\
+高斯率失真 & $R(D) = \frac{1}{2}\log\frac{\sigma^2}{D}$ \\
+\addlinespace[6pt]
+\rowcolor{red!10!white}
+\multicolumn{2}{c}{\textbf{渐进理论与其它}} \\
+\midrule
+熵率（平稳） & $H' = \lim_{n\to\infty} \frac{1}{n}H(X^n) = \lim H(X_n|X^{n-1})$ \\
+马尔可夫熵率 & $H(X_0|X_{-1}) = \sum_i u_i \sum_j P_{ij} \log\frac{1}{P_{ij}}$ \\
+Huffman & $\min \sum p_x l_x,\; s.t.\; \sum 2^{-l_x} \leq 1,\; l_x \in \mathbb{Z}^+$ \\
+AEP概率界 & $2^{-n(H+\epsilon)} \leq p(x^n) \leq 2^{-n(H-\epsilon)}$ \\
+AEP大小界 & $(1-\epsilon)2^{n(H-\epsilon)} \leq |A_\epsilon^{(n)}| \leq 2^{n(H+\epsilon)}$ \\
+\bottomrule
+\end{longtable}
+
+% ============================================================
+\section{关键证明思路汇总}
+% ============================================================
+
+\begin{enumerate}[label=\textbf{\arabic*.}, leftmargin=*]
+
+  \item \textbf{KL散度非负}
+  \begin{itemize}[nosep]
+    \item 法一：Log-sum不等式，代入 $a_x = p(x), b_x = q(x)$
+    \item 法二：Jensen不等式，利用 $-\log x$ 凸性
+  \end{itemize}
+
+  \item \textbf{均匀分布熵最大}：$H(p) = \log|\XX| - \DKL(p\|u) \leq \log|\XX|$
+
+  \item \textbf{熵的凹性}
+  \begin{itemize}[nosep]
+    \item 法一：Log-sum不等式
+    \item 法二：Jensen + $x\log x$ 凸
+    \item 法三：$H(p) = \log|\XX| - \DKL(p\|u)$ + KL凸性
+    \item 法四：条件熵 $H(X|Y) \leq H(X)$ + 构造混合分布
+  \end{itemize}
+
+  \item \textbf{Kraft不等式}
+  \begin{itemize}[nosep]
+    \item 充分性：二分分布构造前缀树（补充缺失概率）
+    \item 必要性：完全二叉树的叶子计数
+  \end{itemize}
+
+  \item \textbf{Huffman最优性}：递归归约——融合/扩展保持最优性
+
+  \item \textbf{Fano不等式}：$H(E,X|\hat{X})$ 的两种链式展开
+
+  \item \textbf{DPI}：互信息链式法则 $I(X;Y,Z) = I(X;Z) + I(X;Y|Z) = I(X;Y) + I(X;Z|Y)$
+
+  \item \textbf{联合典型引理}：$p(x^n)p(y^n)$ 对典型集求和 + AEP界
+
+  \item \textbf{信道编码正向（20分大题，5步）：}
+  \begin{enumerate}[nosep]
+    \item \textbf{香农期望技巧：} $\min_i f_i \leq \EE[F]$——若随机码本平均误差 $\to 0$，则存在一个好码
+    \item \textbf{随机码本构造：} 固定 $P_X$，从 $A_\epsilon^{(n)}(X)$ 中独立均匀抽取 $M=2^{nR}$ 个码字
+    \item \textbf{联合典型译码：} 接收 $y^n$ 后，找\textbf{唯一}与 $y^n$ 联合典型的码字 $\hat{u}$；若无或多于一个则译码错误
+    \item \textbf{Union Bound 误差分析：}
+    \begin{align*}
+    P_e &\leq \underbrace{P((x^n(1),y^n)\notin A_\epsilon^{(n)})}_{E_1:\ \text{AEP}\ \leq\epsilon}
+          + \sum_{k=2}^{M} \underbrace{P((x^n(k),y^n)\in A_\epsilon^{(n)})}_{E_2:\ \text{JTL}\ \leq 2^{-n(I-3\epsilon)}} \\
+        &\leq \epsilon + M\cdot 2^{-n(I-3\epsilon)}
+          = \epsilon + 2^{-n(I-R-3\epsilon)} \xrightarrow{n\to\infty} 0 \quad (\text{若 } R<I)
+    \end{align*}
+    \item \textbf{存在性：} 取容达分布 $P_X^*$ 使 $I(X;Y)=C$，得任意 $R<C$ 可达
+  \end{enumerate}
+
+  \item \textbf{信道编码反向（4步）：}
+  \begin{enumerate}[nosep]
+    \item \textbf{Fano：} $H(U|Y^n) \leq 1 + P_e \cdot nR \;\Rightarrow\; P_e \geq 1 - \frac{I(U;Y^n)}{nR} - \frac{1}{nR}$
+    \item \textbf{DPI：} $U\to X^n\to Y^n$ 是马尔可夫链，$I(U;Y^n) \leq I(X^n;Y^n)$
+    \item \textbf{DMC 仅：} $I(X^n;Y^n) \leq \sum_{i=1}^n I(X_i;Y_i) \leq nC$（不假设 i.i.d.）
+    \item \textbf{结论：} $P_e \geq 1 - \frac{C}{R} - \frac{1}{nR} > 0$（若 $R>C$，$n$ 足够大）
+  \end{enumerate}
+
+  \item \textbf{高斯信道容量（计算，不考推导）：}
+  $C = \frac{1}{2}\log(1 + \frac{P}{\sigma^2})$。给定功率 $P$ 和噪声方差 $\sigma^2$ 直接代公式。
+  并行信道用水填充：$P_i^* = (\mu - N_i)^+$，$\mu$ 由 $\sum P_i^* = P$ 确定。
+
+  \item \textbf{率失真凸性}：Time-sharing argument：对序列分两段，各用不同的失真-率配置
+
+  \item \textbf{几何解释——噪声球与失真球（重点）}
+
+  \begin{keybox}[信息论两大极限的几何统一]
+  \begin{center}
+  \begin{tabular}{c|c|c}
+  \toprule
+  & \textbf{信道编码（可靠传输）} & \textbf{率失真（有损压缩）} \\
+  \midrule
+  基本问题 & 噪声信道中最大传多少 bit？ & 允许失真 $D$ 下最少需多少 bit？ \\
+  极限量 & 信道容量 $C = \max I(X;Y)$ & 率失真函数 $R(D) = \min I(V;\hat{V})$ \\
+  \textbf{几何图像} & \textbf{噪声球} & \textbf{失真球} \\
+  球的大小 & $\approx 2^{nH(Y|X)}$（每个码字） & $\approx 2^{nH(\hat{V}|V)}$（每个码字） \\
+  空间总大小 & $\approx 2^{nH(Y)}$（输出端） & $\approx 2^{nH(V)}$（数据空间） \\
+  可区分/覆盖数 & $\leq 2^{nI(X;Y)}$ & $\geq 2^{nI(V;\hat{V})}$ \\
+  \textbf{极限条件} & $2^{nR} \cdot 2^{nH(Y|X)} \leq 2^{nH(Y)}$ & $2^{nR} \cdot 2^{nH(\hat{V}|V)} \geq 2^{nH(V)}$ \\
+  \textbf{结论} & $R \leq I(X;Y) \leq C$ & $R \geq I(V;\hat{V}) \geq R(D)$ \\
+  \bottomrule
+  \end{tabular}
+  \end{center}
+
+  \textbf{信道编码的噪声球：}
+  每个发送码字 $x^n$ 经过噪声信道后，输出 $y^n$ 分布在以 $x^n$ 为中心、
+  大小为 $2^{nH(Y|X)}$ 的"噪声球"内。$2^{nR}$ 个球要互不重叠地塞进大小为 $2^{nH(Y)}$
+  的输出空间，所以 $2^{nR} \cdot 2^{nH(Y|X)} \leq 2^{nH(Y)} \Rightarrow R \leq I(X;Y)$。
+  $n\to\infty$ 时，大数定理使所有 DMC 都表现为噪声打印机——每个码字的输出分布
+  恰好是一个"噪声球"。
+
+  \textbf{率失真的失真球：}
+  数据空间中，每个"代表码字" $\hat{v}^n$ 覆盖一个大小为 $2^{nH(\hat{V}|V)}$ 的"失真球"——
+  球内的原始数据点都可以用该码字替代（失真 $\leq D$）。
+  $2^{nR}$ 个失真球要覆盖整个数据空间 $2^{nH(V)}$，
+  所以 $2^{nR} \cdot 2^{nH(\hat{V}|V)} \geq 2^{nH(V)} \Rightarrow R \geq I(V;\hat{V})$。
+
+  \textbf{对偶关系：}
+  信道编码是"球的打包"——球不能重叠（可区分），$R$ 受限于空间/球；
+  率失真是"球的覆盖"——球必须覆盖全空间，$R$ 需要至少空间/球。
+  一个最大化 $I$（上限），一个最小化 $I$（下限）。
+  \end{keybox}
+
+\end{enumerate}
+
+\end{document}
