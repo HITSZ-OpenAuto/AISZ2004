@@ -64,9 +64,15 @@
 <!-- TOML-ITEM: id="item-学习资料-1" -->
 
 - 本仓库：考试笔记、分章节习题集（`notes/`）；期末回忆卷（`exams/`）
-- 复习网站与章节测试（外链，非本仓维护）：[MukioXun/AISZ-23-CS-Review-Materials](https://github.com/MukioXun/AISZ-23-CS-Review-Materials)
 
 > 文 / [aqua](https://github.com/marine-aqua)，2026-07
+
+<!-- TOML-ITEM: id="item-学习资料-2" -->
+
+- [2026 年 AISZ-23 复习资料总览](notes/2026_AISZ-23-CS-Reviews/信息论复习.html)：知识图谱、考试重点、三个讲解模块与疑问解答
+- `notes/2026_AISZ-23-CS-Reviews/知识清单/` 与 `章节测试/`：覆盖 Lecture 2–16 的知识清单和交互式章节测试
+- HTML 可直接用浏览器打开；公式由 MathJax 渲染，首次加载需要联网
+- 资料来源：[MukioXun/AISZ-23-CS-Review-Materials](https://github.com/MukioXun/AISZ-23-CS-Review-Materials)
 
 ## 课程内容
 <!-- TOML-SECTION: title="课程内容" -->

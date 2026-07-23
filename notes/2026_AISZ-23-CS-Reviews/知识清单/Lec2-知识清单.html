@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Lecture 2 – 信息度量</title>
+<script>
+MathJax = {
+  tex: {
+    inlineMath: [['$', '$']],
+    displayMath: [['$$', '$$']]
+  }
+};
+</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js"></script>
+<style>
+/* === ExamPass Shared Styles === */
+/* Paper-like warm background, clean typography, responsive */
+
+:root {
+  --paper: #fdf6e3;
+  --paper-dark: #f5ecd7;
+  --ink: #2c2c2c;
+  --ink-light: #555;
+  --accent: #2563eb;
+  --accent-hover: #1d4ed8;
+  --divider: #d6c8a8;
+  --card-bg: #fef9ef;
+  --card-border: #e8dcc8;
+  --correct: #22c55e;
+  --correct-bg: #f0fdf4;
+  --wrong: #ef4444;
+  --wrong-bg: #fef2f2;
+  --tag-bg: #fef3c7;
+  --tag-text: #92400e;
+  --radius: 6px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: "Microsoft YaHei", "Noto Sans SC", "SimSun", sans-serif;
+  font-size: 12pt; line-height: 1.75; color: var(--ink);
+  max-width: 860px; margin: auto; padding: 24px 20px 60px;
+  background: var(--paper);
+}
+
+@media print {
+  body { font-size: 10.5pt; background: #fff; }
+  .no-print { display: none !important; }
+  h1, h2, h3 { page-break-after: avoid; }
+}
+
+/* ── Header ── */
+#exampass-header {
+  display: flex; justify-content: space-between; align-items: baseline;
+  padding: 6px 0; margin-bottom: 0;
+}
+.header-brand { font-size: 1.2em; font-weight: 700; color: #1a1a2e; letter-spacing: 0.3px; }
+.header-url  { font-size: 0.78em; color: #999; }
+.header-divider { border: none; border-top: 2px solid var(--divider); margin: 4px 0 20px 0; }
+
+/* ── Typography ── */
+h1 { font-size: 1.55em; text-align: center; border-bottom: 2px solid var(--divider); padding-bottom: 8px; margin-top: 0; }
+h2 { font-size: 1.25em; border-bottom: 1px solid var(--divider); padding-bottom: 4px; margin-top: 28px; }
+h3 { font-size: 1.08em; margin-top: 20px; color: var(--ink); }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ── Tables ── */
+table { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 0.95em; }
+td, th { border: 1px solid var(--card-border); padding: 5px 9px; text-align: left; }
+th { background: var(--paper-dark); font-weight: 700; }
+
+/* ── Embedded source images ── */
+.embedded-images {
+  margin: 18px 0 24px;
+}
+.embedded-images-intro {
+  color: var(--ink-light);
+  font-size: 0.95em;
+}
+.embedded-image {
+  margin: 14px 0 18px;
+  padding: 10px;
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  background: var(--card-bg);
+  break-inside: avoid;
+}
+.embedded-image img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+  border: 1px solid var(--divider);
+  background: #fff;
+}
+.embedded-image figcaption {
+  margin-top: 8px;
+  color: var(--ink-light);
+  font-size: 0.92em;
+  line-height: 1.5;
+}
+.embedded-image-note::before {
+  content: " - ";
+}
+
+/* ── Knowledge point vs explanation ── */
+.kp { font-weight: 700; color: var(--ink); }           /* key point: bold dark */
+.exp { font-weight: 400; color: var(--ink-light); }    /* explanation: lighter */
+.exp em, .exp strong { color: var(--ink); }             /* emphasis inside explanation */
+
+/* ── Block elements ── */
+blockquote {
+  border-left: 3px solid #c0392b; background: #fef9ef;
+  padding: 6px 14px; margin: 10px 0; font-size: 0.95em;
+}
+code { background: #f0ede0; padding: 2px 5px; border-radius: 3px; font-size: 0.92em; }
+pre { background: #f0ede0; padding: 10px; border-radius: var(--radius); overflow-x: auto; }
+
+/* ── TOC ── */
+div.toc {
+  background: var(--card-bg); padding: 14px 18px;
+  border: 1px solid var(--card-border); border-radius: var(--radius); margin-bottom: 22px;
+}
+div.toc ul { padding-left: 18px; }
+div.toc li { margin: 3px 0; font-size: 0.95em; }
+
+/* ── Priority tags ── */
+.tag-must   { background: #fee2e2; color: #991b1b; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+.tag-key    { background: #fef3c7; color: #92400e; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+.tag-freq   { background: #dbeafe; color: #1e40af; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+.tag-info   { background: #f0fdf4; color: #166534; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+
+
+</style>
+</head>
+<body>
+
+<header id="exampass-header">
+  <div class="header-left"><span class="header-brand">ExamPass Assistant</span></div>
+  <div class="header-right"><span class="header-url">github.com/MIKUZ12/ExamPass-Assistant</span></div>
+</header>
+<hr class="header-divider">
+
+<h1>Lecture 2 – 信息度量</h1>
+<div class="toc">
+<h2>目录</h2>
+<ul>
+<li><a href="#s50904594">本章整体概览</a></li>
+<li><a href="#s65311279">前置知识与记号系统</a></li>
+  <li><a href="#s42817641">随机变量与概率分布的记号 重点</a></li>
+<li><a href="#s68582985">本章知识地图与逻辑主线</a></li>
+<li><a href="#s21871094">逐模块深度讲解</a></li>
+  <li><a href="#s77427355">模块一：为什么需要定量衡量信息 重点</a></li>
+  <li><a href="#s49642845">模块二：自信息量的公理化推导 必考</a></li>
+  <li><a href="#s74525477">模块三：信息量的单位换算 高频</a></li>
+  <li><a href="#s59999404">模块四："白马非马"困境——熵不等于信息量 重点</a></li>
+  <li><a href="#s34885442">模块五：信息熵的定义与基本性质 必考</a></li>
+  <li><a href="#s22198930">模块六：信息增益——接收信息等于熵减 必考</a></li>
+  <li><a href="#s68223105">模块七：条件熵——观测Y后X的剩余不确定性 必考</a></li>
+  <li><a href="#s11236700">模块八：互信息——量化两变量的关联程度 必考</a></li>
+  <li><a href="#s41773480">模块九：联合熵与链式法则 必考</a></li>
+  <li><a href="#s52433595">模块十：KL散度（相对熵）——分布之间的"距离" 重点</a></li>
+  <li><a href="#s22995174">模块十一：交叉熵及其在机器学习中的应用 重点</a></li>
+  <li><a href="#s68131401">模块十二：Venn图——各度量的几何关系 必考</a></li>
+<li><a href="#s60934032">公式与考点复盘索引</a></li>
+<li><a href="#s34444795">常见误区与易混淆点</a></li>
+<li><a href="#s48394123">考试可能考点</a></li>
+<li><a href="#s41499927">本章总结</a></li>
+</ul>
+</div>
+
+<h2 id="s50904594">本章整体概览</h2>
+<p>
+  本章是信息论的核心基础，建立了一套完整的<span class="kp">信息度量体系</span>。
+  从单个事件的<span class="kp">自信息量</span>出发，经由公理化推导确立对数形式，
+  再扩展到随机变量级别的<span class="kp">信息熵</span>，进而刻画两个随机变量之间的
+  <span class="kp">条件熵</span>、<span class="kp">互信息</span>与<span class="kp">联合熵</span>，
+  最后引入衡量分布差异的<span class="kp">KL散度</span>与<span class="kp">交叉熵</span>。
+  这些概念构成了信息论后续所有定理（信源编码、信道容量等）的数学语言。
+</p>
+<p>
+  <strong>学习主线</strong>：
+  为什么需要量化信息 --> 如何量化单个事件 --> 如何量化随机变量 --> 如何量化两变量关系 --> 如何量化分布差异
+</p>
+
+<h2 id="s65311279">前置知识与记号系统</h2>
+
+<h3 id="s42817641">随机变量与概率分布的记号 <span class="tag-key">重点</span></h3>
+<p><strong>是什么</strong>：本课程使用如下统一记号，熟悉记号是读懂公式的前提。</p>
+<ul>
+  <li><span class="kp">X</span>：离散随机变量，取值集合（字母表）记为 $\mathcal{X}$</li>
+  <li><span class="kp">p(x)</span> 或 $p_X(x)$：X 取值 x 的概率，即 $\Pr(X=x)$</li>
+  <li><span class="kp">p(x,y)</span>：联合概率 $\Pr(X=x, Y=y)$</li>
+  <li><span class="kp">p(x|y)</span>：条件概率 $\Pr(X=x \mid Y=y)$</li>
+  <li>期望算子 $\mathbb{E}[\cdot]$：$\mathbb{E}[f(X)] = \sum_{x \in \mathcal{X}} p(x) f(x)$</li>
+</ul>
+<p><strong>为什么</strong>：后续所有度量都是概率的函数，记号统一后可以简洁地用期望形式书写公式。</p>
+<blockquote>易错：p(x) 表示"概率值"（一个数），不是"概率分布"（一个函数）。写 $H(X)$ 时 X 是随机变量，写 $H(p)$ 时 p 是分布；两者等价但含义侧重不同。</blockquote>
+
+<h2 id="s68582985">本章知识地图与逻辑主线</h2>
+<p>下图展示本章各概念之间的推导关系（用 --> 表示"推导/定义"方向）：</p>
+<pre>
+公理化条件（单调性+连续性+可加性）
+        |
+        v
+自信息量 I(x) = -log p(x)
+        |
+        v
+信息熵 H(X) = E[I(X)]  ←─────────────────────────────┐
+        |                                               |
+    ┌───┴───┐                                           |
+    v       v                                           |
+条件熵     联合熵 H(X,Y) = H(X) + H(Y|X)  ←── 链式法则 ┘
+H(X|Y)      |
+    \       /
+     \     /
+      \   /
+       v v
+   互信息 I(X;Y) = H(X) - H(X|Y) = H(Y) - H(Y|X) = H(X)+H(Y)-H(X,Y)
+                        |
+                        v
+        KL散度 D_KL(p||q) = E_p[log(p/q)]
+                        |
+                        v
+        交叉熵 CE(p||q) = H(p) + D_KL(p||q)
+</pre>
+
+<h2 id="s21871094">逐模块深度讲解</h2>
+
+<h3 id="s77427355">模块一：为什么需要定量衡量信息 <span class="tag-key">重点</span></h3>
+<p><strong>承上启下关系</strong>：Shannon 1948 年提出信息论，目标是给"信息"一个与语义无关的数学定义，从而研究通信系统的极限。</p>
+<p><strong>是什么</strong>：我们希望一个函数 $I(x)$ 能衡量事件 $x$ 发生所携带的"信息量"（surprise/不确定性的消除量）。</p>
+<p><strong>为什么</strong>：直觉上：</p>
+<ul>
+  <li>越不可能发生的事，发生后给我们的信息越多（稀奇 --> 信息大）</li>
+  <li>概率为 1 的确定事件，发生后无任何信息（没有惊喜 --> 信息量为 0）</li>
+  <li>两个独立事件同时发生，信息量应该等于各自之和（可加性）</li>
+</ul>
+<p><strong>怎么用</strong>：这三条直觉将被精确化为三条公理，从而唯一确定 $I(x)$ 的函数形式。</p>
+
+<h3 id="s49642845">模块二：自信息量的公理化推导 <span class="tag-must">必考</span></h3>
+<p><strong>是什么</strong>：<span class="kp">自信息量（self-information）</span>$I(x)$ 是事件 $x$ 发生时所含信息量。</p>
+<p><strong>三条公理</strong>：</p>
+<ol>
+  <li><span class="kp">单调递减性</span>：$I(x)$ 是 $p(x)$ 的单调递减函数——概率越大，信息量越小。</li>
+  <li><span class="kp">连续性</span>：$I(x)$ 是 $p(x)$ 的连续函数——概率的微小变化不应引起信息量的跳变。</li>
+  <li><span class="kp">可加性（独立性公理）</span>：若 $X$ 与 $Y$ 相互独立，则
+    $$I(x, y) = I(x) + I(y)$$
+    即 $f(p_1 \cdot p_2) = f(p_1) + f(p_2)$，其中 $f = I \circ p^{-1}$。</li>
+</ol>
+<p><strong>推导</strong>：满足 $f(ab) = f(a) + f(b)$（Cauchy 函数方程）且连续的实函数唯一形式为 $f(t) = c \log t$（$c$ 为常数）。因此：
+$$I(x) = -c \log p(x)$$
+取 $c=1$，底数选 2 时单位为 <span class="kp">比特（bit）</span>，底数选 $e$ 时单位为 <span class="kp">奈特（nat）</span>，底数选 10 时单位为 <span class="kp">哈特（hart）</span>。
+</p>
+<p><strong>最终定义</strong>：
+$$\boxed{I(x) = -\log_2 p(x) \quad [\text{bit}]}$$
+</p>
+<p><strong>注意点</strong>：</p>
+<ul>
+  <li>$p(x) = 1 \Rightarrow I(x) = 0$（必然事件无信息）</li>
+  <li>$p(x) \to 0 \Rightarrow I(x) \to +\infty$（极稀有事件信息量无限大）</li>
+  <li>$0 \le p(x) \le 1 \Rightarrow I(x) \ge 0$（自信息量非负）</li>
+</ul>
+<blockquote>易错：可加性公理要求的是两个<strong>独立</strong>事件，不是任意两个事件。对相关事件，$I(x,y) \ne I(x)+I(y)$。</blockquote>
+
+<h3 id="s74525477">模块三：信息量的单位换算 <span class="tag-freq">高频</span></h3>
+<p><strong>是什么</strong>：三种单位由对数底数决定，互换公式由换底公式给出。</p>
+<table border="1" cellpadding="6" cellspacing="0" style="border-collapse:collapse;width:100%">
+  <thead><tr style="background:#f0f4ff"><th>单位</th><th>底数</th><th>名称</th><th>1 bit 等于</th></tr></thead>
+  <tbody>
+    <tr><td>bit（比特）</td><td>2</td><td>二进制单位</td><td>1 bit</td></tr>
+    <tr><td>nat（奈特）</td><td>$e$</td><td>自然单位</td><td>$\ln 2 \approx 0.693$ nat</td></tr>
+    <tr><td>hart（哈特）</td><td>10</td><td>十进制单位</td><td>$\log_{10} 2 \approx 0.301$ hart</td></tr>
+  </tbody>
+</table>
+<p>换算公式：$I_{\text{bit}} = I_{\text{nat}} \times \log_2 e \approx I_{\text{nat}} \times 1.4427$</p>
+<p><span class="exp">1 nat = $\log_2 e \approx 1.443$ bits，因为 $-\ln p = -\log_2 p \cdot \ln 2$，所以 nat 值 = bit 值 × $\ln 2$，即 bit 值 = nat 值 × $\log_2 e$。</span></p>
+<blockquote>易错：考题常考"1 nat 等于多少 bit"，答案是 $\log_2 e \approx 1.443$，不是 $\ln 2 \approx 0.693$。记住方向：nat 比 bit 大（更粗粒度），所以 1 nat > 1 bit。</blockquote>
+
+<h3 id="s59999404">模块四："白马非马"困境——熵不等于信息量 <span class="tag-key">重点</span></h3>
+<p><strong>承上启下关系</strong>：自信息量 $I(x)$ 依赖于具体的 $x$（哪个事件发生了）。但在通信/压缩中，我们在发送前并不知道 $x$ 是什么，需要一个对整个随机变量的"平均"度量。</p>
+<p><strong>是什么</strong>：$I(x)$ 是对特定实现 $x$ 的度量；<span class="kp">信息熵</span> $H(X)$ 是对整个随机变量 $X$（其概率分布）的度量。</p>
+<p><strong>为什么区分</strong>：若 $X \sim p$，则在观测 $X$ 之前，我们对 $X$ 的"平均不确定性"是：
+$$H(X) = \mathbb{E}_X[I(X)] = \mathbb{E}_X[-\log p(X)]$$
+这与任何具体的 $x$ 值无关，完全由分布 $p$ 决定。
+</p>
+<blockquote>易错：$I(x)$ 是一个具体的数（某次实验结果的信息量）；$H(X)$ 是一个期望（整个分布的平均不确定性）。$H(X)$ 不依赖于 $X$ 取什么具体值，只依赖于概率分布 $p$。</blockquote>
+
+<h3 id="s34885442">模块五：信息熵的定义与基本性质 <span class="tag-must">必考</span></h3>
+<p><strong>是什么</strong>：</p>
+$$\boxed{H(X) = -\sum_{x \in \mathcal{X}} p(x) \log_2 p(x) = \mathbb{E}\!\left[\log_2 \frac{1}{p(X)}\right] \quad [\text{bit}]}$$
+<p>约定 $0 \log 0 = 0$（因为 $\lim_{p \to 0^+} p \log p = 0$）。</p>
+<p><strong>基本性质</strong>：</p>
+<ul>
+  <li><span class="kp">非负性</span>：$H(X) \ge 0$，等号当且仅当 $X$ 是确定性变量（某个 $p(x)=1$）。</li>
+  <li><span class="kp">最大熵</span>：在 $|\mathcal{X}|=N$ 时，$H(X) \le \log_2 N$，等号当且仅当 $X$ 均匀分布。</li>
+  <li><span class="kp">凹性</span>：$H(p)$ 是概率向量 $p$ 的凹函数。</li>
+  <li><span class="kp">对称性</span>：$H$ 关于概率向量的分量置换不变（与随机变量取什么值无关，只依赖概率值集合）。</li>
+</ul>
+<p><strong>特殊情形</strong>：二元随机变量 $X \in \{0,1\}$，$p(X=1)=p$：
+$$H_b(p) = -p \log_2 p - (1-p)\log_2(1-p)$$
+在 $p=0.5$ 时取最大值 1 bit；$p=0$ 或 $p=1$ 时取最小值 0。
+</p>
+<p><strong>怎么用</strong>：计算熵时，将所有非零概率项代入公式求和；为零的项直接忽略。</p>
+<blockquote>易错：熵是"不确定性"的度量，不是"信息量"的度量——接收信息后不确定性降低，因此熵减少量才是所获信息量。</blockquote>
+
+<h3 id="s22198930">模块六：信息增益——接收信息等于熵减 <span class="tag-must">必考</span></h3>
+<p><strong>是什么</strong>：观测到事件 $Y=y$ 之后，对 $X$ 不确定性的减少量：
+$$\text{信息增益}(Y=y \to X) = H(X) - H(X \mid Y=y)$$
+</p>
+<p><strong>为什么</strong>：信息的本质是"不确定性的消除"。通信的过程正是通过接收信号 $Y$，减少对原始信息 $X$ 的不确定性。</p>
+<p><strong>怎么用</strong>：对 $y$ 取期望即得互信息 $I(X;Y) = H(X) - H(X|Y)$（见模块八）。</p>
+
+<h3 id="s68223105">模块七：条件熵——观测Y后X的剩余不确定性 <span class="tag-must">必考</span></h3>
+<p><strong>是什么</strong>：<span class="kp">条件熵</span>是在已知 $Y$ 的条件下，$X$ 的平均不确定性：
+$$\boxed{H(X|Y) = \sum_{y} p(y) \, H(X|Y=y) = -\sum_{x,y} p(x,y) \log_2 p(x|y)}$$
+</p>
+<p><strong>推导</strong>：
+$$H(X|Y) = \mathbb{E}_Y[H(X|Y=y)] = \mathbb{E}_Y\!\left[-\sum_x p(x|y)\log p(x|y)\right] = -\mathbb{E}_{X,Y}[\log p(X|Y)]$$
+</p>
+<p><strong>重要性质</strong>：</p>
+<ul>
+  <li><span class="kp">条件不增熵</span>：$H(X|Y) \le H(X)$（观测 $Y$ 平均上不会增加对 $X$ 的不确定性）。</li>
+  <li>等号成立当且仅当 $X$ 与 $Y$ 相互独立。</li>
+  <li>$H(X|X) = 0$（知道 $X$ 本身后没有不确定性）。</li>
+</ul>
+<p><strong>注意点</strong>：$H(X|Y) \ne H(X|Y=y)$——前者是期望，后者是对特定 $y$ 的熵。</p>
+<blockquote>易错：条件熵 $H(X|Y)$ 非负（因为是概率加权平均，每项 $H(X|Y=y) \ge 0$），但<strong>单次条件信息量</strong> $\log p(x|y)/p(x)$ 可正可负。</blockquote>
+
+<h3 id="s11236700">模块八：互信息——量化两变量的关联程度 <span class="tag-must">必考</span></h3>
+<p><strong>是什么</strong>：<span class="kp">互信息</span>衡量 $X$ 和 $Y$ 之间共享的信息量：
+$$\boxed{I(X;Y) = H(X) - H(X|Y) = H(Y) - H(Y|X)}$$
+</p>
+<p><strong>三种等价表达</strong>：</p>
+<ol>
+  <li>$I(X;Y) = H(X) - H(X|Y)$ <span class="exp">Y 给 X 带来的信息量</span></li>
+  <li>$I(X;Y) = H(X) + H(Y) - H(X,Y)$ <span class="exp">联合熵减去边缘熵之和的冗余量</span></li>
+  <li>$I(X;Y) = D_{\mathrm{KL}}(p(x,y) \| p(x)p(y))$ <span class="exp">联合分布与独立分布的 KL 散度</span></li>
+</ol>
+<p><strong>重要性质</strong>：</p>
+<ul>
+  <li><span class="kp">对称性</span>：$I(X;Y) = I(Y;X)$（证明：由表达式 2 明显）</li>
+  <li><span class="kp">非负性</span>：$I(X;Y) \ge 0$（证明：由表达式 3 + KL 散度非负性）</li>
+  <li>$I(X;Y) = 0 \Leftrightarrow X \perp Y$（独立 --> 互信息为零）</li>
+  <li>$I(X;X) = H(X)$（X 关于自身的互信息 = 熵）</li>
+</ul>
+<blockquote>易错：互信息 $I(X;Y)$ 一定非负，但"单次互信息"（点互信息）$i(x;y) = \log \frac{p(x,y)}{p(x)p(y)}$ 可以为负（例如当 $p(x|y) < p(x)$ 时）。</blockquote>
+
+<h3 id="s41773480">模块九：联合熵与链式法则 <span class="tag-must">必考</span></h3>
+<p><strong>是什么</strong>：<span class="kp">联合熵</span>是两个随机变量联合分布的熵：
+$$H(X,Y) = -\sum_{x,y} p(x,y) \log_2 p(x,y)$$
+</p>
+<p><strong>链式法则（推导）</strong>：利用 $p(x,y) = p(x) p(y|x)$，
+$$H(X,Y) = -\mathbb{E}[\log p(X,Y)] = -\mathbb{E}[\log p(X)] - \mathbb{E}[\log p(Y|X)] = H(X) + H(Y|X)$$
+$$\boxed{H(X,Y) = H(X) + H(Y|X) = H(Y) + H(X|Y)}$$
+</p>
+<p><strong>推广（多变量链式法则）</strong>：
+$$H(X_1, X_2, \ldots, X_n) = \sum_{i=1}^n H(X_i \mid X_1, \ldots, X_{i-1})$$
+</p>
+<p><strong>上下界</strong>：
+$$\max(H(X), H(Y)) \le H(X,Y) \le H(X) + H(Y)$$
+右侧等号当且仅当 $X \perp Y$；左侧等号当某变量是另一变量的确定性函数时取到。
+</p>
+<blockquote>易错：$H(X,Y) = H(X) + H(Y)$ 仅在独立时成立，一般情况下是小于等于号。</blockquote>
+
+<h3 id="s52433595">模块十：KL散度（相对熵）——分布之间的"距离" <span class="tag-key">重点</span></h3>
+<p><strong>是什么</strong>：<span class="kp">KL散度（Kullback-Leibler divergence）</span>又称相对熵，衡量用分布 $q$ 来近似分布 $p$ 时的"损失"：
+$$\boxed{D_{\mathrm{KL}}(p \| q) = \sum_x p(x) \log_2 \frac{p(x)}{q(x)} = \mathbb{E}_p\!\left[\log \frac{p(X)}{q(X)}\right]}$$
+</p>
+<p>约定：若 $q(x)=0$ 而 $p(x)>0$，则该项为 $+\infty$；$0 \log 0/0 = 0$。</p>
+<p><strong>性质</strong>：</p>
+<ul>
+  <li><span class="kp">非负性</span>：$D_{\mathrm{KL}}(p\|q) \ge 0$，等号当且仅当 $p = q$（由 Jensen 不等式证明，$\log$ 为凹函数）。</li>
+  <li><span class="kp">不对称性</span>：$D_{\mathrm{KL}}(p\|q) \ne D_{\mathrm{KL}}(q\|p)$（一般情况下）。</li>
+  <li><span class="kp">无三角不等式</span>：不满足 $D_{\mathrm{KL}}(p\|r) \le D_{\mathrm{KL}}(p\|q) + D_{\mathrm{KL}}(q\|r)$。</li>
+</ul>
+<p><strong>为什么不是"距离"</strong>：真正的距离度量需满足（1）非负性、（2）对称性、（3）三角不等式。KL 散度只满足（1），故称"伪距离"或"散度"而非"距离"。</p>
+<p><strong>与互信息的联系</strong>：
+$$I(X;Y) = D_{\mathrm{KL}}(p(x,y) \| p(x)p(y))$$
+互信息是联合分布与独立乘积分布之间的 KL 散度。</p>
+<blockquote>易错：KL 散度有方向性——$D_{\mathrm{KL}}(p\|q)$ 是"用 q 拟合 p 时"的代价，与"用 p 拟合 q 时"不同。在机器学习中，$p$ 通常是真实分布，$q$ 是模型分布。</blockquote>
+
+<h3 id="s22995174">模块十一：交叉熵及其在机器学习中的应用 <span class="tag-key">重点</span></h3>
+<p><strong>是什么</strong>：<span class="kp">交叉熵</span>是用分布 $q$ 编码分布 $p$ 的平均码长：
+$$\boxed{H(p,q) = CE(p\|q) = -\sum_x p(x) \log_2 q(x) = \mathbb{E}_p\!\left[-\log q(X)\right]}$$
+</p>
+<p><strong>与熵和 KL 散度的关系</strong>：
+$$CE(p\|q) = H(p) + D_{\mathrm{KL}}(p\|q)$$
+</p>
+<p><strong>推导</strong>：$CE(p\|q) = -\sum p \log q = -\sum p\log p + \sum p \log(p/q) = H(p) + D_{\mathrm{KL}}(p\|q)$。</p>
+<p><strong>为什么在机器学习中常用</strong>：训练分类模型时，$p$ 是标签的真实分布（固定的 one-hot），$q$ 是模型输出的预测分布（可学习）。由于 $H(p)$ 与模型参数无关，最小化 $CE(p\|q)$ 等价于最小化 $D_{\mathrm{KL}}(p\|q)$，即让模型分布尽量接近真实分布。</p>
+<p><strong>二分类交叉熵</strong>（常考）：$CE = -y \log \hat{y} - (1-y)\log(1-\hat{y})$</p>
+<blockquote>易错：$CE(p\|q) \ne CE(q\|p)$（交叉熵不对称）。$CE(p\|p) = H(p)$（用真实分布编码自身 = 熵）。</blockquote>
+
+<h3 id="s68131401">模块十二：Venn图——各度量的几何关系 <span class="tag-must">必考</span></h3>
+<p><strong>是什么</strong>：下表总结了本章六大度量的所有关系（Venn 图形式）：</p>
+<table border="1" cellpadding="6" cellspacing="0" style="border-collapse:collapse;width:100%">
+  <thead><tr style="background:#f0f4ff"><th>关系式</th><th>直觉解释</th></tr></thead>
+  <tbody>
+    <tr><td>$H(X,Y) = H(X) + H(Y|X)$</td><td>联合 = X 的不确定性 + 知 X 后 Y 的剩余不确定性</td></tr>
+    <tr><td>$H(X,Y) = H(Y) + H(X|Y)$</td><td>对称地，联合 = Y 的不确定性 + 知 Y 后 X 的剩余</td></tr>
+    <tr><td>$I(X;Y) = H(X) - H(X|Y)$</td><td>互信息 = 观测 Y 后 X 减少的不确定性</td></tr>
+    <tr><td>$I(X;Y) = H(X) + H(Y) - H(X,Y)$</td><td>互信息 = 两个圆圈面积之和 - 联合面积（交集）</td></tr>
+    <tr><td>$H(X,Y) = H(X) + H(Y) - I(X;Y)$</td><td>联合 = 两边缘熵之和 - 重叠部分（互信息）</td></tr>
+    <tr><td>$H(X|Y) = H(X,Y) - H(Y)$</td><td>条件熵 = 联合熵 - 已知量的熵</td></tr>
+  </tbody>
+</table>
+<p><strong>补充解释</strong>（Venn 图描述）：将 $H(X)$ 画为左圆，$H(Y)$ 画为右圆：</p>
+<ul>
+  <li>左圆独占区域 = $H(X|Y)$（X 独有的不确定性）</li>
+  <li>右圆独占区域 = $H(Y|X)$（Y 独有的不确定性）</li>
+  <li>两圆交集 = $I(X;Y)$（共享信息）</li>
+  <li>两圆总面积 = $H(X,Y)$（联合不确定性）</li>
+</ul>
+<blockquote>易错：Venn 图中的"交集"是互信息 $I(X;Y)$，不是 $H(X) \cap H(Y)$（后者没有定义）。考试画 Venn 图时，务必标出每个区域对应的量。</blockquote>
+
+<h2 id="s60934032">公式与考点复盘索引</h2>
+<table border="1" cellpadding="6" cellspacing="0" style="border-collapse:collapse;width:100%">
+  <thead><tr style="background:#e8f4fd"><th>度量</th><th>定义公式</th><th>单位</th><th>非负性</th><th>对称性</th></tr></thead>
+  <tbody>
+    <tr><td>自信息量 $I(x)$</td><td>$-\log_2 p(x)$</td><td>bit</td><td>是</td><td>N/A</td></tr>
+    <tr><td>信息熵 $H(X)$</td><td>$\mathbb{E}[-\log_2 p(X)]$</td><td>bit</td><td>是</td><td>N/A</td></tr>
+    <tr><td>条件熵 $H(X|Y)$</td><td>$\mathbb{E}_{X,Y}[-\log p(X|Y)]$</td><td>bit</td><td>是</td><td>否</td></tr>
+    <tr><td>联合熵 $H(X,Y)$</td><td>$\mathbb{E}[-\log p(X,Y)]$</td><td>bit</td><td>是</td><td>是</td></tr>
+    <tr><td>互信息 $I(X;Y)$</td><td>$H(X)-H(X|Y)$</td><td>bit</td><td>是</td><td>是</td></tr>
+    <tr><td>KL散度 $D_{\mathrm{KL}}(p\|q)$</td><td>$\mathbb{E}_p[\log p/q]$</td><td>bit/nat</td><td>是</td><td>否</td></tr>
+    <tr><td>交叉熵 $CE(p\|q)$</td><td>$H(p) + D_{\mathrm{KL}}(p\|q)$</td><td>bit/nat</td><td>是</td><td>否</td></tr>
+  </tbody>
+</table>
+
+<h2 id="s34444795">常见误区与易混淆点</h2>
+<table border="1" cellpadding="6" cellspacing="0" style="border-collapse:collapse;width:100%">
+  <thead><tr style="background:#fff3cd"><th>混淆点</th><th>正确理解</th></tr></thead>
+  <tbody>
+    <tr><td>$I(x)$ vs $H(X)$</td><td>前者是单次事件的信息量（依赖具体 $x$），后者是整个分布的平均不确定性（只依赖 $p$）</td></tr>
+    <tr><td>点互信息 vs 互信息</td><td>点互信息 $i(x;y) = \log\frac{p(x,y)}{p(x)p(y)}$ 可正可负；互信息 $I(X;Y) = \mathbb{E}[i(X;Y)] \ge 0$</td></tr>
+    <tr><td>$H(X|Y)$ vs $H(X|Y=y)$</td><td>前者是对 $y$ 的期望（一个数），后者是给定特定 $y$ 后的熵（也是一个数，但不同）</td></tr>
+    <tr><td>KL散度 vs 距离</td><td>KL散度不对称、无三角不等式，不是度量意义上的距离</td></tr>
+    <tr><td>交叉熵 vs KL散度</td><td>$CE(p\|q) = H(p) + D_{\mathrm{KL}}(p\|q)$，$p$ 固定时两者等价最小化</td></tr>
+    <tr><td>$H(X,Y) \le H(X)+H(Y)$ vs 等号</td><td>等号仅在 $X \perp Y$ 时成立，不独立时严格小于</td></tr>
+  </tbody>
+</table>
+
+<h2 id="s48394123">考试可能考点</h2>
+<ul>
+  <li>写出并推导自信息量公理化推导过程（必考高频）</li>
+  <li>计算给定分布的 $H(X)$、$H(X|Y)$、$I(X;Y)$、$H(X,Y)$（数值计算必考）</li>
+  <li>证明或使用链式法则 $H(X,Y)=H(X)+H(Y|X)$</li>
+  <li>证明 $I(X;Y) \ge 0$（等价于证明 KL 散度非负）</li>
+  <li>Venn 图：能从图读出各量关系，能从关系写出 Venn 图</li>
+  <li>1 nat = ? bits 单位换算</li>
+  <li>交叉熵最小化等价于 KL 散度最小化（机器学习联系）</li>
+  <li>KL 散度不对称的举例说明</li>
+</ul>
+
+<h2 id="s41499927">本章总结</h2>
+<p>
+  本章建立了信息论的度量语言。核心逻辑链为：
+</p>
+<ol>
+  <li>公理化推导 --> $I(x) = -\log p(x)$（自信息量）</li>
+  <li>取期望 --> $H(X) = \mathbb{E}[I(X)]$（信息熵 = 平均不确定性）</li>
+  <li>条件化 --> $H(X|Y)$（观测 Y 后的剩余不确定性）</li>
+  <li>差值 --> $I(X;Y) = H(X)-H(X|Y)$（共享信息）</li>
+  <li>乘法分解取期望 --> $H(X,Y) = H(X)+H(Y|X)$（链式法则）</li>
+  <li>分布比较 --> $D_{\mathrm{KL}}(p\|q)$（分布差异）</li>
+  <li>分解 --> $CE(p\|q) = H(p) + D_{\mathrm{KL}}(p\|q)$（交叉熵）</li>
+</ol>
+<p>
+  掌握所有关系式的<strong>推导</strong>（而不仅仅是背公式），是信息论考试的核心要求。
+  Venn 图是这些关系的可视化工具，每次推导前先画图有助于确认方向。
+</p>
+
+
+
+</body>
+</html>

@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Lecture 13：Hamming 码与 Viterbi 算法</title>
+<script>
+MathJax = {
+  tex: {
+    inlineMath: [['$', '$']],
+    displayMath: [['$$', '$$']]
+  }
+};
+</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js"></script>
+<style>
+/* === ExamPass Shared Styles === */
+/* Paper-like warm background, clean typography, responsive */
+
+:root {
+  --paper: #fdf6e3;
+  --paper-dark: #f5ecd7;
+  --ink: #2c2c2c;
+  --ink-light: #555;
+  --accent: #2563eb;
+  --accent-hover: #1d4ed8;
+  --divider: #d6c8a8;
+  --card-bg: #fef9ef;
+  --card-border: #e8dcc8;
+  --correct: #22c55e;
+  --correct-bg: #f0fdf4;
+  --wrong: #ef4444;
+  --wrong-bg: #fef2f2;
+  --tag-bg: #fef3c7;
+  --tag-text: #92400e;
+  --radius: 6px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: "Microsoft YaHei", "Noto Sans SC", "SimSun", sans-serif;
+  font-size: 12pt; line-height: 1.75; color: var(--ink);
+  max-width: 860px; margin: auto; padding: 24px 20px 60px;
+  background: var(--paper);
+}
+
+@media print {
+  body { font-size: 10.5pt; background: #fff; }
+  .no-print { display: none !important; }
+  h1, h2, h3 { page-break-after: avoid; }
+}
+
+/* ── Header ── */
+#exampass-header {
+  display: flex; justify-content: space-between; align-items: baseline;
+  padding: 6px 0; margin-bottom: 0;
+}
+.header-brand { font-size: 1.2em; font-weight: 700; color: #1a1a2e; letter-spacing: 0.3px; }
+.header-url  { font-size: 0.78em; color: #999; }
+.header-divider { border: none; border-top: 2px solid var(--divider); margin: 4px 0 20px 0; }
+
+/* ── Typography ── */
+h1 { font-size: 1.55em; text-align: center; border-bottom: 2px solid var(--divider); padding-bottom: 8px; margin-top: 0; }
+h2 { font-size: 1.25em; border-bottom: 1px solid var(--divider); padding-bottom: 4px; margin-top: 28px; }
+h3 { font-size: 1.08em; margin-top: 20px; color: var(--ink); }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ── Tables ── */
+table { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 0.95em; }
+td, th { border: 1px solid var(--card-border); padding: 5px 9px; text-align: left; }
+th { background: var(--paper-dark); font-weight: 700; }
+
+/* ── Embedded source images ── */
+.embedded-images {
+  margin: 18px 0 24px;
+}
+.embedded-images-intro {
+  color: var(--ink-light);
+  font-size: 0.95em;
+}
+.embedded-image {
+  margin: 14px 0 18px;
+  padding: 10px;
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  background: var(--card-bg);
+  break-inside: avoid;
+}
+.embedded-image img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+  border: 1px solid var(--divider);
+  background: #fff;
+}
+.embedded-image figcaption {
+  margin-top: 8px;
+  color: var(--ink-light);
+  font-size: 0.92em;
+  line-height: 1.5;
+}
+.embedded-image-note::before {
+  content: " - ";
+}
+
+/* ── Knowledge point vs explanation ── */
+.kp { font-weight: 700; color: var(--ink); }           /* key point: bold dark */
+.exp { font-weight: 400; color: var(--ink-light); }    /* explanation: lighter */
+.exp em, .exp strong { color: var(--ink); }             /* emphasis inside explanation */
+
+/* ── Block elements ── */
+blockquote {
+  border-left: 3px solid #c0392b; background: #fef9ef;
+  padding: 6px 14px; margin: 10px 0; font-size: 0.95em;
+}
+code { background: #f0ede0; padding: 2px 5px; border-radius: 3px; font-size: 0.92em; }
+pre { background: #f0ede0; padding: 10px; border-radius: var(--radius); overflow-x: auto; }
+
+/* ── TOC ── */
+div.toc {
+  background: var(--card-bg); padding: 14px 18px;
+  border: 1px solid var(--card-border); border-radius: var(--radius); margin-bottom: 22px;
+}
+div.toc ul { padding-left: 18px; }
+div.toc li { margin: 3px 0; font-size: 0.95em; }
+
+/* ── Priority tags ── */
+.tag-must   { background: #fee2e2; color: #991b1b; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+.tag-key    { background: #fef3c7; color: #92400e; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+.tag-freq   { background: #dbeafe; color: #1e40af; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+.tag-info   { background: #f0fdf4; color: #166534; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+
+
+</style>
+</head>
+<body>
+
+<header id="exampass-header">
+  <div class="header-left"><span class="header-brand">ExamPass Assistant</span></div>
+  <div class="header-right"><span class="header-url">github.com/MIKUZ12/ExamPass-Assistant</span></div>
+</header>
+<hr class="header-divider">
+
+<h1>Lecture 13：Hamming 码与 Viterbi 算法</h1>
+<div class="toc">
+<h2>目录</h2>
+<ul>
+<li><a href="#s83776185">一、Hamming 码</a></li>
+  <li><a href="#s92919954">零空间编码思想 必考</a></li>
+  <li><a href="#s81247684">GF(2) 域算术与奇偶校验 必考</a></li>
+  <li><a href="#s36268924">汉明矩阵设计与编码参数 必考</a></li>
+  <li><a href="#s36906887">编码与译码流程 必考</a></li>
+  <li><a href="#s79201340">汉明距离 必考</a></li>
+  <li><a href="#s33167620">零空间性质与纠错几何 重点</a></li>
+  <li><a href="#s32357668">线性编码扩展 了解</a></li>
+<li><a href="#s48222451">二、Viterbi 算法</a></li>
+  <li><a href="#s79988792">隐马尔可夫模型（HMM） 必考</a></li>
+  <li><a href="#s30540613">HMM 参数描述 重点</a></li>
+  <li><a href="#s35394852">MAP 状态估计与递推分解 必考</a></li>
+  <li><a href="#s92083686">Viterbi 算法三步骤 必考</a></li>
+</ul>
+</div>
+
+<h2 id="s83776185">一、Hamming 码</h2>
+
+<h3 id="s92919954">零空间编码思想 <span class="tag-must">必考</span></h3>
+<p>
+  <span class="kp">数据流形（manifold）</span>：合理数据必须满足特定代数结构。
+  将矩阵 $H$ 的<span class="kp">零空间</span>定义为
+  $\mathrm{Null}(H) = \{x : Hx = 0\}$，
+  零空间维数为 $n - \mathrm{rank}(H)$（$H$ 为 $m\times n$ 矩阵）。
+</p>
+<p>
+  <span class="exp">编码思想三步骤：</span>
+</p>
+<ul>
+  <li><strong>编码</strong>：把数据映射到流形（零空间）上 -- $Hx^n = 0$</li>
+  <li><strong>检错</strong>：收到 $y^n$ 后检查 $Hy^n$ 是否为零</li>
+  <li><strong>纠错</strong>：将不在流形上的错误数据"投影"回流形</li>
+</ul>
+<blockquote>易错：零空间编码不是随意设计的矩阵，$H$ 的列向量设计直接决定纠错能力。</blockquote>
+
+<h3 id="s81247684">GF(2) 域算术与奇偶校验 <span class="tag-must">必考</span></h3>
+<p>
+  <span class="kp">GF(2)（二元域）</span>：元素为 $\{0,1\}$，
+  加法等价于<span class="kp">异或（XOR）</span>，乘法等价于逻辑与（AND）。
+  关键等式：$x \oplus x = 0$。
+</p>
+<p>
+  标准 Hamming 矩阵 $H \in GF(2)^{3\times7}$（列向量为 1-7 的二进制表示）：
+</p>
+$$H = \begin{pmatrix} 0&0&0&1&1&1&1 \\ 0&1&1&0&0&1&1 \\ 1&0&1&0&1&0&1 \end{pmatrix}$$
+<p>
+  $Hx=0$ 在 GF(2) 上等价于<span class="kp">分组奇偶校验</span>方程组：
+</p>
+$$x_4 \oplus x_5 \oplus x_6 \oplus x_7 = 0, \quad x_2 \oplus x_3 \oplus x_6 \oplus x_7 = 0, \quad x_1 \oplus x_3 \oplus x_5 \oplus x_7 = 0$$
+<p>
+  <span class="exp">奇偶校验位设置在 $2^n$ 位置（$x_1, x_2, x_4$），其余位存储数据。</span>
+</p>
+<blockquote>易错：GF(2) 加法不是普通整数加法，$1+1=0$ 而非 $2$；GF(2) 算术和等价于奇偶校验。</blockquote>
+
+<h3 id="s36268924">汉明矩阵设计与编码参数 <span class="tag-must">必考</span></h3>
+<p>
+  <span class="kp">汉明矩阵（Hamming matrix）</span>的列向量为 $1$ 到 $n$ 的二进制表示（位置编码），
+  行数 $m$ 与码长 $n$ 满足：
+</p>
+$$n = 2^m - 1$$
+<p>参数表（Hamming$(n, n-m)$ 命名方式）：</p>
+<table>
+  <tr><th>$m$</th><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td><td>8</td></tr>
+  <tr><th>$n$</th><td>7</td><td>15</td><td>31</td><td>63</td><td>127</td><td>255</td></tr>
+</table>
+<ul>
+  <li>可编码数据位数：$n - m = 2^m - m - 1$</li>
+  <li>码字总数：$2^{n-m}$（$H$ 满秩时）</li>
+  <li>零空间维数：$n - m = n - \mathrm{rank}(H)$</li>
+</ul>
+<blockquote>易错：$H$ 矩阵的列向量是 <strong>1 到 n</strong> 的二进制表示，不能包含全零列（全零不是位置编码）。</blockquote>
+
+<h3 id="s36906887">编码与译码流程 <span class="tag-must">必考</span></h3>
+<p>
+  <span class="kp">信道编码器</span>：将 $n-m$ 位数据放入数据位，计算分组奇偶校验得到校验位，
+  构成 $n$ 位码字 $x^n$（码字在零空间中，$Hx^n = 0$）。
+</p>
+<p>
+  <span class="kp">伴随式（syndrome）</span>：收到 $y^n$ 后计算 $\bar\eta = Hy^n$。
+</p>
+<ul>
+  <li>$\bar\eta = \mathbf{0}$：诊断为无错，输出 $y^n$</li>
+  <li>$\bar\eta = \eta_k \neq \mathbf{0}$：诊断为<strong>第 $k$ 位</strong>出错，翻转该位
+    （因为 $H(x^n + e_k) = He_k = \eta_k$ 恰好是 $H$ 的第 $k$ 列）</li>
+</ul>
+<p>
+  <span class="exp">纠错能力：可检测 1 位或 2 位错误，可纠正 1 位错误。</span>
+</p>
+<blockquote>易错：仅当错误数 $\leq 1$ 时纠错成立；两位同时出错 $H(e_i + e_j) = \eta_i \oplus \eta_j \neq 0$，
+可检测但无法定位；三位以上可能漏检。</blockquote>
+
+<h3 id="s79201340">汉明距离 <span class="tag-must">必考</span></h3>
+<p>
+  <span class="kp">汉明距离（Hamming distance）</span>：两个二进制序列 $x^n, y^n$ 对应位不同的个数：
+</p>
+$$D_H(x^n, y^n) = \sum_{k=1}^{n} x_k \oplus y_k$$
+<p>三条基本性质（构成度量空间）：</p>
+<ul>
+  <li><strong>非负性</strong>：$D_H(x^n, y^n) \geq 0$，等号当且仅当 $x^n = y^n$</li>
+  <li><strong>对称性</strong>：$D_H(x^n, y^n) = D_H(y^n, x^n)$</li>
+  <li><strong>三角不等式</strong>：$D_H(x^n, y^n) + D_H(y^n, z^n) \geq D_H(x^n, z^n)$</li>
+</ul>
+<p>
+  <span class="exp">几何意义：$D_H(x^n, y^n)$ 是将 $x^n$ 变为 $y^n$ 所需的最少 bit 翻转次数。</span>
+</p>
+<blockquote>易错：汉明距离是 GF(2) 上的 $\ell_1$ 范数，不是欧氏距离；$x^n \oplus y^n$ 的汉明重量等于 $D_H(x^n, y^n)$。</blockquote>
+
+<h3 id="s33167620">零空间性质与纠错几何 <span class="tag-key">重点</span></h3>
+<p>Hamming 码的码字空间（零空间）具有如下代数性质：</p>
+<ul>
+  <li>包含全零码字 $\mathbf{0}$</li>
+  <li>任意两码字的 GF(2) 线性组合仍为码字（线性子空间）</li>
+  <li>除全零外，所有码字的汉明重量 $\geq 3$
+    （证明：$H$ 的各列向量各不相同，故单列 $\eta_k \neq 0$，两列之和 $\eta_i \oplus \eta_j \neq 0$）</li>
+  <li><span class="kp">最小汉明距离</span> $d_{\min} \geq 3$：不同码字之间距离至少为 3</li>
+</ul>
+<p>
+  <span class="exp">纠错能力几何解释：以每个码字为中心，半径为 1 的汉明球互不相交；
+  接收到错误码字后，最近邻译码即可唯一定位原始码字。</span>
+</p>
+
+<h3 id="s32357668">线性编码扩展 <span class="tag-info">了解</span></h3>
+<ul>
+  <li><span class="kp">Reed-Solomon 码</span>（1950s 初）：基于 GF(2) 的多错纠错码</li>
+  <li><span class="kp">BCH 码</span>（1950s 末，Bose-Ray-Chaudhuri-Hocquenghem）：利用 Galois 域理论的多错纠错码</li>
+  <li>CD 播放器内置 Reed-Solomon 纠错电路，可纠正连续 4000 位的突发错误</li>
+</ul>
+
+<h2 id="s48222451">二、Viterbi 算法</h2>
+
+<h3 id="s79988792">隐马尔可夫模型（HMM） <span class="tag-must">必考</span></h3>
+<p>
+  <span class="kp">HMM（Hidden Markov Model）</span>是最简单的潜空间概率模型，由两部分组成：
+</p>
+<ul>
+  <li><span class="kp">潜空间</span>：马尔可夫链 $X_1, X_2, \ldots$，满足
+    $P(X_t | X_{t-1}, X_{t-2}, \ldots) = P(X_t | X_{t-1})$</li>
+  <li><span class="kp">观测</span>：$Y_t$ 仅依赖当前潜变量
+    $P(Y_t | X_t, X_{t-1}, \ldots) = P(Y_t | X_t)$</li>
+</ul>
+<p>典型应用：语音识别、生物信息学、自然语言处理、<strong>卷积码译码</strong>（Viterbi 原始应用）。</p>
+<blockquote>易错：HMM 的观测独立性是条件独立于潜变量序列，不是边际独立；未来状态仅依赖当前状态（一阶马尔可夫）。</blockquote>
+
+<h3 id="s30540613">HMM 参数描述 <span class="tag-key">重点</span></h3>
+<p>完整描述 HMM 需要两个矩阵：</p>
+<ul>
+  <li><span class="kp">转移矩阵（Transition matrix）</span>：$P(X_t | X_{t-1})$，
+    描述潜状态之间的跳转概率</li>
+  <li><span class="kp">发射矩阵（Emission matrix）</span>：$P(Y_t | X_t)$，
+    描述每个潜状态下的观测概率</li>
+</ul>
+<p><span class="exp">可视化为状态转移图：节点为状态，有向边带转移概率，每个节点对应一个观测概率分布。</span></p>
+
+<h3 id="s35394852">MAP 状态估计与递推分解 <span class="tag-must">必考</span></h3>
+<p>
+  目标：给定观测序列 $Y^n$，估计最可能的潜状态序列
+  $X^n$（<span class="kp">MAP 估计</span>）：
+</p>
+$$\hat{X}^n = \arg\max_{X^n} P(X^n | Y^n) = \arg\max_{X^n} P(X^n, Y^n)$$
+<p>联合分布递推分解（关键推导）：</p>
+$$P(X^n, Y^n) = \prod_{t=1}^{n} P(X_t | X_{t-1}) \cdot P(Y_t | X_t)$$
+$$= P(X^{n-1}, Y^{n-1}) \cdot P(X_n | X_{n-1}) \cdot P(Y_n | X_n)$$
+<blockquote>易错：MAP 与 MLE 不同，MAP 最大化后验概率；当先验均匀时两者等价。
+此处直接最大化联合概率 $P(X^n, Y^n)$ 等价于最大化后验（分母 $P(Y^n)$ 不含 $X^n$）。</blockquote>
+
+<h3 id="s92083686">Viterbi 算法三步骤 <span class="tag-must">必考</span></h3>
+<p>定义<span class="kp">前向变量</span>：</p>
+$$\delta_n(j) \triangleq \max_{X^{n-1}} P(X^{n-1}, X_n = j, Y^n)$$
+<p>即在第 $n$ 步，状态为 $j$，同时匹配前 $n$ 个观测的最大联合概率。</p>
+<p><strong>Step 1 初始化</strong>（$n=1$）：</p>
+$$\delta_1(j) = P(X_1 = j) \cdot P(Y_1 | X_1 = j)$$
+<p><strong>Step 2 前向递推</strong>（第 $n$ 步）：</p>
+$$\delta_n(j) = P(Y_n | X_n = j) \cdot \max_i \left[ \delta_{n-1}(i) \cdot P(X_n = j | X_{n-1} = i) \right]$$
+<p>同时记录最优前驱：$\psi_n(j) = \arg\max_i \left[ \delta_{n-1}(i) \cdot P(j|i) \right]$</p>
+<p><strong>Step 3 终止与回溯</strong>：</p>
+$$X_N^* = \arg\max_j \delta_N(j)$$
+<p>
+  <span class="exp">回溯（Backtracking）：从 $X_N^*$ 出发，利用 $\psi_n$ 逐步向前恢复最优路径
+  $X_{N-1}^*, X_{N-2}^*, \ldots, X_1^*$。</span>
+</p>
+<blockquote>易错：Viterbi 算法是精确 MAP 算法（非近似）；复杂度 $O(N \cdot M^2)$（$N$ 为序列长，$M$ 为状态数），
+利用了动态规划的最优子结构。与前向-后向算法（EM）不同，Viterbi 求的是最优<strong>路径</strong>而非边际后验。</blockquote>
+
+
+
+</body>
+</html>

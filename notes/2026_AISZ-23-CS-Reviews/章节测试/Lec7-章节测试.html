@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Lecture 7：Kraft-McMillan 不等式与变长编码</title>
+<script>
+MathJax = {
+  tex: {
+    inlineMath: [['$', '$']],
+    displayMath: [['$$', '$$']]
+  }
+};
+</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js"></script>
+<style>
+/* === ExamPass Shared Styles === */
+/* Paper-like warm background, clean typography, responsive */
+
+:root {
+  --paper: #fdf6e3;
+  --paper-dark: #f5ecd7;
+  --ink: #2c2c2c;
+  --ink-light: #555;
+  --accent: #2563eb;
+  --accent-hover: #1d4ed8;
+  --divider: #d6c8a8;
+  --card-bg: #fef9ef;
+  --card-border: #e8dcc8;
+  --correct: #22c55e;
+  --correct-bg: #f0fdf4;
+  --wrong: #ef4444;
+  --wrong-bg: #fef2f2;
+  --tag-bg: #fef3c7;
+  --tag-text: #92400e;
+  --radius: 6px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: "Microsoft YaHei", "Noto Sans SC", "SimSun", sans-serif;
+  font-size: 12pt; line-height: 1.75; color: var(--ink);
+  max-width: 860px; margin: auto; padding: 24px 20px 60px;
+  background: var(--paper);
+}
+
+@media print {
+  body { font-size: 10.5pt; background: #fff; }
+  .no-print { display: none !important; }
+  h1, h2, h3 { page-break-after: avoid; }
+}
+
+/* ── Header ── */
+#exampass-header {
+  display: flex; justify-content: space-between; align-items: baseline;
+  padding: 6px 0; margin-bottom: 0;
+}
+.header-brand { font-size: 1.2em; font-weight: 700; color: #1a1a2e; letter-spacing: 0.3px; }
+.header-url  { font-size: 0.78em; color: #999; }
+.header-divider { border: none; border-top: 2px solid var(--divider); margin: 4px 0 20px 0; }
+
+/* ── Typography ── */
+h1 { font-size: 1.55em; text-align: center; border-bottom: 2px solid var(--divider); padding-bottom: 8px; margin-top: 0; }
+h2 { font-size: 1.25em; border-bottom: 1px solid var(--divider); padding-bottom: 4px; margin-top: 28px; }
+h3 { font-size: 1.08em; margin-top: 20px; color: var(--ink); }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ── Tables ── */
+table { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 0.95em; }
+td, th { border: 1px solid var(--card-border); padding: 5px 9px; text-align: left; }
+th { background: var(--paper-dark); font-weight: 700; }
+
+/* ── Embedded source images ── */
+.embedded-images {
+  margin: 18px 0 24px;
+}
+.embedded-images-intro {
+  color: var(--ink-light);
+  font-size: 0.95em;
+}
+.embedded-image {
+  margin: 14px 0 18px;
+  padding: 10px;
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  background: var(--card-bg);
+  break-inside: avoid;
+}
+.embedded-image img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+  border: 1px solid var(--divider);
+  background: #fff;
+}
+.embedded-image figcaption {
+  margin-top: 8px;
+  color: var(--ink-light);
+  font-size: 0.92em;
+  line-height: 1.5;
+}
+.embedded-image-note::before {
+  content: " - ";
+}
+
+/* ── Knowledge point vs explanation ── */
+.kp { font-weight: 700; color: var(--ink); }           /* key point: bold dark */
+.exp { font-weight: 400; color: var(--ink-light); }    /* explanation: lighter */
+.exp em, .exp strong { color: var(--ink); }             /* emphasis inside explanation */
+
+/* ── Block elements ── */
+blockquote {
+  border-left: 3px solid #c0392b; background: #fef9ef;
+  padding: 6px 14px; margin: 10px 0; font-size: 0.95em;
+}
+code { background: #f0ede0; padding: 2px 5px; border-radius: 3px; font-size: 0.92em; }
+pre { background: #f0ede0; padding: 10px; border-radius: var(--radius); overflow-x: auto; }
+
+/* ── TOC ── */
+div.toc {
+  background: var(--card-bg); padding: 14px 18px;
+  border: 1px solid var(--card-border); border-radius: var(--radius); margin-bottom: 22px;
+}
+div.toc ul { padding-left: 18px; }
+div.toc li { margin: 3px 0; font-size: 0.95em; }
+
+/* ── Priority tags ── */
+.tag-must   { background: #fee2e2; color: #991b1b; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+.tag-key    { background: #fef3c7; color: #92400e; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+.tag-freq   { background: #dbeafe; color: #1e40af; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+.tag-info   { background: #f0fdf4; color: #166534; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+
+/* === Interactive Test Styles === */
+
+/* ── Score box ── */
+#score-box {
+  display: none; background: var(--paper-dark); color: var(--ink);
+  padding: 16px 20px; border-radius: var(--radius); margin: 14px 0;
+  text-align: center; border: 1px solid var(--card-border);
+}
+#score-box .score-num { font-size: 2.2em; font-weight: 700; }
+#score-box .score-label { font-size: 0.85em; color: var(--ink-light); }
+
+/* ── Question card ── */
+.q-card {
+  background: var(--card-bg); border: 1px solid var(--card-border);
+  border-radius: var(--radius); padding: 12px 14px; margin: 10px 0;
+  transition: all 0.15s;
+}
+.q-card.correct { border-left: 3px solid var(--correct); background: #f7fdf4; }
+.q-card.wrong   { border-left: 3px solid var(--wrong); background: #fef9f9; }
+
+.q-num  { font-weight: 700; font-size: 0.98em; margin-bottom: 4px; }
+.q-text { margin-bottom: 8px; font-size: 0.98em; }
+.q-text pre {
+  background: #f5f5f5; border: 1px solid #ddd; border-radius: 4px;
+  padding: 10px 14px; margin: 8px 0; overflow-x: auto;
+  font-family: 'Consolas', 'Courier New', monospace; font-size: 0.9em;
+  line-height: 1.5; white-space: pre;
+}
+.q-text code {
+  font-family: 'Consolas', 'Courier New', monospace; font-size: 0.9em;
+  background: #f0f0f0; padding: 1px 4px; border-radius: 3px;
+}
+
+/* ── Options (compact) ── */
+.option {
+  display: block; padding: 4px 10px; margin: 3px 0;
+  border: 1px solid var(--card-border); border-radius: 4px;
+  cursor: pointer; transition: all 0.12s; font-size: 0.93em;
+  background: #fefcf5;
+}
+.option:hover            { background: #f0ede0; }
+.option input            { margin-right: 6px; }
+.option.selected         { border-color: var(--accent); background: #eff6ff; }
+.option.correct-answer   { border-color: var(--correct); background: var(--correct-bg); }
+.option.wrong-answer     { border-color: var(--wrong); background: var(--wrong-bg); }
+
+/* ── Textareas (compact) ── */
+.q-textarea {
+  width: 100%; min-height: 56px; border: 1px solid var(--card-border);
+  border-radius: 4px; padding: 6px 10px; font-family: inherit;
+  font-size: 0.93em; background: #fefcf5; resize: vertical;
+}
+.q-textarea:focus { outline: none; border-color: var(--accent); }
+
+/* ── Result after grading ── */
+.result {
+  display: none; margin-top: 8px; padding: 8px 12px;
+  background: #fefcf5; border: 1px solid var(--card-border);
+  border-radius: 4px; font-size: 0.9em; line-height: 1.6;
+}
+.result .badge {
+  display: inline-block; padding: 1px 9px; border-radius: 3px;
+  font-weight: 700; font-size: 0.82em; margin-right: 6px;
+}
+.badge-ok  { background: var(--correct-bg); color: #166534; }
+.badge-no  { background: var(--wrong-bg); color: #991b1b; }
+.badge-ref { background: #dbeafe; color: #1e40af; }
+
+.result .explanation { margin-top: 4px; color: var(--ink); }
+.result .pitfall { color: #b45309; margin-top: 3px; font-size: 0.9em; }
+
+/* ── Grading button ── */
+.grading-bar { text-align: center; margin: 20px 0; }
+.grading-bar button {
+  font-size: 1em; padding: 8px 32px; background: var(--accent);
+  color: #fff; border: none; border-radius: var(--radius);
+  cursor: pointer; font-weight: 600; letter-spacing: 0.3px;
+}
+.grading-bar button:hover     { background: var(--accent-hover); }
+.grading-bar button:disabled  { background: #bbb; cursor: not-allowed; }
+
+/* ── Wrong-question review document ── */
+.wrong-review-box {
+  display: none;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  margin: 18px 0;
+}
+.wrong-review-box h3 {
+  margin-top: 0;
+}
+.wrong-review-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px 0;
+}
+.wrong-review-actions button {
+  font-size: 0.92em;
+  padding: 6px 12px;
+  background: var(--ink);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+.wrong-review-actions button:hover {
+  background: #000;
+}
+#wrong-review-text {
+  width: 100%;
+  min-height: 220px;
+  border: 1px solid var(--card-border);
+  border-radius: 4px;
+  padding: 8px 10px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.84em;
+  line-height: 1.5;
+  background: #fff;
+  resize: vertical;
+}
+
+</style>
+</head>
+<body>
+
+<header id="exampass-header">
+  <div class="header-left"><span class="header-brand">ExamPass Assistant</span></div>
+  <div class="header-right"><span class="header-url">github.com/MIKUZ12/ExamPass-Assistant</span></div>
+</header>
+<hr class="header-divider">
+
+<h1>Lecture 7：Kraft-McMillan 不等式与变长编码</h1>
+<h2 style="text-align:center">章节测试</h2>
+<p style="text-align:center;color:var(--ink-light);font-size:0.95em">满分100分</p>
+
+<div id="score-box"><div class="score-num" id="score-num">0</div><div class="score-label">总分</div></div>
+<div id="questions-container"></div>
+<div class="grading-bar no-print"><button onclick="gradeAll()" id="grade-btn">提交批改</button></div>
+<div id="wrong-review-box" class="wrong-review-box no-print"></div>
+
+<script>
+var Q = [{"type": "choice", "points": 2, "question": "以下关于非奇异码（non-singular code）的说法，正确的是？", "options": ["非奇异码一定是唯一可译码", "非奇异码要求不同符号对应不同码字，但序列可能有歧义", "非奇异码一定是前缀码", "非奇异码的码字长度必须相等"], "answer": 1, "knowledge_point": "变长编码基本概念", "diagnosis_hint": "混淆单符号唯一性与序列唯一性", "explanation": "<strong>正确答案</strong>：B<br><br><strong>推理过程</strong>：非奇异码仅要求不同符号映射到不同码字，但序列编码可能存在多种断句方式，不保证序列唯一可译。", "pitfall": "非奇异码 ≠ 唯一可译码"}, {"type": "choice", "points": 2, "question": "前缀码（prefix-free code）的正确定义是？", "options": ["任何两个码字长度不同", "任何码字都不是另一个码字的前缀", "码字按概率从大到小排列", "码字长度之和最小"], "answer": 1, "knowledge_point": "前缀码", "diagnosis_hint": "混淆前缀码定义与其他性质", "explanation": "<strong>正确答案</strong>：B<br><br><strong>推理过程</strong>：前缀码要求 no codeword is a prefix of any other codeword，即不存在 c(y)=c(x)... 的情况（当 l(x)<l(y)）。", "pitfall": "码字长度不同不是前缀码的定义"}, {"type": "choice", "points": 2, "question": "关于即时码（instantaneous code）与前缀码，以下说法正确的是？", "options": ["即时码是前缀码的真子集", "前缀码是即时码的真子集", "即时码与前缀码等价", "两者没有包含关系"], "answer": 2, "knowledge_point": "前缀码与即时码", "diagnosis_hint": "不清楚两者的等价关系", "explanation": "<strong>正确答案</strong>：C<br><br><strong>推理过程</strong>：即时码 = 前缀码，两个概念完全等价。前缀码保证收到 c(x) 后不存在更长的 c(y)=c(x)...，因此可以立即译码。", "pitfall": "注意是等价，不是包含"}, {"type": "choice", "points": 2, "question": "Kraft 不等式 $\\sum D^{-l(x)}\\le 1$ 关于前缀码是？", "options": ["充分条件", "必要条件", "充要条件", "与前缀码无关"], "answer": 2, "knowledge_point": "Kraft不等式", "diagnosis_hint": "混淆Kraft与McMillan的适用对象", "explanation": "<strong>正确答案</strong>：C<br><br><strong>推理过程</strong>：对前缀码，Kraft 不等式既是充分条件（满足则可构造前缀码），也是必要条件（前缀码必然满足），故为充要条件。", "pitfall": "对唯一可译码，Kraft 仅是必要条件（McMillan）"}, {"type": "choice", "points": 2, "question": "McMillan 不等式说明，对任意唯一可译码，$\\sum D^{-l(x)}$ 的值满足？", "options": ["$\\sum D^{-l(x)} = 1$", "$\\sum D^{-l(x)} < 1$", "$\\sum D^{-l(x)} \\le 1$", "$\\sum D^{-l(x)} \\ge 1$"], "answer": 2, "knowledge_point": "McMillan不等式", "diagnosis_hint": "错误认为唯一可译码必须取等号", "explanation": "<strong>正确答案</strong>：C<br><br><strong>推理过程</strong>：McMillan 不等式证明任意唯一可译码均满足 $\\sum D^{-l(x)}\\le 1$，不要求等号成立。", "pitfall": "等号成立时称为完备码，但不是必须的"}, {"type": "choice", "points": 2, "question": "符号编码最优码长（连续松弛下）为 $l^*(x)=$？", "options": ["$-\\log_D p(x)$", "$\\lceil -\\log_D p(x)\\rceil$", "$\\lfloor -\\log_D p(x)\\rfloor$", "$H(X)$"], "answer": 0, "knowledge_point": "最优编码长度", "diagnosis_hint": "混淆连续松弛与整数约束", "explanation": "<strong>正确答案</strong>：A<br><br><strong>推理过程</strong>：连续松弛（不要求整数码长）时，最优解为 $l^*(x)=-\\log_D p(x)$，对应平均编码长度 $L^*=H_D(X)$。实际整数码长用上取整。", "pitfall": "Shannon 码用上取整，但理论最优是连续值"}, {"type": "choice", "points": 2, "question": "若用错误的分布 $q(x)$ 设计最优编码，实际平均编码长度为？", "options": ["$H(X)$", "$H(X) + D_{KL}(p\\|q)$", "$H(X) - D_{KL}(p\\|q)$", "$D_{KL}(q\\|p)$"], "answer": 1, "knowledge_point": "编码开销与KL散度", "diagnosis_hint": "不清楚误用分布带来的额外开销", "explanation": "<strong>正确答案</strong>：B<br><br><strong>推理过程</strong>：$L_q=\\sum p(x)\\log(1/q(x))=H(X)+D_{KL}(p\\|q)$，多出的 $D_{KL}(p\\|q)\\ge 0$ 是额外开销。", "pitfall": "注意 KL 散度方向是 $D_{KL}(p\\|q)$，不是 $D_{KL}(q\\|p)$"}, {"type": "choice", "points": 2, "question": "变长码编码定理中，对前缀码，平均编码长度 $L$ 满足（$H=H(X)$）：", "options": ["$H-1 \\le L < H$", "$H \\le L < H+1$", "$H \\le L \\le H+1$", "$L = H$"], "answer": 1, "knowledge_point": "变长码编码定理", "diagnosis_hint": "错误记忆上下界", "explanation": "<strong>正确答案</strong>：B<br><br><strong>推理过程</strong>：取 $l(x)=\\lceil -\\log p(x)\\rceil$，下界 $L\\ge H(X)$，上界 $L<H(X)+1$（严格小于）。", "pitfall": "上界是严格不等式"}, {"type": "choice", "points": 2, "question": "二分分布（Dyadic distribution）要求每个符号的概率形如？", "options": ["$p(x)=1/m$（均匀分布）", "$p(x)=2^{-n_x}$，$n_x$ 为正整数", "$p(x)\\in[0,1]$ 即可", "$p(x)$ 必须是有理数"], "answer": 1, "knowledge_point": "二分分布", "diagnosis_hint": "混淆二分分布与均匀分布", "explanation": "<strong>正确答案</strong>：B<br><br><strong>推理过程</strong>：二分分布要求每个概率都是 2 的负整数次幂，故各概率为 1/2、1/4、1/8 等形式。", "pitfall": "均匀分布是二分分布的特例（当所有 $n_x$ 相同）"}, {"type": "choice", "points": 2, "question": "以下包含关系正确的是？", "options": ["前缀码 ⊂ 唯一可译码 ⊂ 非奇异码 ⊂ 所有编码", "唯一可译码 ⊂ 前缀码 ⊂ 非奇异码 ⊂ 所有编码", "非奇异码 ⊂ 唯一可译码 ⊂ 前缀码 ⊂ 所有编码", "前缀码 ⊂ 非奇异码 ⊂ 唯一可译码 ⊂ 所有编码"], "answer": 0, "knowledge_point": "编码层次", "diagnosis_hint": "混淆各类编码的包含关系", "explanation": "<strong>正确答案</strong>：A<br><br><strong>推理过程</strong>：前缀码必然是唯一可译码，唯一可译码必然是非奇异码，非奇异码是所有编码的子集。逆包含均不成立。", "pitfall": "注意真包含方向"}, {"type": "tf", "points": 1, "question": "Kraft 不等式充分条件的证明中，利用了二分分布与融合树的思想。", "options": [], "answer": true, "knowledge_point": "Kraft不等式", "diagnosis_hint": "不熟悉证明思路", "explanation": "<strong>正确答案</strong>：正确（√）<br><br><strong>推理过程</strong>：充分条件证明：给定满足 Kraft 的码长，令 $p^*(x)=D^{-l(x)}$，缺失概率补全为二分分布，对融合树提取叶子节点即为所求前缀码。", "pitfall": "McMillan 必要条件用的是长序列计数论证"}, {"type": "tf", "points": 1, "question": "前缀码一定是唯一可译码。", "options": [], "answer": true, "knowledge_point": "前缀码", "diagnosis_hint": "", "explanation": "<strong>正确答案</strong>：正确（√）<br><br><strong>推理过程</strong>：前缀码用二叉树路径对应码字，可逐符号从左向右唯一分割，故序列唯一可译。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "满足 Kraft 不等式的码一定是前缀码。", "options": [], "answer": false, "knowledge_point": "Kraft不等式", "diagnosis_hint": "", "explanation": "<strong>正确答案</strong>：错误（×）<br><br><strong>推理过程</strong>：Kraft 不等式保证「存在对应码长的前缀码」，但满足 Kraft 的特定码未必本身是前缀码。", "pitfall": "Kraft 保证存在性而非当前码即为前缀码"}, {"type": "tf", "points": 1, "question": "对任意唯一可译码，必然满足 $\\sum D^{-l(x)}\\le 1$。", "options": [], "answer": true, "knowledge_point": "McMillan不等式", "diagnosis_hint": "", "explanation": "<strong>正确答案</strong>：正确（√）<br><br><strong>推理过程</strong>：McMillan 定理证明了唯一可译码必满足 Kraft 不等式，这是必要条件。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "最优编码长度（连续松弛）等于 $\\lceil -\\log_D p(x)\\rceil$。", "options": [], "answer": false, "knowledge_point": "最优编码长度", "diagnosis_hint": "", "explanation": "<strong>正确答案</strong>：错误（×）<br><br><strong>推理过程</strong>：连续松弛下最优为 $-\\log_D p(x)$，上取整是 Shannon 码的整数近似，两者不同。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "当信源为二分分布时，存在平均编码长度恰好等于 $H(X)$ 的前缀码。", "options": [], "answer": true, "knowledge_point": "二分分布", "diagnosis_hint": "", "explanation": "<strong>正确答案</strong>：正确（√）<br><br><strong>推理过程</strong>：二分分布时 $l^*(x)=-\\log p(x)$ 为整数，Kraft 等号成立，可构造 $L=H(X)$ 的前缀码。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "变长码编码定理中，平均编码长度的上界 $H(X)+1$ 是严格小于（不含等号）。", "options": [], "answer": true, "knowledge_point": "变长码编码定理", "diagnosis_hint": "", "explanation": "<strong>正确答案</strong>：正确（√）<br><br><strong>推理过程</strong>：$l(x)=\\lceil -\\log p(x)\\rceil \\le -\\log p(x)+1$，但严格小于（等号不可达），故 $L<H(X)+1$。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "非奇异码的序列编码一定是唯一可译的。", "options": [], "answer": false, "knowledge_point": "变长编码基本概念", "diagnosis_hint": "", "explanation": "<strong>正确答案</strong>：错误（×）<br><br><strong>推理过程</strong>：非奇异码只保证单符号唯一，序列可能有多种断句。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "误用分布 $q$ 设计编码的额外开销等于 $D_{KL}(q\\|p)$。", "options": [], "answer": false, "knowledge_point": "编码开销与KL散度", "diagnosis_hint": "", "explanation": "<strong>正确答案</strong>：错误（×）<br><br><strong>推理过程</strong>：额外开销为 $D_{KL}(p\\|q)$，不是 $D_{KL}(q\\|p)$。KL 散度不对称。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "D 进制前缀码可以用完全 D 叉树的根-叶路径来描述。", "options": [], "answer": true, "knowledge_point": "前缀码与二叉树", "diagnosis_hint": "", "explanation": "<strong>正确答案</strong>：正确（√）<br><br><strong>推理过程</strong>：前缀码码字对应叶子节点，从根到叶的路径标签拼接即为码字。", "pitfall": ""}, {"type": "short", "points": 6, "question": "请阐述前缀码与即时码的定义，并证明两者等价。", "options": [], "answer": "", "knowledge_point": "前缀码与即时码", "diagnosis_hint": "", "explanation": "<strong>参考答案</strong>：<br>前缀码：任何码字都不是另一个码字的前缀。<br>即时码：收到当前码字 c(x) 后，无需查看后续符号即可立刻译码。<br>等价性：(1) 前缀码→即时码：不存在 c(y)=c(x)...，故收到 c(x) 即可译。(2) 即时码→前缀码：后续不存在 c(y)=c(x)...，即 c(x) 不是任何更长码字的前缀。□", "pitfall": ""}, {"type": "short", "points": 6, "question": "陈述 Kraft 不等式，并分别说明其对前缀码的充分条件和必要条件证明思路。", "options": [], "answer": "", "knowledge_point": "Kraft不等式", "diagnosis_hint": "", "explanation": "<strong>参考答案</strong>：Kraft 不等式：$\\sum_{x}D^{-l(x)}\\le 1$。充分（满足Kraft则存在前缀码）：令 $p^*(x)=D^{-l(x)}$，补全为二分分布，融合树叶子给出前缀码。必要（前缀码则满足Kraft）：在深度 $l_\\mathrm{max}$ 完全叉树中各码字子树不相交，叶子总数 $\\le D^{l_\\mathrm{max}}$，两边除以 $D^{l_\\mathrm{max}}$ 得 Kraft。", "pitfall": ""}, {"type": "short", "points": 6, "question": "证明变长码编码定理：对随机变量 $X$ 存在前缀码使 $H(X)\\le L < H(X)+1$。", "options": [], "answer": "", "knowledge_point": "变长码编码定理", "diagnosis_hint": "", "explanation": "<strong>参考答案</strong>：取 $l(x)=\\lceil-\\log p(x)\\rceil$。Kraft 成立（$\\le\\sum p(x)=1$），前缀码存在。下界：$l(x)\\ge -\\log p(x)\\Rightarrow L\\ge H(X)$。上界：$l(x)< -\\log p(x)+1\\Rightarrow L<H(X)+1$。", "pitfall": ""}, {"type": "short", "points": 6, "question": "若编码者误用 $q(x)$ 设计最优码，实际平均编码长度比最优多多少？请推导。", "options": [], "answer": "", "knowledge_point": "编码开销与KL散度", "diagnosis_hint": "", "explanation": "<strong>参考答案</strong>：$L_q=\\sum_x p(x)\\log(1/q(x))=D_{KL}(p\\|q)+H(X)$，额外开销为 $D_{KL}(p\\|q)\\ge 0$，等号当且仅当 $p=q$。", "pitfall": ""}, {"type": "essay", "points": 8, "question": "论述 Kraft 不等式与 McMillan 不等式的联系与区别，并说明为什么符号编码只需考虑前缀码。", "options": [], "answer": "", "knowledge_point": "Kraft-McMillan不等式", "diagnosis_hint": "", "explanation": "<strong>参考答案</strong>：联系：两者不等式形式相同（$\\sum D^{-l(x)}\\le 1$）。区别：Kraft 针对前缀码（充要条件），McMillan 是唯一可译码满足 Kraft 的必要条件证明。为何只考虑前缀码：McMillan 说明唯一可译码满足 Kraft，Kraft 充分条件保证有等优前缀码。故每个唯一可译码有等优前缀码替代，不损失最优性。", "pitfall": ""}, {"type": "essay", "points": 8, "question": "论述最优符号编码长度的推导（Lagrange 法），并解释为何平均最优编码长度等于信息熵。", "options": [], "answer": "", "knowledge_point": "最优编码长度", "diagnosis_hint": "", "explanation": "<strong>参考答案</strong>：$\\min\\sum p_i l_i$ s.t. $\\sum D^{-l_i}\\le 1$。拉格朗日：$\\partial\\mathcal{L}/\\partial l_i=p_i-\\lambda\\ln D\\cdot D^{-l_i}=0$，得 $D^{-l_i}=p_i/(\\lambda\\ln D)$。代入约束等号得 $\\lambda\\ln D=1/(\\sum p_i)=1$，故 $l_i^*=-\\log_D p_i$，$L^*=\\sum p_i\\log_D(1/p_i)=H_D(X)$。$D=2$ 时 $L^*=H(X)$，平均最优编码长度等于信息熵。", "pitfall": ""}, {"type": "essay", "points": 10, "question": "请完整论述 Kraft 不等式充分条件的证明（满足 Kraft 不等式则存在对应码长的前缀码），证明中用到二分分布。", "options": [], "answer": "", "knowledge_point": "Kraft不等式充分条件", "diagnosis_hint": "", "explanation": "<strong>参考答案</strong>：令 $p^*(x_i)=2^{-l_i}$，$\\sum p^*(x_i)\\le 1$，缺失概率 $u=1-\\sum p^*(x_i)\\ge 0$。$u$ 展开为 $\\sum_k c_k 2^{-k}$，添加对应新符号构成新集合 $\\mathcal{Y}$，使总概率为 1 的二分分布。对此二分分布运行融合算法（每步合并概率最小的两个元素），得到融合树。在融合树中，$\\mathcal{X}$ 中元素对应的叶子节点的根-叶路径即为所求前缀码，码长恰为 $l_1,\\ldots,l_m$。□", "pitfall": ""}, {"type": "comprehensive", "points": 20, "question": "设二进制信源 $\\mathcal{X}=\\{a,b,c,d,e\\}$，概率 $p(a)=1/2,\\ p(b)=1/4,\\ p(c)=1/8,\\ p(d)=p(e)=1/16$。\n(1)计算 $H(X)$。(4分)\n(2)验证码长 $l(a)=1,l(b)=2,l(c)=3,l(d)=l(e)=4$ 满足 Kraft 不等式。(4分)\n(3)说明这是最优码（连续松弛），求 $L$。(6分)\n(4)若误用均匀分布 $q=1/5$ 设计码，求实际 $L_q$ 和额外开销。(6分)", "options": [], "answer": "", "knowledge_point": "变长编码综合", "diagnosis_hint": "", "explanation": "<strong>参考答案</strong>：<br>(1) $H(X)=1/2+2/4+3/8+4/16+4/16=30/16=1.875$ bit。<br>(2) $\\sum 2^{-l}=1/2+1/4+1/8+1/16+1/16=1\\le 1$，满足（完备码）。<br>(3) $l^*(x)=-\\log p(x)$ 恰等于题目码长（二分分布），故为最优码，$L=H(X)=1.875$ bit/符号。<br>(4) $L_q=\\log 5\\approx 2.322$ bit/符号，额外开销 $D_{KL}(p\\|q)=L_q-H(X)\\approx 0.447$ bit/符号。", "pitfall": ""}];
+var LABELS = {"page_title": "章节测试", "section": {"choice": "一、选择题", "tf": "二、判断题", "short": "三、简答题", "essay": "四、问答题", "comprehensive": "五、综合题"}, "section_order": ["choice", "tf", "short", "essay", "comprehensive"], "points_suffix": "分", "true_label": "正确", "false_label": "错误", "placeholder": "在此作答...", "pitfall_prefix": "易错提醒：", "correct_label": "正确", "wrong_label": "错误", "answer_prefix": "正确答案：", "reference_label": "参考答案", "graded_label": "已批改", "grade_button": "提交批改", "unanswered_label": "未作答", "wrong_review_title": "错题分析文档", "wrong_review_intro": "本次收录 __COUNT__ 道客观题错题。可以下载 Markdown 文档，或复制整段内容交给模型做错因分析和二次学习规划。", "no_wrong_questions": "本次客观题没有错题。主观题请对照参考答案自行复盘。", "download_wrong_review": "下载错题文档", "copy_wrong_review_prompt": "复制错题分析 Prompt", "score_label": "总分", "duration_prefix": "满分 100 分 | 建议 ", "duration_suffix": " 分钟 | 选择答案后点击提交批改"};
+var WRONG_REVIEW_PROMPT = "";
+var LAST_WRONG_REVIEW = '';
+
+function pointsOf(q) {
+  return q.points || q.score || 0;
+}
+
+function stripHtml(html) {
+  var div = document.createElement('div');
+  div.innerHTML = html || '';
+  return (div.textContent || div.innerText || '').replace(/\s+/g, ' ').trim();
+}
+
+// Convert Markdown fenced code blocks (```lang\n...\n```) and inline `code`
+// to <pre><code> / <code> HTML, then convert \n to <br> for plain text lines.
+function formatQuestion(text) {
+  if (!text) return '';
+  // 1. Replace fenced code blocks: ```lang\ncode\n```
+  text = text.replace(/```(\w*)\n([\s\S]*?)```/g, function(_, lang, code) {
+    var escaped = code
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+    var cls = lang ? ' class="language-' + lang + '"' : '';
+    return '<pre><code' + cls + '>' + escaped + '</code></pre>';
+  });
+  // 2. Replace inline backtick `code`
+  text = text.replace(/`([^`\n]+)`/g, function(_, code) {
+    var escaped = code.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    return '<code>' + escaped + '</code>';
+  });
+  // 3. Convert remaining \n to <br> (outside pre blocks already handled above)
+  // Split on <pre>...</pre> so we don't double-process code blocks
+  var parts = text.split(/(<pre>[\s\S]*?<\/pre>)/);
+  for (var i = 0; i < parts.length; i++) {
+    if (i % 2 === 0) {
+      parts[i] = parts[i].replace(/\n/g, '<br>');
+    }
+  }
+  return parts.join('');
+}
+
+function answerText(q, value) {
+  if (value === null || value === undefined || value === '') return LABELS.unanswered_label;
+  var idx = parseInt(value);
+  if (q.type === 'choice') {
+    return String.fromCharCode(65 + idx) + '. ' + ((q.options && q.options[idx]) ? stripHtml(q.options[idx]) : '');
+  }
+  if (q.type === 'tf') {
+    return idx === 0 ? LABELS.true_label : LABELS.false_label;
+  }
+  return String(value);
+}
+
+function normalizedAnswer(q) {
+  if (q.type === 'tf') {
+    if (q.answer === LABELS.true_label || q.answer === true || q.answer === 'true') return 0;
+    if (q.answer === LABELS.false_label || q.answer === false || q.answer === 'false') return 1;
+  }
+  return parseInt(q.answer);
+}
+
+function questionTypeLabel(type) {
+  return LABELS.section[type] || type;
+}
+
+function build(){
+  var container = document.getElementById('questions-container');
+  if (!container) { console.error('ExamPass: questions-container not found'); return; }
+  var h = '';
+  var sec = '';
+  var titles = LABELS.section;
+
+  for (var i = 0; i < Q.length; i++) {
+    var q = Q[i];
+    var s = q.type;
+    if (s !== sec) {
+      sec = s;
+      if (titles[s]) {
+        h += '<h3>' + titles[s] + '</h3>';
+      }
+    }
+
+    var qid = 'q' + i;
+    h += '<div class="q-card" id="card-' + qid + '">';
+    h += '<div class="q-num">' + (i+1) + '. (' + pointsOf(q) + ' ' + LABELS.points_suffix + ')</div>';
+    h += '<div class="q-text">' + formatQuestion(q.question) + '</div>';
+
+    if (q.type === 'choice') {
+      var opts = q.options || [];
+      for (var j = 0; j < opts.length; j++) {
+        h += '<label class="option" id="opt-' + qid + '-' + j + '" onclick="sel(\'' + qid + '\',' + j + ')">';
+        h += '<input type="radio" name="' + qid + '" value="' + j + '">' + String.fromCharCode(65+j) + '. ' + opts[j] + '</label>';
+      }
+    } else if (q.type === 'tf') {
+      h += '<label class="option" id="opt-' + qid + '-0" onclick="sel(\'' + qid + '\',0)">';
+      h += '<input type="radio" name="' + qid + '" value="0">' + LABELS.true_label + '</label>';
+      h += '<label class="option" id="opt-' + qid + '-1" onclick="sel(\'' + qid + '\',1)">';
+      h += '<input type="radio" name="' + qid + '" value="1">' + LABELS.false_label + '</label>';
+    } else {
+      h += '<textarea class="q-textarea" id="text-' + qid + '" placeholder="' + LABELS.placeholder + '" rows="3"></textarea>';
+    }
+
+    h += '<div class="result" id="result-' + qid + '">';
+    h += '<span class="badge" id="badge-' + qid + '"></span><span id="correct-' + qid + '"></span>';
+    h += '<div class="explanation">' + q.explanation + '</div>';
+    if (q.pitfall) {
+      h += '<div class="pitfall">' + LABELS.pitfall_prefix + q.pitfall + '</div>';
+    }
+    h += '</div></div>';
+  }
+
+  container.innerHTML = h;
+
+  // Re-render MathJax for dynamically inserted formulas
+  if (window.MathJax && MathJax.typesetPromise) {
+    MathJax.typesetPromise([container]).catch(function(err) {
+      console.error('MathJax typeset error:', err);
+    });
+  }
+}
+
+document.addEventListener('DOMContentLoaded', build);
+if (document.readyState === 'interactive' || document.readyState === 'complete') {
+  build();
+}
+
+function sel(qid, idx) {
+  var prefix = 'opt-' + qid + '-';
+  var all = document.querySelectorAll('[id^="' + prefix + '"]');
+  for (var i = 0; i < all.length; i++) {
+    all[i].classList.remove('selected');
+  }
+  var target = document.getElementById('opt-' + qid + '-' + idx);
+  if (target) {
+    target.classList.add('selected');
+  }
+  var radio = document.querySelector('input[name="' + qid + '"][value="' + idx + '"]');
+  if (radio) {
+    radio.checked = true;
+  }
+}
+
+function gradeAll() {
+  var score = 0;
+  var wrongItems = [];
+  for (var i = 0; i < Q.length; i++) {
+    var q = Q[i];
+    var qid = 'q' + i;
+    var card = document.getElementById('card-' + qid);
+    var result = document.getElementById('result-' + qid);
+    var badge = document.getElementById('badge-' + qid);
+    var correctEl = document.getElementById('correct-' + qid);
+    if (!card || !result) continue;
+
+    result.style.display = 'block';
+
+    if (q.type === 'choice' || q.type === 'tf') {
+      var radio = document.querySelector('input[name="' + qid + '"]:checked');
+      var correctIndex = normalizedAnswer(q);
+      if (radio && parseInt(radio.value) === correctIndex) {
+        score += pointsOf(q);
+        card.classList.add('correct');
+        badge.className = 'badge badge-ok';
+        badge.textContent = LABELS.correct_label;
+        correctEl.innerHTML = '';
+        var correctOpt = document.getElementById('opt-' + qid + '-' + correctIndex);
+        if (correctOpt) correctOpt.classList.add('correct-answer');
+      } else {
+        card.classList.add('wrong');
+        badge.className = 'badge badge-no';
+        badge.textContent = LABELS.wrong_label;
+        var ansText = answerText(q, correctIndex);
+        correctEl.innerHTML = LABELS.answer_prefix + ansText;
+        if (radio) {
+          var wrongOpt = document.getElementById('opt-' + qid + '-' + radio.value);
+          if (wrongOpt) wrongOpt.classList.add('wrong-answer');
+        }
+        var correctOpt = document.getElementById('opt-' + qid + '-' + correctIndex);
+        if (correctOpt) correctOpt.classList.add('correct-answer');
+        wrongItems.push({
+          number: i + 1,
+          type: questionTypeLabel(q.type),
+          points: pointsOf(q),
+          question: stripHtml(q.question),
+          options: (q.options || []).map(stripHtml),
+          userAnswer: answerText(q, radio ? radio.value : null),
+          correctAnswer: ansText,
+          explanation: stripHtml(q.explanation),
+          pitfall: stripHtml(q.pitfall || ''),
+          knowledgePoint: stripHtml(q.knowledge_point || q.knowledgePoint || '')
+        });
+      }
+    } else {
+      card.classList.add('correct');
+      badge.className = 'badge badge-ref';
+      badge.textContent = LABELS.reference_label;
+    }
+  }
+
+  var sb = document.getElementById('score-box');
+  if (sb) {
+    sb.style.display = 'block';
+    document.getElementById('score-num').textContent = score;
+    sb.scrollIntoView({behavior:'smooth'});
+  }
+
+  var opts = document.querySelectorAll('.option');
+  for (var i = 0; i < opts.length; i++) opts[i].style.pointerEvents = 'none';
+  var tas = document.querySelectorAll('.q-textarea');
+  for (var i = 0; i < tas.length; i++) tas[i].disabled = true;
+
+  var btn = document.getElementById('grade-btn');
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = LABELS.graded_label;
+  }
+
+  buildWrongReview(wrongItems);
+
+  // Re-render MathJax for revealed explanations
+  if (window.MathJax && MathJax.typesetPromise) {
+    MathJax.typesetPromise().catch(function(err) {
+      console.error('MathJax typeset error:', err);
+    });
+  }
+}
+
+function buildWrongReview(wrongItems) {
+  var box = document.getElementById('wrong-review-box');
+  if (!box) return;
+
+  LAST_WRONG_REVIEW = renderWrongReviewMarkdown(wrongItems);
+
+  if (!wrongItems.length) {
+    box.style.display = 'block';
+    box.innerHTML = '<h3>' + LABELS.wrong_review_title + '</h3><p>' + LABELS.no_wrong_questions + '</p>';
+    return;
+  }
+
+  box.style.display = 'block';
+  box.innerHTML = [
+    '<h3>' + LABELS.wrong_review_title + '</h3>',
+    '<p>' + LABELS.wrong_review_intro.replace('__COUNT__', wrongItems.length) + '</p>',
+    '<div class="wrong-review-actions">',
+    '<button type="button" onclick="downloadWrongReview()">' + LABELS.download_wrong_review + '</button>',
+    '<button type="button" onclick="copyWrongReviewPrompt()">' + LABELS.copy_wrong_review_prompt + '</button>',
+    '</div>',
+    '<textarea id="wrong-review-text" readonly rows="12">' + LAST_WRONG_REVIEW.replace(/&/g, '&amp;').replace(/</g, '&lt;') + '</textarea>'
+  ].join('');
+}
+
+function renderWrongReviewMarkdown(wrongItems) {
+  var now = new Date().toLocaleString();
+  var lines = [];
+
+  lines.push('# ExamPass 错题分析文档');
+  lines.push('');
+  lines.push('- 生成时间：' + now);
+  lines.push('- 错题数量：' + wrongItems.length);
+  lines.push('');
+  lines.push('## 给模型的错题分析 Prompt');
+  lines.push('');
+  if (WRONG_REVIEW_PROMPT) {
+    lines.push(WRONG_REVIEW_PROMPT);
+  } else {
+    lines.push('请根据下面的错题记录，分析我的错因，并给出继续学习方案。要求：');
+    lines.push('1. 按知识模块归类错题，不要只逐题复述答案；');
+    lines.push('2. 判断每道题错在概念定义、公式推导、图表理解、条件适用、计算步骤、概念混淆还是审题；');
+    lines.push('3. 对涉及公式或推导的错题，补全从前提到结论的推导链条，不能跳步；');
+    lines.push('4. 对选择题，解释我选错选项为什么有迷惑性，以及正确选项和错误选项的关键边界；');
+    lines.push('5. 给出需要回看课件的具体知识点、图表、公式和页/章节线索；');
+    lines.push('6. 最后生成一份二次学习清单和 5 道针对这些薄弱点的进阶训练题。');
+  }
+  lines.push('');
+  lines.push('## 错题记录');
+  lines.push('');
+
+  if (!wrongItems.length) {
+    lines.push('本次没有客观题错题。');
+    return lines.join('\n');
+  }
+
+  for (var i = 0; i < wrongItems.length; i++) {
+    var item = wrongItems[i];
+    lines.push('### 错题 ' + (i + 1) + '：第 ' + item.number + ' 题');
+    lines.push('');
+    lines.push('- 题型：' + item.type);
+    lines.push('- 分值：' + item.points);
+    lines.push('- 题干：' + item.question);
+    if (item.options.length) {
+      lines.push('- 选项：');
+      for (var j = 0; j < item.options.length; j++) {
+        lines.push('  - ' + String.fromCharCode(65 + j) + '. ' + item.options[j]);
+      }
+    }
+    lines.push('- 我的答案：' + item.userAnswer);
+    lines.push('- 正确答案：' + item.correctAnswer);
+    lines.push('- 解析：' + item.explanation);
+    if (item.pitfall) lines.push('- 易错点：' + item.pitfall);
+    if (item.knowledgePoint) lines.push('- 对应知识点：' + item.knowledgePoint);
+    lines.push('');
+  }
+
+  return lines.join('\n');
+}
+
+function downloadWrongReview() {
+  if (!LAST_WRONG_REVIEW) return;
+  var blob = new Blob([LAST_WRONG_REVIEW], {type: 'text/markdown;charset=utf-8'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = '错题分析文档.md';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function copyWrongReviewPrompt() {
+  var text = LAST_WRONG_REVIEW || '';
+  if (!text) return;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text);
+  } else {
+    var ta = document.getElementById('wrong-review-text');
+    if (ta) {
+      ta.focus();
+      ta.select();
+      document.execCommand('copy');
+    }
+  }
+}
+
+</script>
+</body>
+</html>

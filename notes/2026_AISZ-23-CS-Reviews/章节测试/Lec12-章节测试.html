@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Lecture 12：连续情况-高斯信道-水填充</title>
+<script>
+MathJax = {
+  tex: {
+    inlineMath: [['$', '$']],
+    displayMath: [['$$', '$$']]
+  }
+};
+</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js"></script>
+<style>
+/* === ExamPass Shared Styles === */
+/* Paper-like warm background, clean typography, responsive */
+
+:root {
+  --paper: #fdf6e3;
+  --paper-dark: #f5ecd7;
+  --ink: #2c2c2c;
+  --ink-light: #555;
+  --accent: #2563eb;
+  --accent-hover: #1d4ed8;
+  --divider: #d6c8a8;
+  --card-bg: #fef9ef;
+  --card-border: #e8dcc8;
+  --correct: #22c55e;
+  --correct-bg: #f0fdf4;
+  --wrong: #ef4444;
+  --wrong-bg: #fef2f2;
+  --tag-bg: #fef3c7;
+  --tag-text: #92400e;
+  --radius: 6px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: "Microsoft YaHei", "Noto Sans SC", "SimSun", sans-serif;
+  font-size: 12pt; line-height: 1.75; color: var(--ink);
+  max-width: 860px; margin: auto; padding: 24px 20px 60px;
+  background: var(--paper);
+}
+
+@media print {
+  body { font-size: 10.5pt; background: #fff; }
+  .no-print { display: none !important; }
+  h1, h2, h3 { page-break-after: avoid; }
+}
+
+/* ── Header ── */
+#exampass-header {
+  display: flex; justify-content: space-between; align-items: baseline;
+  padding: 6px 0; margin-bottom: 0;
+}
+.header-brand { font-size: 1.2em; font-weight: 700; color: #1a1a2e; letter-spacing: 0.3px; }
+.header-url  { font-size: 0.78em; color: #999; }
+.header-divider { border: none; border-top: 2px solid var(--divider); margin: 4px 0 20px 0; }
+
+/* ── Typography ── */
+h1 { font-size: 1.55em; text-align: center; border-bottom: 2px solid var(--divider); padding-bottom: 8px; margin-top: 0; }
+h2 { font-size: 1.25em; border-bottom: 1px solid var(--divider); padding-bottom: 4px; margin-top: 28px; }
+h3 { font-size: 1.08em; margin-top: 20px; color: var(--ink); }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ── Tables ── */
+table { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 0.95em; }
+td, th { border: 1px solid var(--card-border); padding: 5px 9px; text-align: left; }
+th { background: var(--paper-dark); font-weight: 700; }
+
+/* ── Embedded source images ── */
+.embedded-images {
+  margin: 18px 0 24px;
+}
+.embedded-images-intro {
+  color: var(--ink-light);
+  font-size: 0.95em;
+}
+.embedded-image {
+  margin: 14px 0 18px;
+  padding: 10px;
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  background: var(--card-bg);
+  break-inside: avoid;
+}
+.embedded-image img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+  border: 1px solid var(--divider);
+  background: #fff;
+}
+.embedded-image figcaption {
+  margin-top: 8px;
+  color: var(--ink-light);
+  font-size: 0.92em;
+  line-height: 1.5;
+}
+.embedded-image-note::before {
+  content: " - ";
+}
+
+/* ── Knowledge point vs explanation ── */
+.kp { font-weight: 700; color: var(--ink); }           /* key point: bold dark */
+.exp { font-weight: 400; color: var(--ink-light); }    /* explanation: lighter */
+.exp em, .exp strong { color: var(--ink); }             /* emphasis inside explanation */
+
+/* ── Block elements ── */
+blockquote {
+  border-left: 3px solid #c0392b; background: #fef9ef;
+  padding: 6px 14px; margin: 10px 0; font-size: 0.95em;
+}
+code { background: #f0ede0; padding: 2px 5px; border-radius: 3px; font-size: 0.92em; }
+pre { background: #f0ede0; padding: 10px; border-radius: var(--radius); overflow-x: auto; }
+
+/* ── TOC ── */
+div.toc {
+  background: var(--card-bg); padding: 14px 18px;
+  border: 1px solid var(--card-border); border-radius: var(--radius); margin-bottom: 22px;
+}
+div.toc ul { padding-left: 18px; }
+div.toc li { margin: 3px 0; font-size: 0.95em; }
+
+/* ── Priority tags ── */
+.tag-must   { background: #fee2e2; color: #991b1b; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+.tag-key    { background: #fef3c7; color: #92400e; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+.tag-freq   { background: #dbeafe; color: #1e40af; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+.tag-info   { background: #f0fdf4; color: #166534; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+
+/* === Interactive Test Styles === */
+
+/* ── Score box ── */
+#score-box {
+  display: none; background: var(--paper-dark); color: var(--ink);
+  padding: 16px 20px; border-radius: var(--radius); margin: 14px 0;
+  text-align: center; border: 1px solid var(--card-border);
+}
+#score-box .score-num { font-size: 2.2em; font-weight: 700; }
+#score-box .score-label { font-size: 0.85em; color: var(--ink-light); }
+
+/* ── Question card ── */
+.q-card {
+  background: var(--card-bg); border: 1px solid var(--card-border);
+  border-radius: var(--radius); padding: 12px 14px; margin: 10px 0;
+  transition: all 0.15s;
+}
+.q-card.correct { border-left: 3px solid var(--correct); background: #f7fdf4; }
+.q-card.wrong   { border-left: 3px solid var(--wrong); background: #fef9f9; }
+
+.q-num  { font-weight: 700; font-size: 0.98em; margin-bottom: 4px; }
+.q-text { margin-bottom: 8px; font-size: 0.98em; }
+.q-text pre {
+  background: #f5f5f5; border: 1px solid #ddd; border-radius: 4px;
+  padding: 10px 14px; margin: 8px 0; overflow-x: auto;
+  font-family: 'Consolas', 'Courier New', monospace; font-size: 0.9em;
+  line-height: 1.5; white-space: pre;
+}
+.q-text code {
+  font-family: 'Consolas', 'Courier New', monospace; font-size: 0.9em;
+  background: #f0f0f0; padding: 1px 4px; border-radius: 3px;
+}
+
+/* ── Options (compact) ── */
+.option {
+  display: block; padding: 4px 10px; margin: 3px 0;
+  border: 1px solid var(--card-border); border-radius: 4px;
+  cursor: pointer; transition: all 0.12s; font-size: 0.93em;
+  background: #fefcf5;
+}
+.option:hover            { background: #f0ede0; }
+.option input            { margin-right: 6px; }
+.option.selected         { border-color: var(--accent); background: #eff6ff; }
+.option.correct-answer   { border-color: var(--correct); background: var(--correct-bg); }
+.option.wrong-answer     { border-color: var(--wrong); background: var(--wrong-bg); }
+
+/* ── Textareas (compact) ── */
+.q-textarea {
+  width: 100%; min-height: 56px; border: 1px solid var(--card-border);
+  border-radius: 4px; padding: 6px 10px; font-family: inherit;
+  font-size: 0.93em; background: #fefcf5; resize: vertical;
+}
+.q-textarea:focus { outline: none; border-color: var(--accent); }
+
+/* ── Result after grading ── */
+.result {
+  display: none; margin-top: 8px; padding: 8px 12px;
+  background: #fefcf5; border: 1px solid var(--card-border);
+  border-radius: 4px; font-size: 0.9em; line-height: 1.6;
+}
+.result .badge {
+  display: inline-block; padding: 1px 9px; border-radius: 3px;
+  font-weight: 700; font-size: 0.82em; margin-right: 6px;
+}
+.badge-ok  { background: var(--correct-bg); color: #166534; }
+.badge-no  { background: var(--wrong-bg); color: #991b1b; }
+.badge-ref { background: #dbeafe; color: #1e40af; }
+
+.result .explanation { margin-top: 4px; color: var(--ink); }
+.result .pitfall { color: #b45309; margin-top: 3px; font-size: 0.9em; }
+
+/* ── Grading button ── */
+.grading-bar { text-align: center; margin: 20px 0; }
+.grading-bar button {
+  font-size: 1em; padding: 8px 32px; background: var(--accent);
+  color: #fff; border: none; border-radius: var(--radius);
+  cursor: pointer; font-weight: 600; letter-spacing: 0.3px;
+}
+.grading-bar button:hover     { background: var(--accent-hover); }
+.grading-bar button:disabled  { background: #bbb; cursor: not-allowed; }
+
+/* ── Wrong-question review document ── */
+.wrong-review-box {
+  display: none;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  margin: 18px 0;
+}
+.wrong-review-box h3 {
+  margin-top: 0;
+}
+.wrong-review-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px 0;
+}
+.wrong-review-actions button {
+  font-size: 0.92em;
+  padding: 6px 12px;
+  background: var(--ink);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+.wrong-review-actions button:hover {
+  background: #000;
+}
+#wrong-review-text {
+  width: 100%;
+  min-height: 220px;
+  border: 1px solid var(--card-border);
+  border-radius: 4px;
+  padding: 8px 10px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.84em;
+  line-height: 1.5;
+  background: #fff;
+  resize: vertical;
+}
+
+</style>
+</head>
+<body>
+
+<header id="exampass-header">
+  <div class="header-left"><span class="header-brand">ExamPass Assistant</span></div>
+  <div class="header-right"><span class="header-url">github.com/MIKUZ12/ExamPass-Assistant</span></div>
+</header>
+<hr class="header-divider">
+
+<h1>Lecture 12：连续情况-高斯信道-水填充</h1>
+<h2 style="text-align:center">章节测试</h2>
+<p style="text-align:center;color:var(--ink-light);font-size:0.95em">满分100分</p>
+
+<div id="score-box"><div class="score-num" id="score-num">0</div><div class="score-label">总分</div></div>
+<div id="questions-container"></div>
+<div class="grading-bar no-print"><button onclick="gradeAll()" id="grade-btn">提交批改</button></div>
+<div id="wrong-review-box" class="wrong-review-box no-print"></div>
+
+<script>
+var Q = [{"type": "choice", "points": 2, "question": "均匀分布 $X\\sim U(0,1/4)$ 的微分熵是？", "options": ["$\\log 4$", "$-\\log 4$", "$0$", "$1/4$"], "answer": 1, "knowledge_point": "微分熵定义", "diagnosis_hint": "忘记微分熵可以为负", "explanation": "<strong>正确答案</strong>：B<br><br><strong>推理过程</strong>：$h(X)=\\log(b-a)=\\log(1/4)=-\\log 4$。区间长度小于1时微分熵为负。", "pitfall": ""}, {"type": "choice", "points": 2, "question": "连续分布以精度 $\\Delta$ 量化，$H(X^\\Delta)$ 与 $h(X)$ 的关系？", "options": ["$H(X^\\Delta)=h(X)$", "$H(X^\\Delta)\\approx h(X)+\\log(1/\\Delta)$", "$H(X^\\Delta)=h(X)\\cdot\\log(1/\\Delta)$", "$H(X^\\Delta)\\approx h(X)\\cdot\\Delta$"], "answer": 1, "knowledge_point": "量化与微分熵", "diagnosis_hint": "", "explanation": "<strong>正确答案</strong>：B<br><br><strong>推理过程</strong>：$H(X^\\Delta)\\approx h(X)+\\log(1/\\Delta)$，$\\Delta\\to 0$ 时趋向无穷大。", "pitfall": ""}, {"type": "choice", "points": 2, "question": "变量替换性质：一维情况 $h(aX+c)$（$a\\ne 0$）等于？", "options": ["$h(X)$", "$h(X)+\\log|a|$", "$h(X)+a$", "$|a|\\cdot h(X)$"], "answer": 1, "knowledge_point": "微分熵变量替换", "diagnosis_hint": "", "explanation": "<strong>正确答案</strong>：B<br><br><strong>推理过程</strong>：$h(aX+c)=h(X)+\\log|\\det a|=h(X)+\\log|a|$，平移不改变熵。", "pitfall": ""}, {"type": "choice", "points": 2, "question": "$n$ 维高斯 $\\mathcal{N}(\\mu,\\Sigma)$ 的微分熵？", "options": ["$\\frac{n}{2}\\log(2\\pi e)$", "$\\frac{1}{2}\\log|\\Sigma|$", "$\\frac{n}{2}\\log(2\\pi e)+\\frac{1}{2}\\log|\\Sigma|$", "$n\\log(\\sigma^2)$"], "answer": 2, "knowledge_point": "高斯微分熵", "diagnosis_hint": "忘记行列式项", "explanation": "<strong>正确答案</strong>：C<br><br><strong>推理过程</strong>：$h(X^n)=\\frac{n}{2}\\log(2\\pi e)+\\frac{1}{2}\\log|\\Sigma|$，由白化变换推导。", "pitfall": ""}, {"type": "choice", "points": 2, "question": "固定均值和协方差，哪种分布微分熵最大？", "options": ["均匀分布", "拉普拉斯分布", "高斯分布", "指数分布"], "answer": 2, "knowledge_point": "最大微分熵", "diagnosis_hint": "", "explanation": "<strong>正确答案</strong>：C<br><br><strong>推理过程</strong>：固定均值和协方差时，高斯分布最大化微分熵（最大熵定理），这是高斯信道容量推导的核心。", "pitfall": ""}, {"type": "choice", "points": 2, "question": "高斯信道 $Y=X+W$（$W\\sim\\mathcal{N}(0,\\sigma^2)$，$\\mathbb{E}[X^2]\\le P$）的容量？", "options": ["$\\log(1+P/\\sigma^2)$", "$\\frac{1}{2}\\log(1+P/\\sigma^2)$", "$\\log(P/\\sigma^2)$", "$\\frac{1}{2}\\log(P/\\sigma^2)$"], "answer": 1, "knowledge_point": "高斯信道容量", "diagnosis_hint": "忘记1/2", "explanation": "<strong>正确答案</strong>：B<br><br><strong>推理过程</strong>：$C_I=\\frac{1}{2}\\log(1+P/\\sigma^2)$，信噪比 SNR=$P/\\sigma^2$。", "pitfall": ""}, {"type": "choice", "points": 2, "question": "高斯信道最优输入分布是？", "options": ["$U(-\\sqrt{P},\\sqrt{P})$", "$\\mathcal{N}(0,P)$", "满足功率约束的任意分布", "拉普拉斯分布"], "answer": 1, "knowledge_point": "高斯信道容量", "diagnosis_hint": "", "explanation": "<strong>正确答案</strong>：B<br><br><strong>推理过程</strong>：最优 $X\\sim\\mathcal{N}(0,P)$ 使输出 $Y\\sim\\mathcal{N}(0,P+\\sigma^2)$，达到最大熵 $\\frac{1}{2}\\log(2\\pi e(P+\\sigma^2))$。", "pitfall": ""}, {"type": "choice", "points": 2, "question": "联合高斯 $(X_1,X_2)$，相关系数 $\\rho$，互信息为？", "options": ["$\\frac{1}{2}\\log(1-\\rho^2)$", "$-\\frac{1}{2}\\log(1-\\rho^2)$", "$\\rho^2/2$", "$|\\rho|$"], "answer": 1, "knowledge_point": "互信息与相关性", "diagnosis_hint": "符号方向", "explanation": "<strong>正确答案</strong>：B<br><br><strong>推理过程</strong>：$I(X_1;X_2)=-\\frac{1}{2}\\log(1-\\rho^2)\\ge 0$，$\\rho=0$ 时 $I=0$（独立）。", "pitfall": ""}, {"type": "choice", "points": 2, "question": "水填充中，$N_1=1,N_2=2,N_3=5$，水位 $\\mu=3$，$P_1^*,P_2^*,P_3^*$ 为？", "options": ["$2,1,0$", "$1,1,1$", "$3,0,0$", "$0,0,3$"], "answer": 0, "knowledge_point": "水填充算法", "diagnosis_hint": "", "explanation": "<strong>正确答案</strong>：A<br><br><strong>推理过程</strong>：$P_1^*=(3-1)=2$，$P_2^*=(3-2)=1$，$P_3^*=(3-5)^+=0$。总功率 3。", "pitfall": ""}, {"type": "choice", "points": 2, "question": "KL散度非负性依赖哪个不等式？", "options": ["Markov不等式", "Cauchy-Schwarz不等式", "Jensen不等式", "Chebyshev不等式"], "answer": 2, "knowledge_point": "KL散度", "diagnosis_hint": "", "explanation": "<strong>正确答案</strong>：C<br><br><strong>推理过程</strong>：$-\\log$ 是凸函数，由 Jensen 不等式 $\\mathbb{E}[-\\log(g/f)]\\ge -\\log\\mathbb{E}(g/f)=-\\log 1=0$。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "微分熵（differential entropy）一定是非负数。", "options": [], "answer": false, "knowledge_point": "微分熵定义", "diagnosis_hint": "类比离散熵的非负性", "explanation": "<strong>正确答案</strong>：错误（×）<br><br><strong>推理过程</strong>：微分熵可以为负。例如 $X\\sim U(0,1/4)$，$h(X)=\\log(1/4)=-\\log 4<0$。这是微分熵与离散熵的重要区别。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "均匀分布 $X\\sim U(0,2)$ 的微分熵为 $\\log 2$。", "options": [], "answer": true, "knowledge_point": "微分熵定义", "diagnosis_hint": "", "explanation": "<strong>正确答案</strong>：正确（√）<br><br><strong>推理过程</strong>：$h(X)=\\log(b-a)=\\log(2-0)=\\log 2>0$，区间长度大于1时微分熵为正。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "高斯分布在所有概率分布中具有最大的微分熵。", "options": [], "answer": false, "knowledge_point": "最大微分熵", "diagnosis_hint": "忽略了约束条件", "explanation": "<strong>正确答案</strong>：错误（×）<br><br><strong>推理过程</strong>：最大熵定理的正确表述是：在<strong>固定均值和协方差矩阵</strong>的约束下，高斯分布的微分熵最大。没有约束时，支撑集越大熵可以越大（如均匀分布区间无限扩展）。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "连续随机变量满足 $h(X|Y)\\le h(X)$（条件不增加微分熵）。", "options": [], "answer": true, "knowledge_point": "互信息与微分熵", "diagnosis_hint": "", "explanation": "<strong>正确答案</strong>：正确（√）<br><br><strong>推理过程</strong>：$I(X;Y)=h(X)-h(X|Y)\\ge 0$，故 $h(X|Y)\\le h(X)$。这与离散情况完全类似，由互信息非负性（KL散度非负性）保证。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "连续随机变量的互信息 $I(X;Y)$ 可以为负数。", "options": [], "answer": false, "knowledge_point": "连续互信息", "diagnosis_hint": "把微分熵的可负性误推广到互信息", "explanation": "<strong>正确答案</strong>：错误（×）<br><br><strong>推理过程</strong>：互信息 $I(X;Y)=D_{KL}(f_{XY}\\|f_Xf_Y)\\ge 0$，由 KL 散度非负性保证，对连续和离散情况均成立。虽然微分熵可以为负，但互信息始终非负。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "对联合高斯分布 $(X_1,X_2)$，若 $\\rho=0$（线性不相关），则 $X_1,X_2$ 统计独立。", "options": [], "answer": true, "knowledge_point": "互信息与线性相关性", "diagnosis_hint": "", "explanation": "<strong>正确答案</strong>：正确（√）<br><br><strong>推理过程</strong>：$I(X_1;X_2)=-\\frac{1}{2}\\log(1-\\rho^2)=0 \\Leftrightarrow \\rho=0$。对联合高斯分布，线性不相关等价于独立（这是高斯分布的特殊性质，一般分布不成立）。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "水填充算法中，噪声方差越大的信道，分配的功率越多。", "options": [], "answer": false, "knowledge_point": "水填充算法", "diagnosis_hint": "直觉与实际相反", "explanation": "<strong>正确答案</strong>：错误（×）<br><br><strong>推理过程</strong>：水填充中 $P_i^*=(\\mu-N_i)^+$，噪声 $N_i$ 越大，分配的功率 $P_i^*$ 越小，甚至为零。直觉上：噪声大的信道「池底深」，水（功率）注入少甚至不注入。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "KL 散度 $D_{KL}(f\\|g)$ 满足对称性，即 $D_{KL}(f\\|g)=D_{KL}(g\\|f)$。", "options": [], "answer": false, "knowledge_point": "KL散度", "diagnosis_hint": "", "explanation": "<strong>正确答案</strong>：错误（×）<br><br><strong>推理过程</strong>：KL 散度不是对称的。$D_{KL}(f\\|g)=\\int f\\log\\frac{f}{g}\\,dx$ 与 $D_{KL}(g\\|f)=\\int g\\log\\frac{g}{f}\\,dx$ 一般不相等。这也是 KL 散度不是真正距离的原因之一。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "高斯信道容量 $C_I=\\frac{1}{2}\\log(1+P/\\sigma^2)$ 中，当噪声方差 $\\sigma^2\\to 0$ 时，信道容量趋向无穷大。", "options": [], "answer": true, "knowledge_point": "高斯信道容量", "diagnosis_hint": "", "explanation": "<strong>正确答案</strong>：正确（√）<br><br><strong>推理过程</strong>：当 $\\sigma^2\\to 0$，SNR $=P/\\sigma^2\\to\\infty$，故 $C_I=\\frac{1}{2}\\log(1+P/\\sigma^2)\\to\\infty$。物理解释：无噪声信道可传无限信息。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "微分熵满足平移不变性：$h(X+c)=h(X)$，其中 $c$ 为常数。", "options": [], "answer": true, "knowledge_point": "微分熵变量替换", "diagnosis_hint": "", "explanation": "<strong>正确答案</strong>：正确（√）<br><br><strong>推理过程</strong>：$h(AX+c)=h(X)+\\log|\\det A|$，当 $A=1$（或单位矩阵）时，$h(X+c)=h(X)$。平移只改变支撑集位置，不改变概率密度形状，故熵不变。", "pitfall": ""}, {"type": "short", "points": 6, "question": "请说明微分熵与离散熵的主要区别，并给出微分熵为负的一个例子。", "options": [], "answer": "", "knowledge_point": "微分熵定义", "diagnosis_hint": "", "explanation": "<strong>参考答案</strong>：<br>（1）微分熵定义为 $h(X)=-\\int f(x)\\log f(x)\\,dx$，是离散熵对连续分布的类比，但<strong>可以为负数</strong>；<br>（2）离散熵 $H(X)=-\\sum p_i\\log p_i\\ge 0$ 永远非负，而微分熵没有非负性保证；<br>（3）微分熵与量化精度相关，$H(X^\\Delta)\\approx h(X)+\\log(1/\\Delta)$，当 $\\Delta\\to 0$ 趋向无穷大，微分熵本身不代表「实际比特数」；<br>（4）例：$X\\sim U(0,1/4)$，$h(X)=\\log(1/4)=-\\log 4\\approx-2$ bits $<0$。", "pitfall": ""}, {"type": "short", "points": 6, "question": "推导一维高斯分布 $X\\sim\\mathcal{N}(\\mu,\\sigma^2)$ 的微分熵 $h(X)$。", "options": [], "answer": "", "knowledge_point": "高斯微分熵", "diagnosis_hint": "", "explanation": "<strong>参考答案</strong>：<br>$h(X)=-\\int f(x)\\log f(x)\\,dx$，其中 $f(x)=\\frac{1}{\\sqrt{2\\pi\\sigma^2}}e^{-\\frac{(x-\\mu)^2}{2\\sigma^2}}$。<br>代入：$\\log f(x)=-\\frac{1}{2}\\log(2\\pi\\sigma^2)-\\frac{(x-\\mu)^2}{2\\sigma^2\\ln 2}$。<br>期望：$\\mathbb{E}[-\\log f(x)]=\\frac{1}{2}\\log(2\\pi\\sigma^2)+\\frac{\\mathbb{E}[(X-\\mu)^2]}{2\\sigma^2\\ln 2}=\\frac{1}{2}\\log(2\\pi\\sigma^2)+\\frac{\\sigma^2}{2\\sigma^2\\ln 2}$。<br>注意 $\\frac{1}{\\ln 2}=\\log e$，故 $h(X)=\\frac{1}{2}\\log(2\\pi\\sigma^2)+\\frac{1}{2}\\log e=\\frac{1}{2}\\log(2\\pi e\\sigma^2)$。", "pitfall": ""}, {"type": "short", "points": 6, "question": "解释水填充算法的直觉含义，并写出最优功率分配公式。", "options": [], "answer": "", "knowledge_point": "水填充算法", "diagnosis_hint": "", "explanation": "<strong>参考答案</strong>：<br>（1）<strong>问题</strong>：$n$ 个并行高斯信道，第 $i$ 个噪声方差 $N_i$，总功率 $P$ 如何分配使总容量 $\\sum\\frac{1}{2}\\log(1+P_i/N_i)$ 最大？<br>（2）<strong>最优解（KKT条件）</strong>：$P_i^*=(\\mu-N_i)^+=\\max(\\mu-N_i,0)$，其中水位线 $\\mu$ 由 $\\sum P_i^*=P$ 确定。<br>（3）<strong>直觉</strong>：将噪声 $N_i$ 视为第 $i$ 个池子的底部高度，将总功率 $P$ 像水一样注入。水从低处往高处填，公共水位 $\\mu$；池底高于水位的信道（$N_i>\\mu$）分配功率为零。", "pitfall": ""}, {"type": "short", "points": 6, "question": "证明：对于连续互信息，$I(X;Y)=h(X)-h(X|Y)$。", "options": [], "answer": "", "knowledge_point": "连续互信息", "diagnosis_hint": "", "explanation": "<strong>参考答案</strong>：<br>$I(X;Y)=\\iint f_{XY}(x,y)\\log\\frac{f_{XY}(x,y)}{f_X(x)f_Y(y)}\\,dx\\,dy$<br>$=\\iint f_{XY}\\log\\frac{f_{XY}}{f_Y}\\,dx\\,dy - \\iint f_{XY}\\log f_X\\,dx\\,dy$<br>第一项：$\\iint f_{XY}\\log f_{X|Y}\\,dx\\,dy$ 的负值即 $-h(X|Y)$（注意符号）；等式拆分后：<br>$I(X;Y)=-\\iint f_{XY}\\log f_X\\,dx\\,dy - (-\\iint f_{XY}\\log f_{X|Y}\\,dx\\,dy)$<br>$=h(X)-h(X|Y)$，其中 $h(X)=-\\int f_X\\log f_X\\,dx$。", "pitfall": ""}, {"type": "essay", "points": 8, "question": "论述高斯信道容量公式 $C_I=\\frac{1}{2}\\log(1+P/\\sigma^2)$ 的完整推导过程，说明最优输入分布及其依据。", "options": [], "answer": "", "knowledge_point": "高斯信道容量", "diagnosis_hint": "", "explanation": "<strong>参考答案</strong>：<br>（1）<strong>模型</strong>：$Y_i=X_i+W_i$，$W_i\\sim\\mathcal{N}(0,\\sigma^2)$ i.i.d.，功率约束 $\\mathbb{E}[X^2]\\le P$。<br>（2）<strong>互信息分解</strong>：$I(X;Y)=h(Y)-h(Y|X)=h(Y)-h(W)$（因 $Y|X=x\\Rightarrow Y=x+W$，$h(Y|X)=h(W)$）。<br>（3）<strong>固定 $h(W)$</strong>：$h(W)=\\frac{1}{2}\\log(2\\pi e\\sigma^2)$（已知，固定）。<br>（4）<strong>最大化 $h(Y)$</strong>：$\\text{Var}(Y)=\\text{Var}(X)+\\sigma^2\\le P+\\sigma^2$。由高斯最大熵定理，固定方差下高斯分布熵最大，故 $h(Y)\\le\\frac{1}{2}\\log(2\\pi e(P+\\sigma^2))$，等号当 $X\\sim\\mathcal{N}(0,P)$ 时成立。<br>（5）<strong>容量</strong>：$C_I=\\frac{1}{2}\\log(2\\pi e(P+\\sigma^2))-\\frac{1}{2}\\log(2\\pi e\\sigma^2)=\\frac{1}{2}\\log(1+P/\\sigma^2)$。<br>（6）<strong>最优输入</strong>：$X\\sim\\mathcal{N}(0,P)$（满功率高斯）。", "pitfall": ""}, {"type": "essay", "points": 8, "question": "用 KL 散度非负性证明：在固定均值 $\\boldsymbol{\\mu}$ 和协方差矩阵 $\\boldsymbol{\\Sigma}$ 的条件下，$n$ 维高斯分布具有最大微分熵。", "options": [], "answer": "", "knowledge_point": "最大微分熵", "diagnosis_hint": "", "explanation": "<strong>参考答案</strong>：<br>（1）设真实分布为 $f$，均值 $\\boldsymbol{\\mu}$、协方差 $\\boldsymbol{\\Sigma}$ 的高斯分布为 $g=\\mathcal{N}(\\boldsymbol{\\mu},\\boldsymbol{\\Sigma})$。<br>（2）由 $D_{KL}(f\\|g)\\ge 0$：$0\\le\\int f\\log\\frac{f}{g}\\,d\\mathbf{x}=-h_f(X)+\\mathbb{E}_f[-\\log g(\\mathbf{x})]$，故 $h_f(X)\\le\\mathbb{E}_f[-\\log g(\\mathbf{x})]$。<br>（3）计算 $\\mathbb{E}_f[-\\log g(\\mathbf{x})]$：$-\\log g(\\mathbf{x})=\\frac{n}{2}\\log(2\\pi)+\\frac{1}{2}\\log|\\boldsymbol{\\Sigma}|+\\frac{1}{2}(\\mathbf{x}-\\boldsymbol{\\mu})^T\\boldsymbol{\\Sigma}^{-1}(\\mathbf{x}-\\boldsymbol{\\mu})\\cdot\\log e$。<br>（4）关键计算：$\\mathbb{E}_f[(\\mathbf{x}-\\boldsymbol{\\mu})^T\\boldsymbol{\\Sigma}^{-1}(\\mathbf{x}-\\boldsymbol{\\mu})]=\\text{tr}(\\boldsymbol{\\Sigma}^{-1}\\mathbb{E}_f[(\\mathbf{x}-\\boldsymbol{\\mu})(\\mathbf{x}-\\boldsymbol{\\mu})^T])=\\text{tr}(\\boldsymbol{\\Sigma}^{-1}\\boldsymbol{\\Sigma})=n$。<br>（5）因此 $h_f(X)\\le\\frac{n}{2}\\log(2\\pi e)+\\frac{1}{2}\\log|\\boldsymbol{\\Sigma}|=h_g(X)$，等号当 $f=g$（高斯）时成立。", "pitfall": ""}, {"type": "essay", "points": 10, "question": "推导并行高斯信道的水填充最优功率分配，包括：（1）写出优化问题；（2）写出拉格朗日函数；（3）利用 KKT 条件推导 $P_i^*=(\\mu-N_i)^+$；（4）给出总容量公式。", "options": [], "answer": "", "knowledge_point": "水填充算法", "diagnosis_hint": "", "explanation": "<strong>参考答案</strong>：<br>（1）<strong>优化问题</strong>：$\\max_{\\{P_i\\}}\\sum_{i=1}^n\\frac{1}{2}\\log(1+P_i/N_i)$，s.t. $\\sum P_i=P$，$P_i\\ge 0$。<br>（2）<strong>拉格朗日函数</strong>：$L=-\\sum\\frac{1}{2}\\log(1+P_i/N_i)+\\lambda(\\sum P_i-P)-\\sum\\nu_i P_i$。<br>（3）<strong>KKT条件</strong>：$\\frac{\\partial L}{\\partial P_i}=-\\frac{1}{2(N_i+P_i)\\ln 2}+\\lambda-\\nu_i=0$，$\\nu_i\\ge 0$，$\\nu_i P_i=0$，$P_i\\ge 0$。<br>情况1：$P_i>0\\Rightarrow\\nu_i=0\\Rightarrow P_i=\\frac{1}{2\\lambda\\ln 2}-N_i=\\mu-N_i$（令 $\\mu=\\frac{1}{2\\lambda\\ln 2}$）。<br>情况2：$P_i=0\\Rightarrow\\nu_i=\\lambda-\\frac{1}{2N_i\\ln 2}\\ge 0\\Rightarrow\\mu\\le N_i$。<br>综合：$P_i^*=(\\mu-N_i)^+=\\max(\\mu-N_i,0)$，水位 $\\mu$ 由 $\\sum P_i^*=P$ 确定。<br>（4）<strong>总容量</strong>：$C=\\sum_{i:P_i^*>0}\\frac{1}{2}\\log(\\mu/N_i)$。", "pitfall": ""}, {"type": "comprehensive", "points": 20, "question": "有3个并行高斯信道，噪声方差分别为 $N_1=1,N_2=4,N_3=9$，总功率约束 $P=8$。\n\n（1）[4分] 写出最优功率分配的优化问题和水填充公式 $P_i^*=(\\mu-N_i)^+$。\n\n（2）[8分] 求最优水位线 $\\mu$ 和各信道最优功率分配 $P_1^*,P_2^*,P_3^*$。（提示：先试 $\\mu$ 使得3个信道都激活，验证；若不成立，尝试2个信道激活。）\n\n（3）[4分] 计算最优总信道容量 $C$（以 bits 为单位，log 底数为2）。\n\n（4）[4分] 若将全部功率 $P=8$ 集中分配给信道1（即 $P_1=8,P_2=P_3=0$），计算此时总容量，并与（3）对比说明水填充的优越性。", "options": [], "answer": "", "knowledge_point": "水填充算法", "diagnosis_hint": "", "explanation": "<strong>参考答案</strong>：\n\n（1）优化问题：$\\max\\sum_{i=1}^3\\frac{1}{2}\\log(1+P_i/N_i)$，s.t. $P_1+P_2+P_3=8$，$P_i\\ge 0$。水填充公式：$P_i^*=(\\mu-N_i)^+$。\n\n（2）先试3个信道均激活（$\\mu>9$）：$\\sum P_i^*=(\\mu-1)+(\\mu-4)+(\\mu-9)=3\\mu-14=8\\Rightarrow\\mu=22/3\\approx 7.33<9$，矛盾（信道3的底高于水位）。\n\n再试2个信道激活（$\\mu>4$ 且 $\\mu\\le 9$，故信道1、2激活，信道3不激活）：$(\\mu-1)+(\\mu-4)=2\\mu-5=8\\Rightarrow\\mu=6.5$。验证：$\\mu=6.5>4$ 且 $6.5<9$，信道3不激活，满足条件。\n\n最优分配：$P_1^*=6.5-1=5.5$，$P_2^*=6.5-4=2.5$，$P_3^*=0$。验证：$5.5+2.5+0=8$。\n\n（3）最优总容量：$C=\\frac{1}{2}\\log(1+5.5/1)+\\frac{1}{2}\\log(1+2.5/4)=\\frac{1}{2}\\log 6.5+\\frac{1}{2}\\log 1.625\\approx\\frac{1}{2}(2.700+0.700)=1.70$ bits。\n\n（4）集中分配：$C'=\\frac{1}{2}\\log(1+8/1)=\\frac{1}{2}\\log 9\\approx\\frac{1}{2}\\times 3.170=1.585$ bits。水填充（1.70 bits）$>$ 集中分配（1.585 bits）。水填充通过向多个「池底较浅」的信道分配功率，利用 $\\log$ 的凹性（边际收益递减）实现更高总容量。", "pitfall": ""}];
+var LABELS = {"page_title": "章节测试", "section": {"choice": "一、选择题", "tf": "二、判断题", "short": "三、简答题", "essay": "四、问答题", "comprehensive": "五、综合题"}, "section_order": ["choice", "tf", "short", "essay", "comprehensive"], "points_suffix": "分", "true_label": "正确", "false_label": "错误", "placeholder": "在此作答...", "pitfall_prefix": "易错提醒：", "correct_label": "正确", "wrong_label": "错误", "answer_prefix": "正确答案：", "reference_label": "参考答案", "graded_label": "已批改", "grade_button": "提交批改", "unanswered_label": "未作答", "wrong_review_title": "错题分析文档", "wrong_review_intro": "本次收录 __COUNT__ 道客观题错题。可以下载 Markdown 文档，或复制整段内容交给模型做错因分析和二次学习规划。", "no_wrong_questions": "本次客观题没有错题。主观题请对照参考答案自行复盘。", "download_wrong_review": "下载错题文档", "copy_wrong_review_prompt": "复制错题分析 Prompt", "score_label": "总分", "duration_prefix": "满分 100 分 | 建议 ", "duration_suffix": " 分钟 | 选择答案后点击提交批改"};
+var WRONG_REVIEW_PROMPT = "";
+var LAST_WRONG_REVIEW = '';
+
+function pointsOf(q) {
+  return q.points || q.score || 0;
+}
+
+function stripHtml(html) {
+  var div = document.createElement('div');
+  div.innerHTML = html || '';
+  return (div.textContent || div.innerText || '').replace(/\s+/g, ' ').trim();
+}
+
+// Convert Markdown fenced code blocks (```lang\n...\n```) and inline `code`
+// to <pre><code> / <code> HTML, then convert \n to <br> for plain text lines.
+function formatQuestion(text) {
+  if (!text) return '';
+  // 1. Replace fenced code blocks: ```lang\ncode\n```
+  text = text.replace(/```(\w*)\n([\s\S]*?)```/g, function(_, lang, code) {
+    var escaped = code
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+    var cls = lang ? ' class="language-' + lang + '"' : '';
+    return '<pre><code' + cls + '>' + escaped + '</code></pre>';
+  });
+  // 2. Replace inline backtick `code`
+  text = text.replace(/`([^`\n]+)`/g, function(_, code) {
+    var escaped = code.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    return '<code>' + escaped + '</code>';
+  });
+  // 3. Convert remaining \n to <br> (outside pre blocks already handled above)
+  // Split on <pre>...</pre> so we don't double-process code blocks
+  var parts = text.split(/(<pre>[\s\S]*?<\/pre>)/);
+  for (var i = 0; i < parts.length; i++) {
+    if (i % 2 === 0) {
+      parts[i] = parts[i].replace(/\n/g, '<br>');
+    }
+  }
+  return parts.join('');
+}
+
+function answerText(q, value) {
+  if (value === null || value === undefined || value === '') return LABELS.unanswered_label;
+  var idx = parseInt(value);
+  if (q.type === 'choice') {
+    return String.fromCharCode(65 + idx) + '. ' + ((q.options && q.options[idx]) ? stripHtml(q.options[idx]) : '');
+  }
+  if (q.type === 'tf') {
+    return idx === 0 ? LABELS.true_label : LABELS.false_label;
+  }
+  return String(value);
+}
+
+function normalizedAnswer(q) {
+  if (q.type === 'tf') {
+    if (q.answer === LABELS.true_label || q.answer === true || q.answer === 'true') return 0;
+    if (q.answer === LABELS.false_label || q.answer === false || q.answer === 'false') return 1;
+  }
+  return parseInt(q.answer);
+}
+
+function questionTypeLabel(type) {
+  return LABELS.section[type] || type;
+}
+
+function build(){
+  var container = document.getElementById('questions-container');
+  if (!container) { console.error('ExamPass: questions-container not found'); return; }
+  var h = '';
+  var sec = '';
+  var titles = LABELS.section;
+
+  for (var i = 0; i < Q.length; i++) {
+    var q = Q[i];
+    var s = q.type;
+    if (s !== sec) {
+      sec = s;
+      if (titles[s]) {
+        h += '<h3>' + titles[s] + '</h3>';
+      }
+    }
+
+    var qid = 'q' + i;
+    h += '<div class="q-card" id="card-' + qid + '">';
+    h += '<div class="q-num">' + (i+1) + '. (' + pointsOf(q) + ' ' + LABELS.points_suffix + ')</div>';
+    h += '<div class="q-text">' + formatQuestion(q.question) + '</div>';
+
+    if (q.type === 'choice') {
+      var opts = q.options || [];
+      for (var j = 0; j < opts.length; j++) {
+        h += '<label class="option" id="opt-' + qid + '-' + j + '" onclick="sel(\'' + qid + '\',' + j + ')">';
+        h += '<input type="radio" name="' + qid + '" value="' + j + '">' + String.fromCharCode(65+j) + '. ' + opts[j] + '</label>';
+      }
+    } else if (q.type === 'tf') {
+      h += '<label class="option" id="opt-' + qid + '-0" onclick="sel(\'' + qid + '\',0)">';
+      h += '<input type="radio" name="' + qid + '" value="0">' + LABELS.true_label + '</label>';
+      h += '<label class="option" id="opt-' + qid + '-1" onclick="sel(\'' + qid + '\',1)">';
+      h += '<input type="radio" name="' + qid + '" value="1">' + LABELS.false_label + '</label>';
+    } else {
+      h += '<textarea class="q-textarea" id="text-' + qid + '" placeholder="' + LABELS.placeholder + '" rows="3"></textarea>';
+    }
+
+    h += '<div class="result" id="result-' + qid + '">';
+    h += '<span class="badge" id="badge-' + qid + '"></span><span id="correct-' + qid + '"></span>';
+    h += '<div class="explanation">' + q.explanation + '</div>';
+    if (q.pitfall) {
+      h += '<div class="pitfall">' + LABELS.pitfall_prefix + q.pitfall + '</div>';
+    }
+    h += '</div></div>';
+  }
+
+  container.innerHTML = h;
+
+  // Re-render MathJax for dynamically inserted formulas
+  if (window.MathJax && MathJax.typesetPromise) {
+    MathJax.typesetPromise([container]).catch(function(err) {
+      console.error('MathJax typeset error:', err);
+    });
+  }
+}
+
+document.addEventListener('DOMContentLoaded', build);
+if (document.readyState === 'interactive' || document.readyState === 'complete') {
+  build();
+}
+
+function sel(qid, idx) {
+  var prefix = 'opt-' + qid + '-';
+  var all = document.querySelectorAll('[id^="' + prefix + '"]');
+  for (var i = 0; i < all.length; i++) {
+    all[i].classList.remove('selected');
+  }
+  var target = document.getElementById('opt-' + qid + '-' + idx);
+  if (target) {
+    target.classList.add('selected');
+  }
+  var radio = document.querySelector('input[name="' + qid + '"][value="' + idx + '"]');
+  if (radio) {
+    radio.checked = true;
+  }
+}
+
+function gradeAll() {
+  var score = 0;
+  var wrongItems = [];
+  for (var i = 0; i < Q.length; i++) {
+    var q = Q[i];
+    var qid = 'q' + i;
+    var card = document.getElementById('card-' + qid);
+    var result = document.getElementById('result-' + qid);
+    var badge = document.getElementById('badge-' + qid);
+    var correctEl = document.getElementById('correct-' + qid);
+    if (!card || !result) continue;
+
+    result.style.display = 'block';
+
+    if (q.type === 'choice' || q.type === 'tf') {
+      var radio = document.querySelector('input[name="' + qid + '"]:checked');
+      var correctIndex = normalizedAnswer(q);
+      if (radio && parseInt(radio.value) === correctIndex) {
+        score += pointsOf(q);
+        card.classList.add('correct');
+        badge.className = 'badge badge-ok';
+        badge.textContent = LABELS.correct_label;
+        correctEl.innerHTML = '';
+        var correctOpt = document.getElementById('opt-' + qid + '-' + correctIndex);
+        if (correctOpt) correctOpt.classList.add('correct-answer');
+      } else {
+        card.classList.add('wrong');
+        badge.className = 'badge badge-no';
+        badge.textContent = LABELS.wrong_label;
+        var ansText = answerText(q, correctIndex);
+        correctEl.innerHTML = LABELS.answer_prefix + ansText;
+        if (radio) {
+          var wrongOpt = document.getElementById('opt-' + qid + '-' + radio.value);
+          if (wrongOpt) wrongOpt.classList.add('wrong-answer');
+        }
+        var correctOpt = document.getElementById('opt-' + qid + '-' + correctIndex);
+        if (correctOpt) correctOpt.classList.add('correct-answer');
+        wrongItems.push({
+          number: i + 1,
+          type: questionTypeLabel(q.type),
+          points: pointsOf(q),
+          question: stripHtml(q.question),
+          options: (q.options || []).map(stripHtml),
+          userAnswer: answerText(q, radio ? radio.value : null),
+          correctAnswer: ansText,
+          explanation: stripHtml(q.explanation),
+          pitfall: stripHtml(q.pitfall || ''),
+          knowledgePoint: stripHtml(q.knowledge_point || q.knowledgePoint || '')
+        });
+      }
+    } else {
+      card.classList.add('correct');
+      badge.className = 'badge badge-ref';
+      badge.textContent = LABELS.reference_label;
+    }
+  }
+
+  var sb = document.getElementById('score-box');
+  if (sb) {
+    sb.style.display = 'block';
+    document.getElementById('score-num').textContent = score;
+    sb.scrollIntoView({behavior:'smooth'});
+  }
+
+  var opts = document.querySelectorAll('.option');
+  for (var i = 0; i < opts.length; i++) opts[i].style.pointerEvents = 'none';
+  var tas = document.querySelectorAll('.q-textarea');
+  for (var i = 0; i < tas.length; i++) tas[i].disabled = true;
+
+  var btn = document.getElementById('grade-btn');
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = LABELS.graded_label;
+  }
+
+  buildWrongReview(wrongItems);
+
+  // Re-render MathJax for revealed explanations
+  if (window.MathJax && MathJax.typesetPromise) {
+    MathJax.typesetPromise().catch(function(err) {
+      console.error('MathJax typeset error:', err);
+    });
+  }
+}
+
+function buildWrongReview(wrongItems) {
+  var box = document.getElementById('wrong-review-box');
+  if (!box) return;
+
+  LAST_WRONG_REVIEW = renderWrongReviewMarkdown(wrongItems);
+
+  if (!wrongItems.length) {
+    box.style.display = 'block';
+    box.innerHTML = '<h3>' + LABELS.wrong_review_title + '</h3><p>' + LABELS.no_wrong_questions + '</p>';
+    return;
+  }
+
+  box.style.display = 'block';
+  box.innerHTML = [
+    '<h3>' + LABELS.wrong_review_title + '</h3>',
+    '<p>' + LABELS.wrong_review_intro.replace('__COUNT__', wrongItems.length) + '</p>',
+    '<div class="wrong-review-actions">',
+    '<button type="button" onclick="downloadWrongReview()">' + LABELS.download_wrong_review + '</button>',
+    '<button type="button" onclick="copyWrongReviewPrompt()">' + LABELS.copy_wrong_review_prompt + '</button>',
+    '</div>',
+    '<textarea id="wrong-review-text" readonly rows="12">' + LAST_WRONG_REVIEW.replace(/&/g, '&amp;').replace(/</g, '&lt;') + '</textarea>'
+  ].join('');
+}
+
+function renderWrongReviewMarkdown(wrongItems) {
+  var now = new Date().toLocaleString();
+  var lines = [];
+
+  lines.push('# ExamPass 错题分析文档');
+  lines.push('');
+  lines.push('- 生成时间：' + now);
+  lines.push('- 错题数量：' + wrongItems.length);
+  lines.push('');
+  lines.push('## 给模型的错题分析 Prompt');
+  lines.push('');
+  if (WRONG_REVIEW_PROMPT) {
+    lines.push(WRONG_REVIEW_PROMPT);
+  } else {
+    lines.push('请根据下面的错题记录，分析我的错因，并给出继续学习方案。要求：');
+    lines.push('1. 按知识模块归类错题，不要只逐题复述答案；');
+    lines.push('2. 判断每道题错在概念定义、公式推导、图表理解、条件适用、计算步骤、概念混淆还是审题；');
+    lines.push('3. 对涉及公式或推导的错题，补全从前提到结论的推导链条，不能跳步；');
+    lines.push('4. 对选择题，解释我选错选项为什么有迷惑性，以及正确选项和错误选项的关键边界；');
+    lines.push('5. 给出需要回看课件的具体知识点、图表、公式和页/章节线索；');
+    lines.push('6. 最后生成一份二次学习清单和 5 道针对这些薄弱点的进阶训练题。');
+  }
+  lines.push('');
+  lines.push('## 错题记录');
+  lines.push('');
+
+  if (!wrongItems.length) {
+    lines.push('本次没有客观题错题。');
+    return lines.join('\n');
+  }
+
+  for (var i = 0; i < wrongItems.length; i++) {
+    var item = wrongItems[i];
+    lines.push('### 错题 ' + (i + 1) + '：第 ' + item.number + ' 题');
+    lines.push('');
+    lines.push('- 题型：' + item.type);
+    lines.push('- 分值：' + item.points);
+    lines.push('- 题干：' + item.question);
+    if (item.options.length) {
+      lines.push('- 选项：');
+      for (var j = 0; j < item.options.length; j++) {
+        lines.push('  - ' + String.fromCharCode(65 + j) + '. ' + item.options[j]);
+      }
+    }
+    lines.push('- 我的答案：' + item.userAnswer);
+    lines.push('- 正确答案：' + item.correctAnswer);
+    lines.push('- 解析：' + item.explanation);
+    if (item.pitfall) lines.push('- 易错点：' + item.pitfall);
+    if (item.knowledgePoint) lines.push('- 对应知识点：' + item.knowledgePoint);
+    lines.push('');
+  }
+
+  return lines.join('\n');
+}
+
+function downloadWrongReview() {
+  if (!LAST_WRONG_REVIEW) return;
+  var blob = new Blob([LAST_WRONG_REVIEW], {type: 'text/markdown;charset=utf-8'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = '错题分析文档.md';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function copyWrongReviewPrompt() {
+  var text = LAST_WRONG_REVIEW || '';
+  if (!text) return;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text);
+  } else {
+    var ta = document.getElementById('wrong-review-text');
+    if (ta) {
+      ta.focus();
+      ta.select();
+      document.execCommand('copy');
+    }
+  }
+}
+
+</script>
+</body>
+</html>

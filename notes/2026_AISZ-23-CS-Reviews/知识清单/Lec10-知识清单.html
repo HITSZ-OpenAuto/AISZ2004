@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Lecture 10：信道容量与联合典型集</title>
+<script>
+MathJax = {
+  tex: {
+    inlineMath: [['$', '$']],
+    displayMath: [['$$', '$$']]
+  }
+};
+</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js"></script>
+<style>
+/* === ExamPass Shared Styles === */
+/* Paper-like warm background, clean typography, responsive */
+
+:root {
+  --paper: #fdf6e3;
+  --paper-dark: #f5ecd7;
+  --ink: #2c2c2c;
+  --ink-light: #555;
+  --accent: #2563eb;
+  --accent-hover: #1d4ed8;
+  --divider: #d6c8a8;
+  --card-bg: #fef9ef;
+  --card-border: #e8dcc8;
+  --correct: #22c55e;
+  --correct-bg: #f0fdf4;
+  --wrong: #ef4444;
+  --wrong-bg: #fef2f2;
+  --tag-bg: #fef3c7;
+  --tag-text: #92400e;
+  --radius: 6px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: "Microsoft YaHei", "Noto Sans SC", "SimSun", sans-serif;
+  font-size: 12pt; line-height: 1.75; color: var(--ink);
+  max-width: 860px; margin: auto; padding: 24px 20px 60px;
+  background: var(--paper);
+}
+
+@media print {
+  body { font-size: 10.5pt; background: #fff; }
+  .no-print { display: none !important; }
+  h1, h2, h3 { page-break-after: avoid; }
+}
+
+/* ── Header ── */
+#exampass-header {
+  display: flex; justify-content: space-between; align-items: baseline;
+  padding: 6px 0; margin-bottom: 0;
+}
+.header-brand { font-size: 1.2em; font-weight: 700; color: #1a1a2e; letter-spacing: 0.3px; }
+.header-url  { font-size: 0.78em; color: #999; }
+.header-divider { border: none; border-top: 2px solid var(--divider); margin: 4px 0 20px 0; }
+
+/* ── Typography ── */
+h1 { font-size: 1.55em; text-align: center; border-bottom: 2px solid var(--divider); padding-bottom: 8px; margin-top: 0; }
+h2 { font-size: 1.25em; border-bottom: 1px solid var(--divider); padding-bottom: 4px; margin-top: 28px; }
+h3 { font-size: 1.08em; margin-top: 20px; color: var(--ink); }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ── Tables ── */
+table { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 0.95em; }
+td, th { border: 1px solid var(--card-border); padding: 5px 9px; text-align: left; }
+th { background: var(--paper-dark); font-weight: 700; }
+
+/* ── Embedded source images ── */
+.embedded-images {
+  margin: 18px 0 24px;
+}
+.embedded-images-intro {
+  color: var(--ink-light);
+  font-size: 0.95em;
+}
+.embedded-image {
+  margin: 14px 0 18px;
+  padding: 10px;
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  background: var(--card-bg);
+  break-inside: avoid;
+}
+.embedded-image img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+  border: 1px solid var(--divider);
+  background: #fff;
+}
+.embedded-image figcaption {
+  margin-top: 8px;
+  color: var(--ink-light);
+  font-size: 0.92em;
+  line-height: 1.5;
+}
+.embedded-image-note::before {
+  content: " - ";
+}
+
+/* ── Knowledge point vs explanation ── */
+.kp { font-weight: 700; color: var(--ink); }           /* key point: bold dark */
+.exp { font-weight: 400; color: var(--ink-light); }    /* explanation: lighter */
+.exp em, .exp strong { color: var(--ink); }             /* emphasis inside explanation */
+
+/* ── Block elements ── */
+blockquote {
+  border-left: 3px solid #c0392b; background: #fef9ef;
+  padding: 6px 14px; margin: 10px 0; font-size: 0.95em;
+}
+code { background: #f0ede0; padding: 2px 5px; border-radius: 3px; font-size: 0.92em; }
+pre { background: #f0ede0; padding: 10px; border-radius: var(--radius); overflow-x: auto; }
+
+/* ── TOC ── */
+div.toc {
+  background: var(--card-bg); padding: 14px 18px;
+  border: 1px solid var(--card-border); border-radius: var(--radius); margin-bottom: 22px;
+}
+div.toc ul { padding-left: 18px; }
+div.toc li { margin: 3px 0; font-size: 0.95em; }
+
+/* ── Priority tags ── */
+.tag-must   { background: #fee2e2; color: #991b1b; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+.tag-key    { background: #fef3c7; color: #92400e; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+.tag-freq   { background: #dbeafe; color: #1e40af; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+.tag-info   { background: #f0fdf4; color: #166534; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+
+
+</style>
+</head>
+<body>
+
+<header id="exampass-header">
+  <div class="header-left"><span class="header-brand">ExamPass Assistant</span></div>
+  <div class="header-right"><span class="header-url">github.com/MIKUZ12/ExamPass-Assistant</span></div>
+</header>
+<hr class="header-divider">
+
+<h1>Lecture 10：信道容量与联合典型集</h1>
+<div class="toc">
+<h2>目录</h2>
+<ul>
+<li><a href="#s51536058">一、通信系统模型与离散无记忆信道</a></li>
+  <li><a href="#s26785533">通信系统模型 必考</a></li>
+  <li><a href="#s77762197">离散无记忆信道（DMC） 必考</a></li>
+  <li><a href="#s75182015">传输率与可达性 必考</a></li>
+<li><a href="#s10374625">二、信道容量</a></li>
+  <li><a href="#s26078415">噪声信道编码定理（Shannon 1948） 必考</a></li>
+  <li><a href="#s40680630">信道容量的计算（KKT 条件） 重点</a></li>
+  <li><a href="#s35648749">典型信道的容量 必考</a></li>
+<li><a href="#s75692492">三、联合典型集</a></li>
+  <li><a href="#s82016850">定义 必考</a></li>
+  <li><a href="#s12691080">联合典型集的三个关键性质 必考</a></li>
+  <li><a href="#s72243206">联合典型引理在编码定理中的应用 重点</a></li>
+<li><a href="#s64533747">四、信道的分类（附录）</a></li>
+  <li><a href="#s31150546">特殊信道类型 常考</a></li>
+</ul>
+</div>
+
+<h2 id="s51536058">一、通信系统模型与离散无记忆信道</h2>
+
+<h3 id="s26785533">通信系统模型 <span class="tag-must">必考</span></h3>
+<p>通信系统由三个部分组成：<span class="kp">信道编码器</span>、<span class="kp">噪声信道</span>、<span class="kp">信道译码器</span>。</p>
+<ul>
+  <li>消息集合（共 $M$ 个状态）：$\mathcal{U} = \{1, 2, \ldots, M\}$</li>
+  <li>编码器：$U \to X^n(U)$，将 $M$ 个状态映射到长为 $n$ 的码字 $X^n$</li>
+  <li>译码器：$Y^n \to \hat{U}$，根据信道输出 $Y^n$ 恢复状态估计 $\hat{U}$</li>
+</ul>
+<p><span class="kp">编码方案</span> $C_n$ = (编码器, 译码器) 的好坏决定了整个系统的可靠性。</p>
+
+<h3 id="s77762197">离散无记忆信道（DMC） <span class="tag-must">必考</span></h3>
+<p>信道由转移概率 $P_{Y|X}$ 描述；<span class="kp">无记忆性</span>意味着 $n$ 次使用中，每次信道转移独立同分布：</p>
+$$P_{Y^n|X^n}(y^n|x^n) = \prod_{i=1}^{n} P_{Y|X}(y_i|x_i)$$
+<p><span class="kp">信道矩阵</span> $p_{ij} = P_{Y|X}(Y=j \mid X=i)$：每行代表一个输入 $x$ 对应的输出分布。输出分布：$p(y) = \sum_x p(x)p(y|x)$，即 $\mathbf{p}_Y = \mathbf{p}_X \cdot P_{Y|X}$（行向量乘矩阵）。</p>
+<blockquote>易错：DMC 要求每次信道转移独立，但输入序列 $X^n$ 本身可以相关（由编码器设计）；无记忆是信道的性质，不是输入的性质。</blockquote>
+
+<h3 id="s75182015">传输率与可达性 <span class="tag-must">必考</span></h3>
+<p><span class="kp">传输率</span>（Rate）：每次信道使用所传输的 bits 数：</p>
+$$R = \frac{\log_2 M}{n} \quad \text{(bits/channel use)}$$
+<p>$n$ 越大，码字越长，传输率越低，但可靠性越高（更多冗余）。</p>
+<ul>
+  <li><strong>可达（Achievable）</strong>：存在编码方案 $C_n$ 使传输率 $\ge R$ 且传输错误趋于零</li>
+  <li><strong>不可达（Not achievable）</strong>：不存在满足上述条件的编码方案</li>
+</ul>
+
+<h2 id="s10374625">二、信道容量</h2>
+
+<h3 id="s26078415">噪声信道编码定理（Shannon 1948） <span class="tag-must">必考</span></h3>
+<p><span class="kp">信道容量</span> $C$ 等于最大可达传输率，且等于输入输出互信息的最大值：</p>
+$$C = \max_{P_X} I(X; Y)$$
+<p>定理正反两方向：</p>
+<ul>
+  <li><strong>正向（可达性）</strong>：若 $R < C$，则存在编码方案使传输错误趋于零</li>
+  <li><strong>反向（不可能性）</strong>：若 $R > C$，则对任何编码方案，传输错误必大于零</li>
+</ul>
+<p><span class="exp">正向证明用联合典型集（Joint Typicality Lemma），反向用数据处理不等式 + Fano 不等式。</span></p>
+
+<h3 id="s40680630">信道容量的计算（KKT 条件） <span class="tag-key">重点</span></h3>
+<p>容量是关于 $P_X$ 的凸优化（目标函数是 $P_X$ 的<strong>凹函数</strong>，约束集为单纯形，一阶最优即全局最优）：</p>
+$$\frac{\partial I(X;Y)}{\partial p(x_i)} = D_{KL}(P_{Y|X=x_i} \,\|\, P_Y) - 1$$
+<p><span class="kp">KKT 最优性条件</span>：存在常数 $\lambda$ 使得：</p>
+<ul>
+  <li>$p(x_i) > 0$（被使用的输入）：$D_{KL}(P_{Y|X=x_i} \| P_Y) = \lambda + 1$</li>
+  <li>$p(x_i) = 0$（未被使用的输入）：$D_{KL}(P_{Y|X=x_i} \| P_Y) \le \lambda + 1$</li>
+</ul>
+<p><span class="exp">含义：最优输入下，所有被实际使用的符号，其条件分布与输出边缘分布之间的 KL 散度相等。</span></p>
+<p>数值算法：<span class="kp">Blahut-Arimoto 算法</span>，迭代交替优化，线性收敛到 $C$。</p>
+
+<h3 id="s35648749">典型信道的容量 <span class="tag-must">必考</span></h3>
+<table style="border-collapse:collapse;margin:8px 0;">
+  <tr style="background:#f0f4ff;"><th style="border:1px solid #aac;padding:5px 12px;">信道类型</th><th style="border:1px solid #aac;padding:5px 12px;">模型</th><th style="border:1px solid #aac;padding:5px 12px;">容量</th></tr>
+  <tr><td style="border:1px solid #ccc;padding:5px 12px;"><span class="kp">二元对称信道 BSC(p)</span></td><td style="border:1px solid #ccc;padding:5px 12px;">翻转概率 $p$</td><td style="border:1px solid #ccc;padding:5px 12px;">$C = 1 - H_b(p)$</td></tr>
+  <tr><td style="border:1px solid #ccc;padding:5px 12px;"><span class="kp">二元删除信道 BEC($\alpha$)</span></td><td style="border:1px solid #ccc;padding:5px 12px;">删除概率 $\alpha$</td><td style="border:1px solid #ccc;padding:5px 12px;">$C = 1 - \alpha$</td></tr>
+  <tr><td style="border:1px solid #ccc;padding:5px 12px;">无用信道</td><td style="border:1px solid #ccc;padding:5px 12px;">$X \perp Y$</td><td style="border:1px solid #ccc;padding:5px 12px;">$C = 0$</td></tr>
+  <tr><td style="border:1px solid #ccc;padding:5px 12px;">无噪信道</td><td style="border:1px solid #ccc;padding:5px 12px;">$H(X|Y)=H(Y|X)=0$</td><td style="border:1px solid #ccc;padding:5px 12px;">$C = \log |\mathcal{X}|$</td></tr>
+</table>
+<p><span class="kp">对称信道</span>（Gallager 1968）：信道矩阵可按输出集划分成若干子矩阵，每个子矩阵的每行是其他行的排列、每列是其他列的排列，则最优输入分布是<strong>均匀分布</strong>。</p>
+<p>BSC 容量推导：$I(X;Y) = H(Y) - H(Y|X) = H(Y) - H_b(p)$；均匀输入使 $H(Y)=1$，故 $C = 1 - H_b(p)$。</p>
+<p>BEC 容量推导：$I(X;Y) = H(X) - H(X|Y)$；当 $Y=0$ 或 $Y=1$ 时 $H(X|Y=y)=0$，当 $Y=$ erasure 时 $H(X|Y=e)=H(X)$；故 $I(X;Y) = (1-\alpha)H(X)$；均匀输入 $H(X)=1$，故 $C=1-\alpha$。</p>
+<blockquote>易错：BSC 容量 $C=1-H_b(p)$，当 $p=0.5$ 时 $H_b(0.5)=1$，$C=0$（最差情况）；当 $p=0$ 或 $p=1$ 时 $H_b(p)=0$，$C=1$（完美信道）。</blockquote>
+
+<h2 id="s75692492">三、联合典型集</h2>
+
+<h3 id="s82016850">定义 <span class="tag-must">必考</span></h3>
+<p>$(X_i, Y_i) \overset{i.i.d.}{\sim} P_{XY}(x,y)$。<span class="kp">$\epsilon$-联合典型序列</span> $(x^n, y^n)$ 同时满足三个条件：</p>
+<ul>
+  <li>$x^n$ 是 $P_X$ 的典型序列：$\left|\frac{1}{n}\log\frac{1}{p(x^n)} - H(X)\right| \le \epsilon$</li>
+  <li>$y^n$ 是 $P_Y$ 的典型序列：$\left|\frac{1}{n}\log\frac{1}{p(y^n)} - H(Y)\right| \le \epsilon$</li>
+  <li>$(x^n, y^n)$ 是 $P_{XY}$ 的典型序列：$\left|\frac{1}{n}\log\frac{1}{p(x^n,y^n)} - H(X,Y)\right| \le \epsilon$</li>
+</ul>
+<p><span class="kp">联合典型集</span> $A_\epsilon^n(X,Y)$ 是所有 $\epsilon$-联合典型序列构成的集合。</p>
+
+<h3 id="s12691080">联合典型集的三个关键性质 <span class="tag-must">必考</span></h3>
+<p><strong>性质1（概率趋1）</strong>：若 $(X^n, Y^n) \sim P_{XY}^n$（即来自真实联合分布），则</p>
+$$\Pr\!\left((X^n, Y^n) \in A_\epsilon^n(X,Y)\right) \xrightarrow{n\to\infty} 1$$
+<p>证明：对联合 $(X,Y)$、边缘 $X$、边缘 $Y$ 分别用 AEP，各项误差 $< \epsilon/3$；再用 Union Bound 合并，总偏差 $< \epsilon$。</p>
+<p><strong>性质2（集合大小上界）</strong>：对任意 $n$，</p>
+$$|A_\epsilon^n(X,Y)| \le 2^{n(H(X,Y)+\epsilon)}$$
+<p>证明：典型序列满足 $p(x^n,y^n) \ge 2^{-n(H(X,Y)+\epsilon)}$；概率之和 $\le 1$，故集合大小 $\le 2^{n(H(X,Y)+\epsilon)}$。</p>
+
+<p><strong>性质3（联合典型引理，Joint Typicality Lemma）</strong>：设 $\tilde{X}^n \sim P_X^n$，$\tilde{Y}^n \sim P_Y^n$ 相互独立，则</p>
+$$\Pr\!\left((\tilde{X}^n, \tilde{Y}^n) \in A_\epsilon^n(X,Y)\right) \le 2^{-n(I(X;Y)-3\epsilon)}$$
+<p>直觉推导：联合典型集大小 $\approx 2^{nH(X,Y)}$，独立采样序列对总数 $\approx 2^{nH(X)} \cdot 2^{nH(Y)}$，命中概率 $\approx \frac{2^{nH(X,Y)}}{2^{nH(X)} \cdot 2^{nH(Y)}} = 2^{-nI(X;Y)}$。</p>
+<blockquote>易错：$(\tilde{X}^n, \tilde{Y}^n)$ 是独立采样但边缘分布正确（分别为 $P_X$ 和 $P_Y$），联合典型要求它们的联合经验分布接近 $P_{XY}$，而独立采样破坏了这种关联——正是 $I(X;Y)$ 衡量了关联的强度，$I(X;Y)$ 越大，独立采样命中联合典型集的概率越小。</blockquote>
+
+<h3 id="s72243206">联合典型引理在编码定理中的应用 <span class="tag-key">重点</span></h3>
+<p>噪声信道编码定理正向证明框架（随机编码论证）：</p>
+<ol>
+  <li>随机生成码本：$M = 2^{nR}$ 个码字，每个独立地从 $P_X^n$ 中采样</li>
+  <li>译码规则：搜索码本，找唯一与 $y^n$ 联合典型的码字 $x^n(i)$，译为 $i$</li>
+  <li>错误事件 $E_0$：正确码字与 $y^n$ 不联合典型（由性质1，$\Pr(E_0)\to 0$）</li>
+  <li>错误事件 $E_i$（$i \ne$ 正确状态）：错误码字 $x^n(i)$ 与 $y^n$ 联合典型（由性质3，$\Pr(E_i) \le 2^{-n(I(X;Y)-3\epsilon)}$）</li>
+  <li>Union Bound：总错误 $\le \Pr(E_0) + \sum_{i \ne \text{correct}} \Pr(E_i) \le \epsilon + (M-1) \cdot 2^{-n(I(X;Y)-3\epsilon)}$</li>
+  <li>当 $R < I(X;Y)$，选取合适 $\epsilon$ 后，总错误 $\to 0$。$C = \max_{P_X} I(X;Y)$ 是可达速率的上确界。</li>
+</ol>
+
+<h2 id="s64533747">四、信道的分类（附录）</h2>
+
+<h3 id="s31150546">特殊信道类型 <span class="tag-freq">常考</span></h3>
+<table style="border-collapse:collapse;margin:8px 0;">
+  <tr style="background:#f0f4ff;"><th style="border:1px solid #aac;padding:5px 12px;">类型</th><th style="border:1px solid #aac;padding:5px 12px;">条件</th><th style="border:1px solid #aac;padding:5px 12px;">含义</th></tr>
+  <tr><td style="border:1px solid #ccc;padding:5px 12px;"><span class="kp">无损信道</span></td><td style="border:1px solid #ccc;padding:5px 12px;">$H(X|Y)=0$</td><td style="border:1px solid #ccc;padding:5px 12px;">知道输出可确定输入</td></tr>
+  <tr><td style="border:1px solid #ccc;padding:5px 12px;"><span class="kp">确定信道</span></td><td style="border:1px solid #ccc;padding:5px 12px;">$H(Y|X)=0$</td><td style="border:1px solid #ccc;padding:5px 12px;">知道输入可确定输出</td></tr>
+  <tr><td style="border:1px solid #ccc;padding:5px 12px;"><span class="kp">无噪信道</span></td><td style="border:1px solid #ccc;padding:5px 12px;">$H(X|Y)=H(Y|X)=0$</td><td style="border:1px solid #ccc;padding:5px 12px;">既无损又确定</td></tr>
+  <tr><td style="border:1px solid #ccc;padding:5px 12px;"><span class="kp">无用信道</span></td><td style="border:1px solid #ccc;padding:5px 12px;">$I(X;Y)=0$</td><td style="border:1px solid #ccc;padding:5px 12px;">输入输出独立，$C=0$</td></tr>
+</table>
+
+
+
+</body>
+</html>

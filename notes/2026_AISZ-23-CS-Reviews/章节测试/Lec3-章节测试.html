@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Lecture 3 – 不等式与凹凸性</title>
+<script>
+MathJax = {
+  tex: {
+    inlineMath: [['$', '$']],
+    displayMath: [['$$', '$$']]
+  }
+};
+</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js"></script>
+<style>
+/* === ExamPass Shared Styles === */
+/* Paper-like warm background, clean typography, responsive */
+
+:root {
+  --paper: #fdf6e3;
+  --paper-dark: #f5ecd7;
+  --ink: #2c2c2c;
+  --ink-light: #555;
+  --accent: #2563eb;
+  --accent-hover: #1d4ed8;
+  --divider: #d6c8a8;
+  --card-bg: #fef9ef;
+  --card-border: #e8dcc8;
+  --correct: #22c55e;
+  --correct-bg: #f0fdf4;
+  --wrong: #ef4444;
+  --wrong-bg: #fef2f2;
+  --tag-bg: #fef3c7;
+  --tag-text: #92400e;
+  --radius: 6px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: "Microsoft YaHei", "Noto Sans SC", "SimSun", sans-serif;
+  font-size: 12pt; line-height: 1.75; color: var(--ink);
+  max-width: 860px; margin: auto; padding: 24px 20px 60px;
+  background: var(--paper);
+}
+
+@media print {
+  body { font-size: 10.5pt; background: #fff; }
+  .no-print { display: none !important; }
+  h1, h2, h3 { page-break-after: avoid; }
+}
+
+/* ── Header ── */
+#exampass-header {
+  display: flex; justify-content: space-between; align-items: baseline;
+  padding: 6px 0; margin-bottom: 0;
+}
+.header-brand { font-size: 1.2em; font-weight: 700; color: #1a1a2e; letter-spacing: 0.3px; }
+.header-url  { font-size: 0.78em; color: #999; }
+.header-divider { border: none; border-top: 2px solid var(--divider); margin: 4px 0 20px 0; }
+
+/* ── Typography ── */
+h1 { font-size: 1.55em; text-align: center; border-bottom: 2px solid var(--divider); padding-bottom: 8px; margin-top: 0; }
+h2 { font-size: 1.25em; border-bottom: 1px solid var(--divider); padding-bottom: 4px; margin-top: 28px; }
+h3 { font-size: 1.08em; margin-top: 20px; color: var(--ink); }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ── Tables ── */
+table { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 0.95em; }
+td, th { border: 1px solid var(--card-border); padding: 5px 9px; text-align: left; }
+th { background: var(--paper-dark); font-weight: 700; }
+
+/* ── Embedded source images ── */
+.embedded-images {
+  margin: 18px 0 24px;
+}
+.embedded-images-intro {
+  color: var(--ink-light);
+  font-size: 0.95em;
+}
+.embedded-image {
+  margin: 14px 0 18px;
+  padding: 10px;
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  background: var(--card-bg);
+  break-inside: avoid;
+}
+.embedded-image img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+  border: 1px solid var(--divider);
+  background: #fff;
+}
+.embedded-image figcaption {
+  margin-top: 8px;
+  color: var(--ink-light);
+  font-size: 0.92em;
+  line-height: 1.5;
+}
+.embedded-image-note::before {
+  content: " - ";
+}
+
+/* ── Knowledge point vs explanation ── */
+.kp { font-weight: 700; color: var(--ink); }           /* key point: bold dark */
+.exp { font-weight: 400; color: var(--ink-light); }    /* explanation: lighter */
+.exp em, .exp strong { color: var(--ink); }             /* emphasis inside explanation */
+
+/* ── Block elements ── */
+blockquote {
+  border-left: 3px solid #c0392b; background: #fef9ef;
+  padding: 6px 14px; margin: 10px 0; font-size: 0.95em;
+}
+code { background: #f0ede0; padding: 2px 5px; border-radius: 3px; font-size: 0.92em; }
+pre { background: #f0ede0; padding: 10px; border-radius: var(--radius); overflow-x: auto; }
+
+/* ── TOC ── */
+div.toc {
+  background: var(--card-bg); padding: 14px 18px;
+  border: 1px solid var(--card-border); border-radius: var(--radius); margin-bottom: 22px;
+}
+div.toc ul { padding-left: 18px; }
+div.toc li { margin: 3px 0; font-size: 0.95em; }
+
+/* ── Priority tags ── */
+.tag-must   { background: #fee2e2; color: #991b1b; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+.tag-key    { background: #fef3c7; color: #92400e; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+.tag-freq   { background: #dbeafe; color: #1e40af; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+.tag-info   { background: #f0fdf4; color: #166534; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+
+/* === Interactive Test Styles === */
+
+/* ── Score box ── */
+#score-box {
+  display: none; background: var(--paper-dark); color: var(--ink);
+  padding: 16px 20px; border-radius: var(--radius); margin: 14px 0;
+  text-align: center; border: 1px solid var(--card-border);
+}
+#score-box .score-num { font-size: 2.2em; font-weight: 700; }
+#score-box .score-label { font-size: 0.85em; color: var(--ink-light); }
+
+/* ── Question card ── */
+.q-card {
+  background: var(--card-bg); border: 1px solid var(--card-border);
+  border-radius: var(--radius); padding: 12px 14px; margin: 10px 0;
+  transition: all 0.15s;
+}
+.q-card.correct { border-left: 3px solid var(--correct); background: #f7fdf4; }
+.q-card.wrong   { border-left: 3px solid var(--wrong); background: #fef9f9; }
+
+.q-num  { font-weight: 700; font-size: 0.98em; margin-bottom: 4px; }
+.q-text { margin-bottom: 8px; font-size: 0.98em; }
+.q-text pre {
+  background: #f5f5f5; border: 1px solid #ddd; border-radius: 4px;
+  padding: 10px 14px; margin: 8px 0; overflow-x: auto;
+  font-family: 'Consolas', 'Courier New', monospace; font-size: 0.9em;
+  line-height: 1.5; white-space: pre;
+}
+.q-text code {
+  font-family: 'Consolas', 'Courier New', monospace; font-size: 0.9em;
+  background: #f0f0f0; padding: 1px 4px; border-radius: 3px;
+}
+
+/* ── Options (compact) ── */
+.option {
+  display: block; padding: 4px 10px; margin: 3px 0;
+  border: 1px solid var(--card-border); border-radius: 4px;
+  cursor: pointer; transition: all 0.12s; font-size: 0.93em;
+  background: #fefcf5;
+}
+.option:hover            { background: #f0ede0; }
+.option input            { margin-right: 6px; }
+.option.selected         { border-color: var(--accent); background: #eff6ff; }
+.option.correct-answer   { border-color: var(--correct); background: var(--correct-bg); }
+.option.wrong-answer     { border-color: var(--wrong); background: var(--wrong-bg); }
+
+/* ── Textareas (compact) ── */
+.q-textarea {
+  width: 100%; min-height: 56px; border: 1px solid var(--card-border);
+  border-radius: 4px; padding: 6px 10px; font-family: inherit;
+  font-size: 0.93em; background: #fefcf5; resize: vertical;
+}
+.q-textarea:focus { outline: none; border-color: var(--accent); }
+
+/* ── Result after grading ── */
+.result {
+  display: none; margin-top: 8px; padding: 8px 12px;
+  background: #fefcf5; border: 1px solid var(--card-border);
+  border-radius: 4px; font-size: 0.9em; line-height: 1.6;
+}
+.result .badge {
+  display: inline-block; padding: 1px 9px; border-radius: 3px;
+  font-weight: 700; font-size: 0.82em; margin-right: 6px;
+}
+.badge-ok  { background: var(--correct-bg); color: #166534; }
+.badge-no  { background: var(--wrong-bg); color: #991b1b; }
+.badge-ref { background: #dbeafe; color: #1e40af; }
+
+.result .explanation { margin-top: 4px; color: var(--ink); }
+.result .pitfall { color: #b45309; margin-top: 3px; font-size: 0.9em; }
+
+/* ── Grading button ── */
+.grading-bar { text-align: center; margin: 20px 0; }
+.grading-bar button {
+  font-size: 1em; padding: 8px 32px; background: var(--accent);
+  color: #fff; border: none; border-radius: var(--radius);
+  cursor: pointer; font-weight: 600; letter-spacing: 0.3px;
+}
+.grading-bar button:hover     { background: var(--accent-hover); }
+.grading-bar button:disabled  { background: #bbb; cursor: not-allowed; }
+
+/* ── Wrong-question review document ── */
+.wrong-review-box {
+  display: none;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  margin: 18px 0;
+}
+.wrong-review-box h3 {
+  margin-top: 0;
+}
+.wrong-review-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px 0;
+}
+.wrong-review-actions button {
+  font-size: 0.92em;
+  padding: 6px 12px;
+  background: var(--ink);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+.wrong-review-actions button:hover {
+  background: #000;
+}
+#wrong-review-text {
+  width: 100%;
+  min-height: 220px;
+  border: 1px solid var(--card-border);
+  border-radius: 4px;
+  padding: 8px 10px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.84em;
+  line-height: 1.5;
+  background: #fff;
+  resize: vertical;
+}
+
+</style>
+</head>
+<body>
+
+<header id="exampass-header">
+  <div class="header-left"><span class="header-brand">ExamPass Assistant</span></div>
+  <div class="header-right"><span class="header-url">github.com/MIKUZ12/ExamPass-Assistant</span></div>
+</header>
+<hr class="header-divider">
+
+<h1>Lecture 3 – 不等式与凹凸性</h1>
+<h2 style="text-align:center">章节测试</h2>
+<p style="text-align:center;color:var(--ink-light);font-size:0.95em">满分100分</p>
+
+<div id="score-box"><div class="score-num" id="score-num">0</div><div class="score-label">总分</div></div>
+<div id="questions-container"></div>
+<div class="grading-bar no-print"><button onclick="gradeAll()" id="grade-btn">提交批改</button></div>
+<div id="wrong-review-box" class="wrong-review-box no-print"></div>
+
+<script>
+var Q = [{"type": "choice", "points": 2, "question": "对于凸函数 $f$，Jensen 不等式的正确表述是？", "options": ["$\\mathbb{E}[f(X)] \\le f(\\mathbb{E}[X])$", "$\\mathbb{E}[f(X)] \\ge f(\\mathbb{E}[X])$", "$\\mathbb{E}[f(X)] = f(\\mathbb{E}[X])$", "$\\mathbb{E}[f(X)] \\le 0$"], "answer": 1, "knowledge_point": "Jensen不等式", "diagnosis_hint": "混淆凹凸函数的不等号方向", "explanation": "<strong>正确答案</strong>：B<br><br><strong>推理过程</strong>：凸函数的定义是弦在图像之上，即 $\\lambda f(x_1)+(1-\\lambda)f(x_2) \\ge f(\\lambda x_1+(1-\\lambda)x_2)$。推广到期望形式即 $\\mathbb{E}[f(X)] \\ge f(\\mathbb{E}[X])$。直觉：对凸函数，\"先算$f$再平均\"（左边）比\"先平均再算$f$\"（右边）更大。<br><br><strong>干扰项分析</strong>：A 是凹函数的 Jensen；C 仅在 $X$ 为常数或 $f$ 为线性函数时成立；D 无意义。<br><br><strong>复盘建议</strong>：凸函数口诀——\"$\\mathbb{E}[f] \\ge f(\\mathbb{E})$，外小内大\"（先算期望再算$f$比较小）。", "pitfall": "凸函数 $\\mathbb{E}[f] \\ge f(\\mathbb{E})$，凹函数 $\\mathbb{E}[f] \\le f(\\mathbb{E})$，符号相反，务必先判断凹凸性。"}, {"type": "choice", "points": 2, "question": "以下哪个函数是凸函数（convex）？", "options": ["$\\log x$（$x > 0$）", "$\\sqrt{x}$（$x > 0$）", "$x \\log x$（$x > 0$）", "$-x^2$"], "answer": 2, "knowledge_point": "凸函数判断", "diagnosis_hint": "混淆常见函数的凹凸性", "explanation": "<strong>正确答案</strong>：C<br><br><strong>推理过程</strong>：$(x\\log x)'' = \\frac{1}{x\\ln 2} > 0$（对 $x>0$），故 $x\\log x$ 是严格凸函数。<br>A：$(\\log x)'' = -1/x^2 < 0$，凹函数。<br>B：$(\\sqrt{x})'' = -\\frac{1}{4}x^{-3/2} < 0$，凹函数。<br>D：$(-x^2)'' = -2 < 0$，凹函数。<br><br><strong>复盘建议</strong>：信息论四大函数凹凸性：$\\log x$（凹）、$-\\log x$（凸）、$x\\log x$（凸）、$x^2$（凸）。这四个必须熟记。", "pitfall": "$x\\log x$ 是凸函数，$\\log x$ 是凹函数，符号不同凹凸性完全相反。"}, {"type": "choice", "points": 2, "question": "Log-sum 不等式 $\\sum a_i \\log(a_i/b_i) \\ge (\\sum a_i)\\log(\\sum a_i/\\sum b_i)$ 中，等号成立的条件是？", "options": ["所有 $a_i = b_i$", "所有 $a_i/b_i$ 相等（为同一常数）", "所有 $a_i$ 相等", "所有 $b_i$ 相等"], "answer": 1, "knowledge_point": "Log-sum不等式等号条件", "diagnosis_hint": "混淆等号条件", "explanation": "<strong>正确答案</strong>：B<br><br><strong>推理过程</strong>：Log-sum 不等式通过 Jensen 不等式证明，Jensen 等号条件是 $X$ 为常数，对应这里 $X_i = a_i/b_i$ 为常数，即所有 $a_i/b_i$ 相等。<br><br><strong>干扰项分析</strong>：A（$a_i=b_i$）是 B 的特例（此时常数=1），B 更一般；C 和 D 单独相等不足以保证比值相等。<br><br><strong>复盘建议</strong>：Log-sum 不等式等号条件 = Jensen 等号条件 = $X$ 为常数 = 各比值 $a_i/b_i$ 相等。应用到 KL 散度，则等号条件是 $p(x)/q(x)=\\text{const}$，结合 $\\sum p=\\sum q=1$，得 $p=q$。", "pitfall": "等号条件是比值相等，不是绝对值相等。A 是 B 的特例（比值=1），但 B 更一般（比值可以是任意常数）。"}, {"type": "choice", "points": 2, "question": "利用 KL 散度非负性，可以直接推出哪个结论？", "options": ["$H(X,Y) = H(X) + H(Y)$", "$H(X|Y) \\ge H(X)$", "$H(p) \\le \\log |\\mathcal{X}|$（均匀分布熵最大）", "$D_{\\mathrm{KL}}(p\\|q) = D_{\\mathrm{KL}}(q\\|p)$"], "answer": 2, "knowledge_point": "KL散度非负性推论", "diagnosis_hint": "不清楚哪些结论可以直接从 KL≥0 推出", "explanation": "<strong>正确答案</strong>：C<br><br><strong>推理过程</strong>：关键恒等式 $H(p) = \\log N - D_{\\mathrm{KL}}(p\\|u)$，由 $D_{\\mathrm{KL}}(p\\|u) \\ge 0$ 即得 $H(p) \\le \\log N = \\log|\\mathcal{X}|$，等号当 $p = u$（均匀分布）。<br><br><strong>干扰项分析</strong>：A 只在独立时成立；B 方向反了（应是 $H(X|Y) \\le H(X)$）；D KL 散度不对称。<br><br><strong>复盘建议</strong>：记住 $H(p) = \\log N - D_{\\mathrm{KL}}(p\\|u)$ 这个恒等式，它把\"熵上界\"问题直接转化为\"KL散度非负\"问题。", "pitfall": "B 的方向写反了——条件减少不确定性，所以 $H(X|Y) \\le H(X)$，不是 $\\ge$。"}, {"type": "choice", "points": 2, "question": "熵 $H(p)$ 关于概率分布 $p$（视为向量）的凹凸性是？", "options": ["凸函数", "凹函数", "既不凸也不凹", "线性函数"], "answer": 1, "knowledge_point": "熵的凹凸性", "diagnosis_hint": "混淆熵的凹凸性方向", "explanation": "<strong>正确答案</strong>：B<br><br><strong>推理过程</strong>：熵 $H(p) = -\\sum p_i \\log p_i$ 是关于概率向量 $p$ 的凹函数，即 $H(\\lambda p_1 + (1-\\lambda)p_2) \\ge \\lambda H(p_1) + (1-\\lambda)H(p_2)$。这可用 log-sum 不等式、Jensen 不等式或 KL 散度凸性三种路线证明。直觉：混合分布不确定性不减（混合增加熵）。<br><br><strong>干扰项分析</strong>：A 凸函数意味混合后熵更小，与直觉相反；C、D 均错。<br><br><strong>复盘建议</strong>：熵是凹的（concave），这与 $x\\log x$ 是凸函数相对应——$H = -\\mathbb{E}[X\\log X]$，负号使凸变凹。", "pitfall": "$x\\log x$ 是凸函数，所以 $-x\\log x$ 是凹函数，$H(p) = \\sum_x p(-\\log p) = -\\sum p\\log p$ 的每一项 $-p\\log p$ 作为 $p$ 的函数是凹的，总和也是凹的。"}, {"type": "choice", "points": 2, "question": "固定信道 $p(Y|X)$，互信息 $I(X;Y)$ 关于输入分布 $p(X)$ 的凹凸性是？", "options": ["凸函数", "凹函数", "既不凸也不凹", "线性函数"], "answer": 1, "knowledge_point": "互信息凹凸性", "diagnosis_hint": "混淆固定哪个变量时的凹凸性", "explanation": "<strong>正确答案</strong>：B<br><br><strong>推理过程</strong>：固定 $p(Y|X)$，$I(X;Y)$ 是关于 $p(X)$ 的凹函数。这一性质是信道容量 $C = \\max_{p(X)} I(X;Y)$ 的优化问题为凸优化的基础，保证存在全局最优输入分布。<br><br><strong>干扰项分析</strong>：A 若是凸的，则最大值在极端点取到，不符合理论；固定 $p(X)$ 时 $I$ 关于 $p(Y|X)$ 才是凸的，注意两个方向不同。<br><br><strong>复盘建议</strong>：记住\"输入-凹，信道-凸\"：固定信道（$p(Y|X)$）时 $I$ 关于输入分布（$p(X)$）为凹；固定输入（$p(X)$）时 $I$ 关于信道（$p(Y|X)$）为凸。", "pitfall": "两个方向：凹在 p(X) 上，凸在 p(Y|X) 上。方向相反，不要混淆。"}, {"type": "choice", "points": 2, "question": "利用 Jensen 不等式证明 AM-GM 不等式（$\\frac{x_1+\\cdots+x_n}{n} \\ge \\sqrt[n]{x_1\\cdots x_n}$）应选取哪个函数 $f$？", "options": ["$f(x) = x^2$（凸函数）", "$f(x) = \\log x$（凹函数，推出 $\\mathbb{E}[\\log X] \\le \\log\\mathbb{E}[X]$）", "$f(x) = -\\log x$（凸函数，推出 $\\mathbb{E}[-\\log X] \\ge -\\log\\mathbb{E}[X]$）", "$f(x) = e^x$（凸函数）"], "answer": 2, "knowledge_point": "Jensen不等式应用——AM-GM", "diagnosis_hint": "不知道如何选择合适的函数", "explanation": "<strong>正确答案</strong>：C<br><br><strong>推理过程</strong>：取 $X$ 均匀分布在 $\\{x_1,\\ldots,x_n\\}$，$f(x)=-\\log x$ 是凸函数，Jensen 给出 $\\mathbb{E}[-\\log X] \\ge -\\log\\mathbb{E}[X]$，即 $-\\frac{1}{n}\\sum\\log x_i \\ge -\\log(\\frac{1}{n}\\sum x_i)$，即 $\\log(\\frac{1}{n}\\sum x_i) \\ge \\frac{1}{n}\\sum\\log x_i = \\log(\\sqrt[n]{\\prod x_i})$，取指数得 AM $\\ge$ GM。<br><br><strong>干扰项分析</strong>：B 用凹函数 $\\log x$ 方向相反（$\\mathbb{E}[\\log X] \\le \\log\\mathbb{E}[X]$），其实与 C 等价，只是写法不同；A 和 D 不直接给出对数不等式形式。<br><br><strong>复盘建议</strong>：AM-GM 用 $-\\log x$（凸）或等价地用 $\\log x$（凹）均可，关键是等价转化步骤。", "pitfall": "用 log x（凹）时方向是 $\\mathbb{E}[\\log X] \\le \\log\\mathbb{E}[X]$（即 $\\log(\\text{GM}) \\le \\log(\\text{AM})$），也能推出 AM≥GM，和 C 等价。"}, {"type": "choice", "points": 2, "question": "以下哪个等式在任意 $p, u$（$u$ 为均匀分布）下都成立？", "options": ["$H(p) = \\log N + D_{\\mathrm{KL}}(p\\|u)$", "$H(p) = \\log N - D_{\\mathrm{KL}}(p\\|u)$", "$H(p) = D_{\\mathrm{KL}}(p\\|u)$", "$H(p) = D_{\\mathrm{KL}}(u\\|p)$"], "answer": 1, "knowledge_point": "熵与KL散度的关系", "diagnosis_hint": "记错了符号", "explanation": "<strong>正确答案</strong>：B<br><br><strong>推理过程</strong>：$D_{\\mathrm{KL}}(p\\|u) = \\sum p(x)\\log\\frac{p(x)}{1/N} = \\sum p(x)\\log p(x) + \\log N = -H(p) + \\log N$，故 $H(p) = \\log N - D_{\\mathrm{KL}}(p\\|u)$。<br><br><strong>干扰项分析</strong>：A 符号错误（加号应为减号）；C、D 量纲和数值都不对，$D_{\\mathrm{KL}}$ 不等于 $H(p)$。<br><br><strong>复盘建议</strong>：这个恒等式非常重要，它揭示了\"熵越大 = 越接近均匀分布 = KL散度越小\"的关系，是最大熵定理的核心。", "pitfall": "符号是减号：$H(p) = \\log N - D_{\\mathrm{KL}}(p\\|u)$，因为 $D_{\\mathrm{KL}} \\ge 0$ 才得到 $H(p) \\le \\log N$。如果是加号，结论就变成 $H(p) \\ge \\log N$，与事实相反。"}, {"type": "choice", "points": 2, "question": "以下关于 $H(X|Y) \\le H(X)$ 的正确说法是？", "options": ["对任意特定观测值 $y$，均有 $H(X|Y=y) \\le H(X)$", "它等价于互信息非负性 $I(X;Y) \\ge 0$", "等号当且仅当 $X$ 是确定性变量", "它说明条件始终减少不确定性"], "answer": 1, "knowledge_point": "条件熵不大于原熵", "diagnosis_hint": "混淆期望层面与单次观测层面的结论", "explanation": "<strong>正确答案</strong>：B<br><br><strong>推理过程</strong>：$H(X|Y) \\le H(X) \\Leftrightarrow H(X) - H(X|Y) \\ge 0 \\Leftrightarrow I(X;Y) \\ge 0$。两者完全等价。<br><br><strong>干扰项分析</strong>：A 错误——对特定 $y$，$H(X|Y=y)$ 可以大于 $H(X)$（例如当 $Y=y$ 是罕见事件时），只有对 $y$ 取期望后才不超过；C 等号条件是 $X \\perp Y$（独立），不是 $X$ 为常数；D 的措辞有误，\"条件减少不确定性\"是期望层面的，不是每次观测都减少。<br><br><strong>复盘建议</strong>：$H(X|Y) \\le H(X)$ 和 $I(X;Y) \\ge 0$ 互为等价，记住其中一个即可推出另一个。", "pitfall": "A 是最常见的陷阱：特定 y 观测后 H(X|Y=y) 可以 > H(X)，只有期望意义上 H(X|Y) ≤ H(X)。"}, {"type": "choice", "points": 2, "question": "KL 散度 $D_{\\mathrm{KL}}(p\\|q)$ 关于 $(p, q)$ 的联合凹凸性是？", "options": ["凹函数", "凸函数", "关于 $p$ 凸，关于 $q$ 凹", "不具有任何凹凸性"], "answer": 1, "knowledge_point": "KL散度的凹凸性", "diagnosis_hint": "混淆 KL 散度对单个参数和联合参数的凹凸性", "explanation": "<strong>正确答案</strong>：B<br><br><strong>推理过程</strong>：$D_{\\mathrm{KL}}(p\\|q)$ 关于 $(p,q)$ 联合为凸函数，即 $\\lambda D_{\\mathrm{KL}}(p_1\\|q_1)+(1-\\lambda)D_{\\mathrm{KL}}(p_2\\|q_2) \\ge D_{\\mathrm{KL}}(\\lambda p_1+(1-\\lambda)p_2\\|\\lambda q_1+(1-\\lambda)q_2)$。可用 log-sum 不等式直接证明。<br><br><strong>干扰项分析</strong>：A 若 KL 是凹的，则混合分布的 KL 散度不减，与 KL 散度的几何意义相反；C 不完整，实际上联合为凸；D 错误，KL 散度有明确的凸性。<br><br><strong>复盘建议</strong>：KL 散度（凸）--> 负KL 散度（凹）--> 熵 $H(p) = \\log N - D_{\\mathrm{KL}}(p\\|u)$（凹）的推导链要记清楚。", "pitfall": "KL 散度是凸函数（联合），而熵是凹函数，因为 H = log N - D_KL，负号使方向反转。"}, {"type": "tf", "points": 1, "question": "对于严格凸函数 $f$，Jensen 不等式等号 $\\mathbb{E}[f(X)] = f(\\mathbb{E}[X])$ 成立的充要条件是 $X$ 几乎处处为常数。", "options": [], "answer": true, "knowledge_point": "Jensen不等式等号条件", "diagnosis_hint": "不清楚严格凸函数时等号条件", "explanation": "<strong>正确答案</strong>：正确（√）<br><br><strong>判断边界</strong>：对严格凸函数，支撑超平面唯一，等号成立当且仅当 $X$ 以概率1等于某常数（即 $\\mathrm{Var}(X)=0$）。若 $f$ 是非严格凸（如线性函数），则等号可在非常数 $X$ 处成立。<br><br><strong>复盘建议</strong>：信息论中使用的函数（$-\\log x$、$x\\log x$）都是严格凸函数，所以等号条件都是\"$X$ 为常数\"，即所有 $x_i$ 相等，或等价地所有比值 $a_i/b_i$ 相等。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "$\\log x$ 是凸函数，因此 $\\mathbb{E}[\\log X] \\ge \\log \\mathbb{E}[X]$。", "options": [], "answer": false, "knowledge_point": "log x 的凹凸性", "diagnosis_hint": "误认为 log x 是凸函数", "explanation": "<strong>正确答案</strong>：错误（×）<br><br><strong>判断边界</strong>：$\\log x$ 是凹函数（$(\\log x)'' = -1/x^2 < 0$），因此 Jensen 不等式方向为 $\\mathbb{E}[\\log X] \\le \\log \\mathbb{E}[X]$（小于等于，不是大于等于）。题目中两个错误：（1）$\\log x$ 是凹函数不是凸函数；（2）不等号方向应该反过来。<br><br><strong>复盘建议</strong>：$\\log$ 是凹的：\"$\\mathbb{E}[\\log] \\le \\log\\mathbb{E}$\"；$-\\log$ 是凸的：\"$\\mathbb{E}[-\\log] \\ge -\\log\\mathbb{E}$\"。两者等价但写法不同。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "KL 散度非负性 $D_{\\mathrm{KL}}(p\\|q) \\ge 0$ 是 Gibbs 不等式的另一种说法。", "options": [], "answer": true, "knowledge_point": "Gibbs不等式", "diagnosis_hint": "不熟悉 Gibbs 不等式的名称", "explanation": "<strong>正确答案</strong>：正确（√）<br><br><strong>判断边界</strong>：Gibbs 不等式即 $D_{\\mathrm{KL}}(p\\|q) \\ge 0$，等号当且仅当 $p=q$。它与信息不等式（information inequality）是同一结论的不同名称。本讲给出两种证明：（1）通过 Jensen 不等式（$-\\log x$ 凸）；（2）通过 log-sum 不等式直接推导。<br><br><strong>复盘建议</strong>：Gibbs 不等式 = KL散度非负性 = 信息不等式，三个名字同一结论。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "对于特定的观测值 $y$，有时会出现 $H(X|Y=y) > H(X)$。", "options": [], "answer": true, "knowledge_point": "条件熵与单次条件熵的区别", "diagnosis_hint": "混淆 H(X|Y) 和 H(X|Y=y)", "explanation": "<strong>正确答案</strong>：正确（√）<br><br><strong>判断边界</strong>：$H(X|Y=y)$ 是观测到特定 $y$ 后 $X$ 的熵，可以大于 $H(X)$。例如：$X$ 均匀分布在 $\\{1,2,3,4\\}$，$Y=X \\mod 2$。当 $Y=0$（偶数）时，$X \\in \\{2,4\\}$，$H(X|Y=0)=1$ bit；当 $Y=1$（奇数）时，$H(X|Y=1)=1$ bit；原始 $H(X)=2$ bit。这个例子 $H(X|Y=y) < H(X)$，但可以构造 $H(X|Y=y) > H(X)$ 的例子（当 $y$ 是罕见事件且对应高不确定性时）。条件熵 $H(X|Y) = \\sum_y p(y) H(X|Y=y) \\le H(X)$ 是期望层面的。<br><br><strong>复盘建议</strong>：期望层面的条件熵一定不超过原熵，但单次观测的条件熵可以超过。这是信息论中的重要微妙点。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "混合两个概率分布一定不会减少熵，即 $H(\\lambda p_1 + (1-\\lambda) p_2) \\ge \\lambda H(p_1) + (1-\\lambda) H(p_2)$。", "options": [], "answer": true, "knowledge_point": "熵的凹性", "diagnosis_hint": "不清楚熵凹性的直接含义", "explanation": "<strong>正确答案</strong>：正确（√）<br><br><strong>判断边界</strong>：这正是熵的凹性（concavity）的定义，即混合分布的熵不低于各分布熵的加权平均。直觉：将两个不同的\"世界\"混合（不确定用哪个分布），会额外引入关于\"选哪个世界\"的不确定性，从而增加熵。<br><br><strong>复盘建议</strong>：熵凹性等价表述：\"混合增加不确定性\"（Mixing probability distributions increases uncertainty / entropy）。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "均匀分布在所有概率分布中熵最大，等号条件是 $p = u$（均匀分布），可由 $D_{\\mathrm{KL}}(p\\|u) \\ge 0$ 直接得到。", "options": [], "answer": true, "knowledge_point": "最大熵定理", "diagnosis_hint": "不熟悉通过KL散度证明最大熵的路线", "explanation": "<strong>正确答案</strong>：正确（√）<br><br><strong>判断边界</strong>：$H(p) = \\log N - D_{\\mathrm{KL}}(p\\|u) \\le \\log N$，等号当 $D_{\\mathrm{KL}}(p\\|u)=0$，即 $p=u$。这是最简洁的最大熵定理证明路线。<br><br><strong>复盘建议</strong>：先记住恒等式 $H(p) = \\log N - D_{\\mathrm{KL}}(p\\|u)$，再用 $D_{\\mathrm{KL}} \\ge 0$ 得到 $H(p) \\le \\log N$，两步搞定最大熵定理。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "$D_{\\mathrm{KL}}(p\\|q)$ 关于 $q$ 是凸函数（固定 $p$ 时）。", "options": [], "answer": true, "knowledge_point": "KL散度凹凸性", "diagnosis_hint": "不清楚 KL 散度对单个参数的凹凸性", "explanation": "<strong>正确答案</strong>：正确（√）<br><br><strong>判断边界</strong>：$D_{\\mathrm{KL}}(p\\|q) = \\sum p(x)\\log p(x) - \\sum p(x)\\log q(x)$。第一项与 $q$ 无关，第二项 $-\\sum p(x)\\log q(x) = CE(p\\|q)$，其中 $\\log q(x)$ 对 $q(x)$ 是凹函数，加权后仍凹，取负后变凸。故固定 $p$ 时 $D_{\\mathrm{KL}}(p\\|q)$ 对 $q$ 是凸函数。<br><br><strong>复盘建议</strong>：KL 散度对 $q$ 的凸性意味着：用\"错误\"分布 $q$ 近似真实分布 $p$ 时，两个错误模型的\"平均\"不会比两个单独的错误更好（凸性保证了混合模型的 KL 散度不超过单模型的平均 KL 散度的反面）。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "Log-sum 不等式是 Jensen 不等式在 $f(x) = x\\log x$ 上的应用。", "options": [], "answer": true, "knowledge_point": "Log-sum不等式的证明", "diagnosis_hint": "不清楚log-sum和Jensen的关系", "explanation": "<strong>正确答案</strong>：正确（√）<br><br><strong>判断边界</strong>：一种标准证明路线是令 $p_i = b_i/\\sum b_j$，$X_i = a_i/b_i$，则 log-sum 不等式等价于 $\\mathbb{E}[X\\log X] \\ge \\mathbb{E}[X]\\log\\mathbb{E}[X]$，即 $f(x) = x\\log x$ 的 Jensen 不等式（$f$ 为凸函数，$\\mathbb{E}[f(X)] \\ge f(\\mathbb{E}[X])$）。另一种路线用 $\\log x$（凹函数）也可以得到等价结果。<br><br><strong>复盘建议</strong>：log-sum 不等式 = Jensen 不等式（$x\\log x$ 或 $\\log x$ 版本），是对 Jensen 的一个有用的重新参数化。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "对任意非负实数 $a_1, a_2, b_1, b_2 > 0$，有 $a_1\\log\\frac{a_1}{b_1} + a_2\\log\\frac{a_2}{b_2} \\ge (a_1+a_2)\\log\\frac{a_1+a_2}{b_1+b_2}$。", "options": [], "answer": true, "knowledge_point": "Log-sum不等式（n=2情形）", "diagnosis_hint": "不确定log-sum不等式是否适用于n=2的情形", "explanation": "<strong>正确答案</strong>：正确（√）<br><br><strong>判断边界</strong>：这是 log-sum 不等式的 $n=2$ 特例，直接代入即得。等号条件：$a_1/b_1 = a_2/b_2$。该不等式是 KL 散度凸性和熵凹性证明的核心步骤，经常用 $n=2$ 情形。<br><br><strong>复盘建议</strong>：log-sum 不等式对所有 $n \\ge 1$ 成立，$n=1$ 时两边相等（退化为等号）。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "固定输入分布 $p(X)$，互信息 $I(X;Y)$ 关于信道转移概率 $p(Y|X)$ 是凹函数。", "options": [], "answer": false, "knowledge_point": "互信息关于信道的凸性", "diagnosis_hint": "混淆互信息关于输入和关于信道的凹凸性方向", "explanation": "<strong>正确答案</strong>：错误（×）<br><br><strong>判断边界</strong>：固定输入分布 $p(X)$，$I(X;Y)$ 关于 $p(Y|X)$ 是<strong>凸函数</strong>（不是凹函数）。两个方向：固定信道时 $I$ 关于输入是凹（用于信道容量优化）；固定输入时 $I$ 关于信道是凸（用于信道编码分析）。<br><br><strong>复盘建议</strong>：记忆口诀——\"输入-凹（concave in $p(X)$），信道-凸（convex in $p(Y|X)$)\"。", "pitfall": ""}, {"type": "short", "points": 6, "question": "证明 KL 散度的非负性：$D_{\\mathrm{KL}}(p\\|q) \\ge 0$，等号当且仅当 $p=q$。请给出两种不同的证明路线（log-sum 不等式路线和 Jensen 不等式路线）。", "options": [], "answer": null, "knowledge_point": "KL散度非负性证明", "diagnosis_hint": "只会其中一种路线，或推导步骤不严格", "explanation": "<strong>参考答案</strong>（6分，每种路线3分）：<br><br><strong>路线一：Log-sum 不等式路线</strong>（3分）<br>令 $a_i = p(x_i)$，$b_i = q(x_i)$，由 log-sum 不等式：<br>$$D_{\\mathrm{KL}}(p\\|q) = \\sum_x p(x)\\log\\frac{p(x)}{q(x)} \\ge \\left(\\sum_x p(x)\\right)\\log\\frac{\\sum_x p(x)}{\\sum_x q(x)} = 1 \\cdot \\log\\frac{1}{1} = 0$$<br>等号当且仅当 $p(x)/q(x) = \\text{const}$，结合 $\\sum p = \\sum q = 1$，得 $p = q$。$\\blacksquare$<br><br><strong>路线二：Jensen 不等式路线</strong>（3分）<br>$D_{\\mathrm{KL}}(p\\|q) = -\\sum_x p(x)\\log\\frac{q(x)}{p(x)} = \\mathbb{E}_p[-\\log\\frac{q(X)}{p(X)}]$（1分）<br>$-\\log x$ 是严格凸函数，由 Jensen 不等式（$\\mathbb{E}[f(X)] \\ge f(\\mathbb{E}[X])$）：<br>$$\\mathbb{E}_p\\left[-\\log\\frac{q(X)}{p(X)}\\right] \\ge -\\log\\mathbb{E}_p\\left[\\frac{q(X)}{p(X)}\\right] = -\\log\\sum_x p(x)\\cdot\\frac{q(x)}{p(x)} = -\\log\\sum_x q(x) = -\\log 1 = 0$$（2分）<br>等号条件：严格凸时 $q(X)/p(X)$ 为常数，结合 $\\sum p=\\sum q=1$ 得 $p=q$。$\\blacksquare$", "pitfall": "路线二中，Jensen 用的是凸函数 $-\\log x$，所以 $\\mathbb{E}[f] \\ge f(\\mathbb{E})$，不等号方向不要写反。"}, {"type": "short", "points": 6, "question": "证明熵的凹性：$\\lambda H(p_1) + (1-\\lambda)H(p_2) \\le H(\\lambda p_1 + (1-\\lambda)p_2)$，其中 $0 \\le \\lambda \\le 1$。请用条件熵路线（构造辅助随机变量 $Y$）给出证明。", "options": [], "answer": null, "knowledge_point": "熵凹性——条件熵路线", "diagnosis_hint": "不知道如何构造辅助随机变量", "explanation": "<strong>参考答案</strong>（6分）：<br><br><strong>构造</strong>（2分）：设辅助随机变量 $Y \\in \\{1, 2\\}$，$p(Y=1)=\\lambda$，$p(Y=2)=1-\\lambda$。令 $X|Y=1 \\sim p_1$，$X|Y=2 \\sim p_2$。<br><br><strong>计算 $X$ 的边缘分布</strong>（1分）：<br>$$p(X=x) = \\sum_{y=1}^2 p(Y=y)p(X=x|Y=y) = \\lambda p_1(x) + (1-\\lambda)p_2(x)$$<br>故 $X \\sim \\lambda p_1 + (1-\\lambda)p_2$，从而 $H(X) = H(\\lambda p_1 + (1-\\lambda)p_2)$。<br><br><strong>计算条件熵</strong>（1分）：<br>$$H(X|Y) = \\sum_{y=1}^2 p(Y=y)H(X|Y=y) = \\lambda H(p_1) + (1-\\lambda)H(p_2)$$<br><br><strong>应用条件熵不大于原熵</strong>（2分）：<br>由 $H(X|Y) \\le H(X)$，得：<br>$$\\lambda H(p_1) + (1-\\lambda)H(p_2) \\le H(\\lambda p_1 + (1-\\lambda)p_2)$$<br>证毕。$\\blacksquare$<br><br><span class='exp'>此证明最优雅，只用了 $H(X|Y) \\le H(X)$ 这一个结论，完全不需要 log-sum 或 Jensen 的计算。</span>", "pitfall": "关键是构造辅助变量 Y 使得 H(X|Y) 恰好等于左边的加权平均，而 H(X) 恰好等于右边的混合分布熵，然后直接用 H(X|Y) ≤ H(X) 完成证明。"}, {"type": "short", "points": 6, "question": "写出 log-sum 不等式的表述，并说明如何用它证明 KL 散度是 $(p,q)$ 的联合凸函数。", "options": [], "answer": null, "knowledge_point": "KL散度凸性证明", "diagnosis_hint": "不会将 KL 散度凸性的证明转化为 log-sum 不等式", "explanation": "<strong>参考答案</strong>（6分）：<br><br><strong>Log-sum 不等式</strong>（2分）：对 $a_i \\ge 0$，$b_i \\ge 0$：<br>$$\\sum_{i=1}^n a_i\\log\\frac{a_i}{b_i} \\ge \\left(\\sum_i a_i\\right)\\log\\frac{\\sum_i a_i}{\\sum_i b_i}$$<br>等号当且仅当 $a_i/b_i = \\text{const}$。<br><br><strong>KL 散度凸性证明</strong>（4分）：需证对 $0 \\le \\lambda \\le 1$：<br>$$\\lambda D_{\\mathrm{KL}}(p_1\\|q_1) + (1-\\lambda)D_{\\mathrm{KL}}(p_2\\|q_2) \\ge D_{\\mathrm{KL}}(\\lambda p_1+(1-\\lambda)p_2 \\| \\lambda q_1+(1-\\lambda)q_2)$$<br>左边展开后，对每个 $x$，令 $a_1=\\lambda p_1(x)$，$b_1=\\lambda q_1(x)$，$a_2=(1-\\lambda)p_2(x)$，$b_2=(1-\\lambda)q_2(x)$，套用 $n=2$ 的 log-sum 不等式（1分）：<br>$$a_1\\log\\frac{a_1}{b_1} + a_2\\log\\frac{a_2}{b_2} \\ge (a_1+a_2)\\log\\frac{a_1+a_2}{b_1+b_2}$$<br>即 $\\lambda p_1\\log\\frac{p_1}{q_1}+(1-\\lambda)p_2\\log\\frac{p_2}{q_2} \\ge (\\lambda p_1+(1-\\lambda)p_2)\\log\\frac{\\lambda p_1+(1-\\lambda)p_2}{\\lambda q_1+(1-\\lambda)q_2}$（2分），对 $x$ 求和即得（1分）。$\\blacksquare$", "pitfall": "代入 log-sum 时，$a_i$ 要带上系数 $\\lambda$ 或 $1-\\lambda$，$b_i$ 也要带；这样 $a_i/b_i$ 就等于原始的 $p_i/q_i$，分子分母比值不变。"}, {"type": "short", "points": 6, "question": "利用 Jensen 不等式证明算术平均 ≥ 几何平均（AM-GM 不等式）：$\\frac{x_1+x_2+\\cdots+x_n}{n} \\ge \\sqrt[n]{x_1 x_2 \\cdots x_n}$，其中 $x_i > 0$。", "options": [], "answer": null, "knowledge_point": "Jensen不等式应用——AM-GM", "diagnosis_hint": "不知道如何设置随机变量和函数", "explanation": "<strong>参考答案</strong>（6分）：<br><br><strong>设置</strong>（2分）：令 $X$ 为均匀随机变量，以概率 $1/n$ 取 $x_i$（$i=1,\\ldots,n$）。取 $f(x) = -\\log x$，其是严格凸函数（$f''(x) = 1/x^2 > 0$）。<br><br><strong>应用 Jensen 不等式</strong>（2分）：由凸函数 Jensen（$\\mathbb{E}[f(X)] \\ge f(\\mathbb{E}[X])$）：<br>$$\\mathbb{E}[-\\log X] \\ge -\\log\\mathbb{E}[X]$$<br>$$\\frac{1}{n}\\sum_{i=1}^n (-\\log x_i) \\ge -\\log\\left(\\frac{1}{n}\\sum_{i=1}^n x_i\\right)$$<br><br><strong>整理</strong>（2分）：<br>$$\\log\\left(\\frac{1}{n}\\sum x_i\\right) \\ge \\frac{1}{n}\\sum\\log x_i = \\frac{1}{n}\\log(\\prod x_i) = \\log(\\sqrt[n]{\\prod x_i})$$<br>取指数（$\\exp$ 单调递增）：<br>$$\\frac{x_1+\\cdots+x_n}{n} \\ge \\sqrt[n]{x_1 x_2 \\cdots x_n}$$<br>等号当且仅当 $f$ 严格凸且 $X$ 为常数，即所有 $x_i$ 相等。$\\blacksquare$", "pitfall": "整理时要从 $\\mathbb{E}[-\\log X] \\ge -\\log\\mathbb{E}[X]$ 变为 $\\log\\mathbb{E}[X] \\ge \\mathbb{E}[\\log X]$（两边变号），然后再取指数。"}, {"type": "essay", "points": 8, "question": "本章介绍了证明信息论不等式的四种主要工具：凸函数定义、Jensen 不等式、Log-sum 不等式、KL 散度非负性。请（1）说明这四种工具之间的推导层次关系；（2）分别指出它们各自最适合直接证明哪类不等式；（3）举例说明如何选取合适工具。", "options": [], "answer": null, "knowledge_point": "证明工具体系", "diagnosis_hint": "不清楚四种工具的层次和适用场景", "explanation": "<strong>参考答案</strong>（8分）：<br><br><strong>（1）推导层次关系</strong>（3分）：<br>凸函数定义（支撑超平面）$\\Rightarrow$ Jensen 不等式 $\\Rightarrow$ Log-sum 不等式 $\\Rightarrow$ KL 散度非负性（Gibbs 不等式）。即：凸函数是基础，Jensen 是第一层工具，Log-sum 是 Jensen 的特殊化（$x\\log x$ 或 $\\log x$ 版本），KL 非负是 Log-sum 的直接推论。同时，Jensen（$-\\log x$ 凸）也可以直接推出 KL 非负（另一路线）。<br><br><strong>（2）各工具适用场景</strong>（3分）：<ul><li><strong>凸函数定义</strong>：验证某函数是凸的（为后续工具提供前提）</li><li><strong>Jensen 不等式</strong>：含期望 $\\mathbb{E}[f(X)]$ 和 $f(\\mathbb{E}[X])$ 的不等式；AM-GM、矩不等式等</li><li><strong>Log-sum 不等式</strong>：含 $\\sum a_i \\log(a_i/b_i)$ 结构的不等式；KL 散度凸性、熵凹性</li><li><strong>KL 散度非负性</strong>：信息论中含 $I, H, H(X|Y)$ 关系的不等式；通过 $I=D_{\\mathrm{KL}} \\ge 0$ 推 $H(X|Y) \\le H(X)$ 等</li></ul><br><strong>（3）举例</strong>（2分）：证明 $H(p) \\le \\log N$：最短路线是 KL 路线——先写出恒等式 $H(p)=\\log N - D_{\\mathrm{KL}}(p\\|u)$，再用 $D_{\\mathrm{KL}} \\ge 0$ 直接得到。若用 Jensen，需要先识别出 $f(x)=-\\log x$，设置 $p_i=1/N$，$X=1/(Np_i)$，步骤更多。", "pitfall": "这四种工具不是并列关系，是有层次的：Jensen 可以推出 Log-sum（令 p_i = b_i/sum(b)，X = a_i/b_i），Log-sum 可以推出 KL≥0。"}, {"type": "essay", "points": 8, "question": "给定均匀分布 $u(x) = 1/N$（$x \\in \\mathcal{X}$，$|\\mathcal{X}|=N$），证明恒等式 $H(p) = \\log N - D_{\\mathrm{KL}}(p\\|u)$，并由此推出（1）均匀分布熵最大；（2）熵等于 $\\log N$ 当且仅当 $p$ 是均匀分布。", "options": [], "answer": null, "knowledge_point": "均匀分布熵最大", "diagnosis_hint": "不会建立 H(p) 和 D_KL(p||u) 之间的恒等式", "explanation": "<strong>参考答案</strong>（8分）：<br><br><strong>证明恒等式</strong>（4分）：<br>$$D_{\\mathrm{KL}}(p\\|u) = \\sum_{x} p(x)\\log\\frac{p(x)}{u(x)} = \\sum_x p(x)\\log\\frac{p(x)}{1/N} = \\sum_x p(x)\\log p(x) + \\sum_x p(x)\\log N$$<br>$$= \\sum_x p(x)\\log p(x) + \\log N \\cdot \\underbrace{\\sum_x p(x)}_{=1} = -H(p) + \\log N$$<br>故 $H(p) = \\log N - D_{\\mathrm{KL}}(p\\|u)$。（4分，推导过程完整）<br><br><strong>推论（1）均匀分布熵最大</strong>（2分）：<br>由 Gibbs 不等式 $D_{\\mathrm{KL}}(p\\|u) \\ge 0$，代入恒等式：<br>$$H(p) = \\log N - D_{\\mathrm{KL}}(p\\|u) \\le \\log N = H(u)$$<br>即任意分布 $p$ 的熵不超过均匀分布 $u$ 的熵。<br><br><strong>推论（2）等号条件</strong>（2分）：<br>等号 $H(p) = \\log N$ 当且仅当 $D_{\\mathrm{KL}}(p\\|u) = 0$，由 Gibbs 不等式等号条件，当且仅当 $p(x) = u(x) = 1/N$ 对所有 $x$，即 $p$ 是均匀分布。$\\blacksquare$", "pitfall": "推导恒等式时，$\\sum_x p(x)\\log N = \\log N$（因为 $\\sum_x p(x) = 1$），这步不能省略，否则扣分。"}, {"type": "essay", "points": 10, "question": "互信息 $I(X;Y)$ 具有如下凹凸性：固定 $p(Y|X)$，$I(X;Y)$ 是关于 $p(X)$ 的凹函数；固定 $p(X)$，$I(X;Y)$ 是关于 $p(Y|X)$ 的凸函数。请（1）陈述这两个结论；（2）解释为什么凹性对信道容量优化有重要意义；（3）说明这两种凹凸性的证明思路（无需完整推导）。", "options": [], "answer": null, "knowledge_point": "互信息凹凸性及其意义", "diagnosis_hint": "不清楚凹凸性对优化的意义，或混淆两个方向", "explanation": "<strong>参考答案</strong>（10分）：<br><br><strong>（1）两个结论陈述</strong>（3分）：<br>$I(X;Y) = \\sum_{x,y} p(x)p(y|x)\\log\\frac{p(y|x)}{p(y)}$（$p(y) = \\sum_x p(x)p(y|x)$）<ul><li>固定 $p(Y|X)$：$I(X;Y)$ 是 $p(X)$ 的<strong>凹函数</strong>（concave in $p(X)$）（1.5分）</li><li>固定 $p(X)$：$I(X;Y)$ 是 $p(Y|X)$ 的<strong>凸函数</strong>（convex in $p(Y|X)$）（1.5分）</li></ul><br><strong>（2）凹性对信道容量的意义</strong>（4分）：<br>信道容量定义为 $C = \\max_{p(X)} I(X;Y)$（固定信道 $p(Y|X)$，优化输入分布 $p(X)$）（1分）。<br>由于 $I(X;Y)$ 关于 $p(X)$ 是凹函数，最大化凹函数是<strong>凸优化问题</strong>（2分）：<ul><li>任意局部最大值即全局最大值（凸集上凹函数无局部非全局极值）</li><li>可用 KKT 条件求解最优输入分布，Blahut-Arimoto 算法收敛到全局最优（1分）</li></ul><br><strong>（3）证明思路</strong>（3分）：<br><strong>凹性证明思路</strong>（固定 $p(Y|X)$）（1.5分）：$I(X;Y) = H(Y) - H(Y|X)$。$H(Y|X) = -\\sum_{x,y} p(x)p(y|x)\\log p(y|x)$ 对 $p(X)$ 是线性函数（凹）；$H(Y)$ 是 $p(Y) = \\sum_x p(x)p(y|x)$（$p(X)$ 的线性函数）的熵，而熵对分布是凹函数，因此 $H(Y)$ 关于 $p(X)$ 是凹函数。两个凹函数之差（凹减线性=凹）得到 $I$ 是凹的。<br><strong>凸性证明思路</strong>（固定 $p(X)$）（1.5分）：$I(X;Y) = D_{\\mathrm{KL}}(p(x,y)\\|p(x)p(y))$，而 $D_{\\mathrm{KL}}$ 对 $(p,q)$ 联合是凸函数，固定 $p(X)$ 后，对 $p(Y|X)$ 仍然是凸的。", "pitfall": "最关键的是区分两个方向：固定信道 p(Y|X) 时对输入 p(X) 是凹（用于容量优化），固定输入 p(X) 时对信道 p(Y|X) 是凸（用于信道编码分析）。两个方向反向，务必不要混淆。"}, {"type": "comprehensive", "points": 20, "question": "设两个概率分布 $p = (0.5, 0.5)$ 和 $q = (0.9, 0.1)$，定义在 $\\mathcal{X} = \\{0, 1\\}$ 上。\n\n请计算和证明：\n(1) 计算 $H(p)$ 和 $H(q)$（3分）\n(2) 计算 $D_{\\mathrm{KL}}(p\\|q)$ 和 $D_{\\mathrm{KL}}(q\\|p)$，并验证两者是否相等（5分）\n(3) 令混合分布 $m = 0.5p + 0.5q$，计算 $m$ 的分布和 $H(m)$，并验证熵的凹性：$H(m) \\ge 0.5H(p) + 0.5H(q)$（6分）\n(4) 验证均匀分布熵最大定理：利用 $H(p) = \\log 2 - D_{\\mathrm{KL}}(p\\|u)$（$u=(0.5, 0.5)$）验证 $H(q) \\le \\log 2$（3分）\n(5) 说明本题数值验证体现了本章哪些核心结论（3分）", "options": [], "answer": null, "knowledge_point": "信息论不等式综合数值验证", "diagnosis_hint": "计算 KL 散度时混淆 p 和 q 的位置，或计算 H(m) 时先求 m 分布", "explanation": "<strong>完整参考答案</strong>（20分）：<br><br>\n\n<strong>(1) 计算 $H(p)$ 和 $H(q)$</strong>（3分）：<br>\n$$H(p) = -0.5\\log_2 0.5 - 0.5\\log_2 0.5 = -0.5\\times(-1) - 0.5\\times(-1) = \\boxed{1 \\text{ bit}}$$\n$$H(q) = -0.9\\log_2 0.9 - 0.1\\log_2 0.1 \\approx -0.9\\times(-0.152) - 0.1\\times(-3.322) \\approx 0.137+0.332 \\approx \\boxed{0.469 \\text{ bit}}$$<br>\n\n<strong>(2) 计算 $D_{\\mathrm{KL}}(p\\|q)$ 和 $D_{\\mathrm{KL}}(q\\|p)$</strong>（5分）：<br>\n$$D_{\\mathrm{KL}}(p\\|q) = 0.5\\log_2\\frac{0.5}{0.9} + 0.5\\log_2\\frac{0.5}{0.1}$$\n$$= 0.5\\log_2(0.556) + 0.5\\log_2(5) \\approx 0.5\\times(-0.848) + 0.5\\times 2.322 \\approx -0.424+1.161 \\approx \\boxed{0.737 \\text{ bit}}$$\n$$D_{\\mathrm{KL}}(q\\|p) = 0.9\\log_2\\frac{0.9}{0.5} + 0.1\\log_2\\frac{0.1}{0.5}$$\n$$= 0.9\\log_2(1.8) + 0.1\\log_2(0.2) \\approx 0.9\\times 0.848 + 0.1\\times(-2.322) \\approx 0.763-0.232 \\approx \\boxed{0.531 \\text{ bit}}$$\n两者不相等（$0.737 \\ne 0.531$），验证了 KL 散度的不对称性。<br>\n\n<strong>(3) 混合分布与熵凹性验证</strong>（6分）：<br>\n$$m = 0.5p + 0.5q = 0.5\\times(0.5, 0.5) + 0.5\\times(0.9, 0.1) = (0.5\\times0.5+0.5\\times0.9,\\ 0.5\\times0.5+0.5\\times0.1) = (0.7, 0.3)$$\n$$H(m) = -0.7\\log_2 0.7 - 0.3\\log_2 0.3 \\approx 0.7\\times 0.515 + 0.3\\times 1.737 \\approx 0.360+0.521 \\approx \\boxed{0.881 \\text{ bit}}$$\n右边：$0.5H(p) + 0.5H(q) = 0.5\\times 1 + 0.5\\times 0.469 = 0.5 + 0.235 = 0.735$ bit<br>\n验证：$H(m) \\approx 0.881 \\ge 0.735 = 0.5H(p)+0.5H(q)$，熵凹性成立。$\\checkmark$<br>\n\n<strong>(4) 均匀分布熵最大验证</strong>（3分）：<br>\n$u=(0.5,0.5)$，则 $D_{\\mathrm{KL}}(q\\|u) = 0.9\\log_2\\frac{0.9}{0.5} + 0.1\\log_2\\frac{0.1}{0.5} \\approx 0.531$ bit（与(2)中 $D_{\\mathrm{KL}}(q\\|p)$ 恰好相同，因为 $p=u$）<br>\n验证：$H(q) = \\log_2 2 - D_{\\mathrm{KL}}(q\\|u) = 1 - 0.531 = 0.469$ bit。$\\checkmark$（与(1)结果吻合）<br>\n\n<strong>(5) 核心结论总结</strong>（3分）：<br>\n本题数值验证了：（1）KL 散度不对称性（$D_{\\mathrm{KL}}(p\\|q) \\ne D_{\\mathrm{KL}}(q\\|p)$）；（2）熵的凹性（混合分布的熵 ≥ 各分布熵的加权平均）；（3）均匀分布熵最大（$H(p)=1 \\ge H(q)=0.469$），以及恒等式 $H = \\log N - D_{\\mathrm{KL}}$的数值验证。", "pitfall": "计算 D_KL(p||q) 时，对数中分子是 p，分母是 q，不能搞反；计算混合分布 m 时要先算 m 的每个分量再计算熵，不能直接平均熵。"}];
+var LABELS = {"page_title": "章节测试", "section": {"choice": "一、选择题", "tf": "二、判断题", "short": "三、简答题", "essay": "四、问答题", "comprehensive": "五、综合题"}, "section_order": ["choice", "tf", "short", "essay", "comprehensive"], "points_suffix": "分", "true_label": "正确", "false_label": "错误", "placeholder": "在此作答...", "pitfall_prefix": "易错提醒：", "correct_label": "正确", "wrong_label": "错误", "answer_prefix": "正确答案：", "reference_label": "参考答案", "graded_label": "已批改", "grade_button": "提交批改", "unanswered_label": "未作答", "wrong_review_title": "错题分析文档", "wrong_review_intro": "本次收录 __COUNT__ 道客观题错题。可以下载 Markdown 文档，或复制整段内容交给模型做错因分析和二次学习规划。", "no_wrong_questions": "本次客观题没有错题。主观题请对照参考答案自行复盘。", "download_wrong_review": "下载错题文档", "copy_wrong_review_prompt": "复制错题分析 Prompt", "score_label": "总分", "duration_prefix": "满分 100 分 | 建议 ", "duration_suffix": " 分钟 | 选择答案后点击提交批改"};
+var WRONG_REVIEW_PROMPT = "";
+var LAST_WRONG_REVIEW = '';
+
+function pointsOf(q) {
+  return q.points || q.score || 0;
+}
+
+function stripHtml(html) {
+  var div = document.createElement('div');
+  div.innerHTML = html || '';
+  return (div.textContent || div.innerText || '').replace(/\s+/g, ' ').trim();
+}
+
+// Convert Markdown fenced code blocks (```lang\n...\n```) and inline `code`
+// to <pre><code> / <code> HTML, then convert \n to <br> for plain text lines.
+function formatQuestion(text) {
+  if (!text) return '';
+  // 1. Replace fenced code blocks: ```lang\ncode\n```
+  text = text.replace(/```(\w*)\n([\s\S]*?)```/g, function(_, lang, code) {
+    var escaped = code
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+    var cls = lang ? ' class="language-' + lang + '"' : '';
+    return '<pre><code' + cls + '>' + escaped + '</code></pre>';
+  });
+  // 2. Replace inline backtick `code`
+  text = text.replace(/`([^`\n]+)`/g, function(_, code) {
+    var escaped = code.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    return '<code>' + escaped + '</code>';
+  });
+  // 3. Convert remaining \n to <br> (outside pre blocks already handled above)
+  // Split on <pre>...</pre> so we don't double-process code blocks
+  var parts = text.split(/(<pre>[\s\S]*?<\/pre>)/);
+  for (var i = 0; i < parts.length; i++) {
+    if (i % 2 === 0) {
+      parts[i] = parts[i].replace(/\n/g, '<br>');
+    }
+  }
+  return parts.join('');
+}
+
+function answerText(q, value) {
+  if (value === null || value === undefined || value === '') return LABELS.unanswered_label;
+  var idx = parseInt(value);
+  if (q.type === 'choice') {
+    return String.fromCharCode(65 + idx) + '. ' + ((q.options && q.options[idx]) ? stripHtml(q.options[idx]) : '');
+  }
+  if (q.type === 'tf') {
+    return idx === 0 ? LABELS.true_label : LABELS.false_label;
+  }
+  return String(value);
+}
+
+function normalizedAnswer(q) {
+  if (q.type === 'tf') {
+    if (q.answer === LABELS.true_label || q.answer === true || q.answer === 'true') return 0;
+    if (q.answer === LABELS.false_label || q.answer === false || q.answer === 'false') return 1;
+  }
+  return parseInt(q.answer);
+}
+
+function questionTypeLabel(type) {
+  return LABELS.section[type] || type;
+}
+
+function build(){
+  var container = document.getElementById('questions-container');
+  if (!container) { console.error('ExamPass: questions-container not found'); return; }
+  var h = '';
+  var sec = '';
+  var titles = LABELS.section;
+
+  for (var i = 0; i < Q.length; i++) {
+    var q = Q[i];
+    var s = q.type;
+    if (s !== sec) {
+      sec = s;
+      if (titles[s]) {
+        h += '<h3>' + titles[s] + '</h3>';
+      }
+    }
+
+    var qid = 'q' + i;
+    h += '<div class="q-card" id="card-' + qid + '">';
+    h += '<div class="q-num">' + (i+1) + '. (' + pointsOf(q) + ' ' + LABELS.points_suffix + ')</div>';
+    h += '<div class="q-text">' + formatQuestion(q.question) + '</div>';
+
+    if (q.type === 'choice') {
+      var opts = q.options || [];
+      for (var j = 0; j < opts.length; j++) {
+        h += '<label class="option" id="opt-' + qid + '-' + j + '" onclick="sel(\'' + qid + '\',' + j + ')">';
+        h += '<input type="radio" name="' + qid + '" value="' + j + '">' + String.fromCharCode(65+j) + '. ' + opts[j] + '</label>';
+      }
+    } else if (q.type === 'tf') {
+      h += '<label class="option" id="opt-' + qid + '-0" onclick="sel(\'' + qid + '\',0)">';
+      h += '<input type="radio" name="' + qid + '" value="0">' + LABELS.true_label + '</label>';
+      h += '<label class="option" id="opt-' + qid + '-1" onclick="sel(\'' + qid + '\',1)">';
+      h += '<input type="radio" name="' + qid + '" value="1">' + LABELS.false_label + '</label>';
+    } else {
+      h += '<textarea class="q-textarea" id="text-' + qid + '" placeholder="' + LABELS.placeholder + '" rows="3"></textarea>';
+    }
+
+    h += '<div class="result" id="result-' + qid + '">';
+    h += '<span class="badge" id="badge-' + qid + '"></span><span id="correct-' + qid + '"></span>';
+    h += '<div class="explanation">' + q.explanation + '</div>';
+    if (q.pitfall) {
+      h += '<div class="pitfall">' + LABELS.pitfall_prefix + q.pitfall + '</div>';
+    }
+    h += '</div></div>';
+  }
+
+  container.innerHTML = h;
+
+  // Re-render MathJax for dynamically inserted formulas
+  if (window.MathJax && MathJax.typesetPromise) {
+    MathJax.typesetPromise([container]).catch(function(err) {
+      console.error('MathJax typeset error:', err);
+    });
+  }
+}
+
+document.addEventListener('DOMContentLoaded', build);
+if (document.readyState === 'interactive' || document.readyState === 'complete') {
+  build();
+}
+
+function sel(qid, idx) {
+  var prefix = 'opt-' + qid + '-';
+  var all = document.querySelectorAll('[id^="' + prefix + '"]');
+  for (var i = 0; i < all.length; i++) {
+    all[i].classList.remove('selected');
+  }
+  var target = document.getElementById('opt-' + qid + '-' + idx);
+  if (target) {
+    target.classList.add('selected');
+  }
+  var radio = document.querySelector('input[name="' + qid + '"][value="' + idx + '"]');
+  if (radio) {
+    radio.checked = true;
+  }
+}
+
+function gradeAll() {
+  var score = 0;
+  var wrongItems = [];
+  for (var i = 0; i < Q.length; i++) {
+    var q = Q[i];
+    var qid = 'q' + i;
+    var card = document.getElementById('card-' + qid);
+    var result = document.getElementById('result-' + qid);
+    var badge = document.getElementById('badge-' + qid);
+    var correctEl = document.getElementById('correct-' + qid);
+    if (!card || !result) continue;
+
+    result.style.display = 'block';
+
+    if (q.type === 'choice' || q.type === 'tf') {
+      var radio = document.querySelector('input[name="' + qid + '"]:checked');
+      var correctIndex = normalizedAnswer(q);
+      if (radio && parseInt(radio.value) === correctIndex) {
+        score += pointsOf(q);
+        card.classList.add('correct');
+        badge.className = 'badge badge-ok';
+        badge.textContent = LABELS.correct_label;
+        correctEl.innerHTML = '';
+        var correctOpt = document.getElementById('opt-' + qid + '-' + correctIndex);
+        if (correctOpt) correctOpt.classList.add('correct-answer');
+      } else {
+        card.classList.add('wrong');
+        badge.className = 'badge badge-no';
+        badge.textContent = LABELS.wrong_label;
+        var ansText = answerText(q, correctIndex);
+        correctEl.innerHTML = LABELS.answer_prefix + ansText;
+        if (radio) {
+          var wrongOpt = document.getElementById('opt-' + qid + '-' + radio.value);
+          if (wrongOpt) wrongOpt.classList.add('wrong-answer');
+        }
+        var correctOpt = document.getElementById('opt-' + qid + '-' + correctIndex);
+        if (correctOpt) correctOpt.classList.add('correct-answer');
+        wrongItems.push({
+          number: i + 1,
+          type: questionTypeLabel(q.type),
+          points: pointsOf(q),
+          question: stripHtml(q.question),
+          options: (q.options || []).map(stripHtml),
+          userAnswer: answerText(q, radio ? radio.value : null),
+          correctAnswer: ansText,
+          explanation: stripHtml(q.explanation),
+          pitfall: stripHtml(q.pitfall || ''),
+          knowledgePoint: stripHtml(q.knowledge_point || q.knowledgePoint || '')
+        });
+      }
+    } else {
+      card.classList.add('correct');
+      badge.className = 'badge badge-ref';
+      badge.textContent = LABELS.reference_label;
+    }
+  }
+
+  var sb = document.getElementById('score-box');
+  if (sb) {
+    sb.style.display = 'block';
+    document.getElementById('score-num').textContent = score;
+    sb.scrollIntoView({behavior:'smooth'});
+  }
+
+  var opts = document.querySelectorAll('.option');
+  for (var i = 0; i < opts.length; i++) opts[i].style.pointerEvents = 'none';
+  var tas = document.querySelectorAll('.q-textarea');
+  for (var i = 0; i < tas.length; i++) tas[i].disabled = true;
+
+  var btn = document.getElementById('grade-btn');
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = LABELS.graded_label;
+  }
+
+  buildWrongReview(wrongItems);
+
+  // Re-render MathJax for revealed explanations
+  if (window.MathJax && MathJax.typesetPromise) {
+    MathJax.typesetPromise().catch(function(err) {
+      console.error('MathJax typeset error:', err);
+    });
+  }
+}
+
+function buildWrongReview(wrongItems) {
+  var box = document.getElementById('wrong-review-box');
+  if (!box) return;
+
+  LAST_WRONG_REVIEW = renderWrongReviewMarkdown(wrongItems);
+
+  if (!wrongItems.length) {
+    box.style.display = 'block';
+    box.innerHTML = '<h3>' + LABELS.wrong_review_title + '</h3><p>' + LABELS.no_wrong_questions + '</p>';
+    return;
+  }
+
+  box.style.display = 'block';
+  box.innerHTML = [
+    '<h3>' + LABELS.wrong_review_title + '</h3>',
+    '<p>' + LABELS.wrong_review_intro.replace('__COUNT__', wrongItems.length) + '</p>',
+    '<div class="wrong-review-actions">',
+    '<button type="button" onclick="downloadWrongReview()">' + LABELS.download_wrong_review + '</button>',
+    '<button type="button" onclick="copyWrongReviewPrompt()">' + LABELS.copy_wrong_review_prompt + '</button>',
+    '</div>',
+    '<textarea id="wrong-review-text" readonly rows="12">' + LAST_WRONG_REVIEW.replace(/&/g, '&amp;').replace(/</g, '&lt;') + '</textarea>'
+  ].join('');
+}
+
+function renderWrongReviewMarkdown(wrongItems) {
+  var now = new Date().toLocaleString();
+  var lines = [];
+
+  lines.push('# ExamPass 错题分析文档');
+  lines.push('');
+  lines.push('- 生成时间：' + now);
+  lines.push('- 错题数量：' + wrongItems.length);
+  lines.push('');
+  lines.push('## 给模型的错题分析 Prompt');
+  lines.push('');
+  if (WRONG_REVIEW_PROMPT) {
+    lines.push(WRONG_REVIEW_PROMPT);
+  } else {
+    lines.push('请根据下面的错题记录，分析我的错因，并给出继续学习方案。要求：');
+    lines.push('1. 按知识模块归类错题，不要只逐题复述答案；');
+    lines.push('2. 判断每道题错在概念定义、公式推导、图表理解、条件适用、计算步骤、概念混淆还是审题；');
+    lines.push('3. 对涉及公式或推导的错题，补全从前提到结论的推导链条，不能跳步；');
+    lines.push('4. 对选择题，解释我选错选项为什么有迷惑性，以及正确选项和错误选项的关键边界；');
+    lines.push('5. 给出需要回看课件的具体知识点、图表、公式和页/章节线索；');
+    lines.push('6. 最后生成一份二次学习清单和 5 道针对这些薄弱点的进阶训练题。');
+  }
+  lines.push('');
+  lines.push('## 错题记录');
+  lines.push('');
+
+  if (!wrongItems.length) {
+    lines.push('本次没有客观题错题。');
+    return lines.join('\n');
+  }
+
+  for (var i = 0; i < wrongItems.length; i++) {
+    var item = wrongItems[i];
+    lines.push('### 错题 ' + (i + 1) + '：第 ' + item.number + ' 题');
+    lines.push('');
+    lines.push('- 题型：' + item.type);
+    lines.push('- 分值：' + item.points);
+    lines.push('- 题干：' + item.question);
+    if (item.options.length) {
+      lines.push('- 选项：');
+      for (var j = 0; j < item.options.length; j++) {
+        lines.push('  - ' + String.fromCharCode(65 + j) + '. ' + item.options[j]);
+      }
+    }
+    lines.push('- 我的答案：' + item.userAnswer);
+    lines.push('- 正确答案：' + item.correctAnswer);
+    lines.push('- 解析：' + item.explanation);
+    if (item.pitfall) lines.push('- 易错点：' + item.pitfall);
+    if (item.knowledgePoint) lines.push('- 对应知识点：' + item.knowledgePoint);
+    lines.push('');
+  }
+
+  return lines.join('\n');
+}
+
+function downloadWrongReview() {
+  if (!LAST_WRONG_REVIEW) return;
+  var blob = new Blob([LAST_WRONG_REVIEW], {type: 'text/markdown;charset=utf-8'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = '错题分析文档.md';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function copyWrongReviewPrompt() {
+  var text = LAST_WRONG_REVIEW || '';
+  if (!text) return;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text);
+  } else {
+    var ta = document.getElementById('wrong-review-text');
+    if (ta) {
+      ta.focus();
+      ta.select();
+      document.execCommand('copy');
+    }
+  }
+}
+
+</script>
+</body>
+</html>

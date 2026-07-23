@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Lecture 5 – 非i.i.d. AEP 与平稳遍历信源</title>
+<script>
+MathJax = {
+  tex: {
+    inlineMath: [['$', '$']],
+    displayMath: [['$$', '$$']]
+  }
+};
+</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js"></script>
+<style>
+/* === ExamPass Shared Styles === */
+/* Paper-like warm background, clean typography, responsive */
+
+:root {
+  --paper: #fdf6e3;
+  --paper-dark: #f5ecd7;
+  --ink: #2c2c2c;
+  --ink-light: #555;
+  --accent: #2563eb;
+  --accent-hover: #1d4ed8;
+  --divider: #d6c8a8;
+  --card-bg: #fef9ef;
+  --card-border: #e8dcc8;
+  --correct: #22c55e;
+  --correct-bg: #f0fdf4;
+  --wrong: #ef4444;
+  --wrong-bg: #fef2f2;
+  --tag-bg: #fef3c7;
+  --tag-text: #92400e;
+  --radius: 6px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: "Microsoft YaHei", "Noto Sans SC", "SimSun", sans-serif;
+  font-size: 12pt; line-height: 1.75; color: var(--ink);
+  max-width: 860px; margin: auto; padding: 24px 20px 60px;
+  background: var(--paper);
+}
+
+@media print {
+  body { font-size: 10.5pt; background: #fff; }
+  .no-print { display: none !important; }
+  h1, h2, h3 { page-break-after: avoid; }
+}
+
+/* ── Header ── */
+#exampass-header {
+  display: flex; justify-content: space-between; align-items: baseline;
+  padding: 6px 0; margin-bottom: 0;
+}
+.header-brand { font-size: 1.2em; font-weight: 700; color: #1a1a2e; letter-spacing: 0.3px; }
+.header-url  { font-size: 0.78em; color: #999; }
+.header-divider { border: none; border-top: 2px solid var(--divider); margin: 4px 0 20px 0; }
+
+/* ── Typography ── */
+h1 { font-size: 1.55em; text-align: center; border-bottom: 2px solid var(--divider); padding-bottom: 8px; margin-top: 0; }
+h2 { font-size: 1.25em; border-bottom: 1px solid var(--divider); padding-bottom: 4px; margin-top: 28px; }
+h3 { font-size: 1.08em; margin-top: 20px; color: var(--ink); }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ── Tables ── */
+table { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 0.95em; }
+td, th { border: 1px solid var(--card-border); padding: 5px 9px; text-align: left; }
+th { background: var(--paper-dark); font-weight: 700; }
+
+/* ── Embedded source images ── */
+.embedded-images {
+  margin: 18px 0 24px;
+}
+.embedded-images-intro {
+  color: var(--ink-light);
+  font-size: 0.95em;
+}
+.embedded-image {
+  margin: 14px 0 18px;
+  padding: 10px;
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  background: var(--card-bg);
+  break-inside: avoid;
+}
+.embedded-image img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+  border: 1px solid var(--divider);
+  background: #fff;
+}
+.embedded-image figcaption {
+  margin-top: 8px;
+  color: var(--ink-light);
+  font-size: 0.92em;
+  line-height: 1.5;
+}
+.embedded-image-note::before {
+  content: " - ";
+}
+
+/* ── Knowledge point vs explanation ── */
+.kp { font-weight: 700; color: var(--ink); }           /* key point: bold dark */
+.exp { font-weight: 400; color: var(--ink-light); }    /* explanation: lighter */
+.exp em, .exp strong { color: var(--ink); }             /* emphasis inside explanation */
+
+/* ── Block elements ── */
+blockquote {
+  border-left: 3px solid #c0392b; background: #fef9ef;
+  padding: 6px 14px; margin: 10px 0; font-size: 0.95em;
+}
+code { background: #f0ede0; padding: 2px 5px; border-radius: 3px; font-size: 0.92em; }
+pre { background: #f0ede0; padding: 10px; border-radius: var(--radius); overflow-x: auto; }
+
+/* ── TOC ── */
+div.toc {
+  background: var(--card-bg); padding: 14px 18px;
+  border: 1px solid var(--card-border); border-radius: var(--radius); margin-bottom: 22px;
+}
+div.toc ul { padding-left: 18px; }
+div.toc li { margin: 3px 0; font-size: 0.95em; }
+
+/* ── Priority tags ── */
+.tag-must   { background: #fee2e2; color: #991b1b; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+.tag-key    { background: #fef3c7; color: #92400e; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+.tag-freq   { background: #dbeafe; color: #1e40af; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+.tag-info   { background: #f0fdf4; color: #166534; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+
+
+</style>
+</head>
+<body>
+
+<header id="exampass-header">
+  <div class="header-left"><span class="header-brand">ExamPass Assistant</span></div>
+  <div class="header-right"><span class="header-url">github.com/MIKUZ12/ExamPass-Assistant</span></div>
+</header>
+<hr class="header-divider">
+
+<h1>Lecture 5 – 非i.i.d. AEP 与平稳遍历信源</h1>
+<div class="toc">
+<h2>目录</h2>
+<ul>
+<li><a href="#s90552695">一、AEP 回顾与推广动机</a></li>
+  <li><a href="#s86236631">1.1 i.i.d. AEP 回顾 重点</a></li>
+  <li><a href="#s16116732">1.2 推广到非 i.i.d. 的问题 必考</a></li>
+<li><a href="#s52655468">二、平稳信源（Stationary Process）</a></li>
+  <li><a href="#s70954152">2.1 定义 必考</a></li>
+  <li><a href="#s16913525">2.2 记号系统 了解</a></li>
+  <li><a href="#s14565328">2.3 链式法则与平稳性化简 重点</a></li>
+<li><a href="#s89488815">三、熵率（Entropy Rate）</a></li>
+  <li><a href="#s86890504">3.1 条件熵的单调性 必考</a></li>
+  <li><a href="#s28427631">3.2 熵率的存在性 必考</a></li>
+  <li><a href="#s41397106">3.3 Cesàro 定理 重点</a></li>
+  <li><a href="#s78777492">3.4 熵率的等价定义 必考</a></li>
+  <li><a href="#s42031099">3.5 熵率的物理含义 重点</a></li>
+<li><a href="#s51416534">四、Shannon-McMillan-Breiman 定理</a></li>
+  <li><a href="#s23925314">4.1 定理陈述 必考</a></li>
+  <li><a href="#s14765369">4.2 证明思路 常考</a></li>
+  <li><a href="#s61191228">4.3 与 i.i.d. AEP 对比 重点</a></li>
+</ul>
+</div>
+<style>
+.ppt-discrepancy{border:2px solid #f0a500;background:#fff8e6;border-radius:6px;padding:10px 14px;margin:10px 0;}
+.discrepancy-label{font-weight:bold;color:#c07000;display:block;margin-bottom:6px;}
+.discrepancy-table{width:100%;border-collapse:collapse;font-size:.95em;}
+.discrepancy-table th,.discrepancy-table td{border:1px solid #d4a000;padding:5px 10px;text-align:left;}
+.discrepancy-table th{background:#fde9a0;}
+.discrepancy-note{margin-top:6px;font-size:.9em;color:#555;}
+</style>
+
+<h2 id="s90552695">一、AEP 回顾与推广动机</h2>
+
+<h3 id="s86236631">1.1 i.i.d. AEP 回顾 <span class="tag-key">重点</span></h3>
+<p>对独立同分布序列，联合概率 $p(X^n)=\prod_{i=1}^n p(X_i)$，联合熵 $H(X^n)=nH(X)$。</p>
+<p>由大数定律：$$\frac{1}{n}\log\frac{1}{p(X^n)} \xrightarrow{i.p.} H(X)$$</p>
+<p><span class="kp">AEP 本质</span>：<span class="exp">绝大多数序列概率近似相等，约为 $2^{-nH(X)}$；典型集之外的序列总概率趋于 0。</span></p>
+
+<h3 id="s16116732">1.2 推广到非 i.i.d. 的问题 <span class="tag-must">必考</span></h3>
+<p>实际信源（语音、文字）符号间存在相关性，不满足 i.i.d. 假设。核心问题：</p>
+<ul>
+  <li>非 i.i.d. 情况下，$\frac{1}{n}\log\frac{1}{p(X^n)}$ 是否仍收敛？</li>
+  <li>若收敛，收敛到什么量？</li>
+</ul>
+<p>答案：在<span class="kp">平稳遍历</span>条件下，收敛到<span class="kp">熵率</span>，即 <span class="kp">Shannon-McMillan-Breiman（SMB）定理</span>。</p>
+
+<h2 id="s52655468">二、平稳信源（Stationary Process）</h2>
+
+<h3 id="s70954152">2.1 定义 <span class="tag-must">必考</span></h3>
+<p>随机过程 $\{X_i\}$ 称为<span class="kp">平稳过程</span>，若其联合分布具有<span class="exp">时间平移不变性</span>：</p>
+<p>$$p(X_1=x_1,\ldots,X_n=x_n)=p(X_{k+1}=x_1,\ldots,X_{n+k}=x_n),\quad\forall k\geq 0$$</p>
+<blockquote>易错：平稳性是对联合分布的要求（时移后分布不变），而非仅每个 $X_i$ 边缘分布相同（后者是平稳性的推论）。</blockquote>
+
+<h3 id="s16913525">2.2 记号系统 <span class="tag-info">了解</span></h3>
+<p>PPT 约定：$X_k^i \triangleq (X_i, X_{i-1}, \ldots, X_k)$，$i$ 为最新下标，$k$ 为最旧下标。</p>
+<p>例如：$X_1^{i-1}=(X_{i-1},X_{i-2},\ldots,X_1)$；$X_{-\infty}^{-1}=(\ldots,X_{-2},X_{-1})$ 表示全部过去历史。</p>
+
+<h3 id="s14565328">2.3 链式法则与平稳性化简 <span class="tag-key">重点</span></h3>
+<p>一般过程：$p(X^n)=\prod_{i=1}^n p(X_i \mid X_1^{i-1})$</p>
+<p>平稳过程——利用时间不变性，将条件分布时移到以 $X_0$ 为当前符号：</p>
+<p>$$p(X^n)=\prod_{i=1}^n p(X_0 \mid X_{1-i}^{-1})$$</p>
+<p><span class="exp">即 $p(X_i\mid X_{i-1},\ldots,X_1)$ 经时移等于 $p(X_0\mid X_{-1},\ldots,X_{1-i})$，这一化简是 SMB 定理证明的关键步骤。</span></p>
+
+<h2 id="s89488815">三、熵率（Entropy Rate）</h2>
+
+<h3 id="s86890504">3.1 条件熵的单调性 <span class="tag-must">必考</span></h3>
+<p>令 $b_n = H(X_n\mid X_{n-1},\ldots,X_1)$，对平稳过程，$\{b_n\}$ 单调不增：</p>
+<p>$$H(X_n\mid X_{n-1},\ldots,X_1) \;\leq\; H(X_n\mid X_{n-1},\ldots,X_2) \;=\; H(X_{n-1}\mid X_{n-2},\ldots,X_1)$$</p>
+<ul>
+  <li>不等号：条件越多，不确定性不增（条件熵减少原理）</li>
+  <li>等号：利用平稳性，时移一步后联合分布不变</li>
+</ul>
+<p>因此：$0 \leq b_n \leq b_{n-1} \leq \cdots \leq H(X_1)$，非负且单调不增。</p>
+
+<h3 id="s28427631">3.2 熵率的存在性 <span class="tag-must">必考</span></h3>
+<p>由<span class="kp">单调有界定理</span>（非负 + 单调不增），以下极限存在，定义为熵率：</p>
+<p>$$H'(\mathcal{X}) \;\triangleq\; \lim_{n\to\infty} H(X_n\mid X_{n-1},\ldots,X_1)$$</p>
+<p><strong>注意</strong>：熵率存在性只需<span class="kp">平稳</span>条件，<strong>无需遍历性</strong>。</p>
+
+<h3 id="s41397106">3.3 Cesàro 定理 <span class="tag-key">重点</span></h3>
+<p><span class="kp">Cesàro 定理</span>：若序列 $\{b_n\}$ 满足 $\lim_{n\to\infty}b_n=b$，则其算术均值也收敛：</p>
+<p>$$\lim_{n\to\infty}\frac{1}{n}\sum_{i=1}^n b_i = b$$</p>
+<blockquote>易错：Cesàro 定理反向不成立——Cesàro 均值收敛不代表序列本身收敛。例如 $b_n=(-1)^n$，其 Cesàro 均值趋于 0，但序列不收敛。</blockquote>
+
+<h3 id="s78777492">3.4 熵率的等价定义 <span class="tag-must">必考</span></h3>
+<p>对平稳过程，两种熵率定义等价：</p>
+<p>$$H'(\mathcal{X}) = \lim_{n\to\infty}H(X_n\mid X_{n-1},\ldots,X_1) = \lim_{n\to\infty}\frac{1}{n}H(X^n) \;\triangleq\; H(\mathcal{X})$$</p>
+<p><strong>证明</strong>（链式法则 + Cesàro 定理）：</p>
+<p>$$\frac{1}{n}H(X^n)=\frac{1}{n}\sum_{i=1}^n H(X_i\mid X_{i-1},\ldots,X_1)=\frac{1}{n}\sum_{i=1}^n b_i$$</p>
+<p>因 $b_n\to H'(\mathcal{X})$，由 Cesàro 定理得 $\frac{1}{n}\sum b_i\to H'(\mathcal{X})$。$\blacksquare$</p>
+
+<h3 id="s42031099">3.5 熵率的物理含义 <span class="tag-key">重点</span></h3>
+<p>利用平稳性将极限表达式时移，得：</p>
+<p>$$H(\mathcal{X})=\lim_{n\to\infty}H(X_n\mid X_{n-1},\ldots,X_1)=\lim_{n\to\infty}H(X_0\mid X_{-1},\ldots,X_{1-n})=H(X_0\mid X_{-\infty}^{-1})$$</p>
+<p><span class="kp">物理含义</span>：<span class="exp">熵率是在已知全部过去历史的条件下，当前符号的剩余不确定性。随着已知历史越来越长，条件熵单调减少并趋近一个极限值，这个极限就是熵率。</span></p>
+
+<h2 id="s51416534">四、Shannon-McMillan-Breiman 定理</h2>
+
+<h3 id="s23925314">4.1 定理陈述 <span class="tag-must">必考</span></h3>
+<p>对<span class="kp">平稳遍历信源</span>，有：</p>
+<p>$$\frac{1}{n}\log\frac{1}{p(X^n)} \xrightarrow{a.s.} H(\mathcal{X})=H(X_0\mid X_{-\infty}^{-1})$$</p>
+<p>即 $-\frac{1}{n}\log p(X^n)$ 以<span class="kp">几乎必然（a.s.）</span>方式收敛到熵率。</p>
+
+<div class="ppt-discrepancy">
+  <span class="discrepancy-label">⚠️ PPT 与标准表述存在差异</span>
+  <table class="discrepancy-table">
+    <tr><th>PPT 说法</th><th>标准说法</th></tr>
+    <tr>
+      <td>PPT 第 9 页写"当 $n\to\infty$ 时概率收敛"（convergence in probability）</td>
+      <td>完整的 Shannon-McMillan-<strong>Breiman</strong> 定理（Breiman, 1960）断言的是<strong>几乎必然收敛</strong>（almost sure，a.s.），强于依概率收敛。McMillan (1953) 的版本是 $L^1$ 收敛（蕴含概率收敛），但 SMB 完整版是 a.s. 收敛。</td>
+    </tr>
+  </table>
+  <p class="discrepancy-note">查证：Cover &amp; Thomas《Elements of Information Theory》2nd ed. Theorem 16.8.1；Breiman (1960) "The individual ergodic theorem of information theory"</p>
+</div>
+
+<h3 id="s14765369">4.2 证明思路 <span class="tag-freq">常考</span></h3>
+<p>展开联合概率并利用平稳性：</p>
+<p>$$\frac{1}{n}\log\frac{1}{p(X^n)}=\frac{1}{n}\sum_{i=1}^n\log\frac{1}{p(X_i\mid X_1^{i-1})} \;\xrightarrow{\text{平稳性}}\; \frac{1}{n}\sum_{i=1}^n\log\frac{1}{p(X_0\mid X_{1-i}^{-1})}$$</p>
+<p>令 $Y_i=\log\frac{1}{p(X_0\mid X_{1-i}^{-1})}$，问题转化为时间均值 $\frac{1}{n}\sum Y_i$ 的收敛性。</p>
+<p>对遍历过程，<span class="kp">Birkhoff 遍历定理</span>保证时间均值 a.s. 收敛到系综均值：</p>
+<p>$$\frac{1}{n}\sum_{i=1}^n Y_i \xrightarrow{a.s.} \mathbb{E}\!\left[\log\frac{1}{p(X_0\mid X_{-\infty}^{-1})}\right]=H(X_0\mid X_{-\infty}^{-1})=H(\mathcal{X})$$</p>
+<blockquote>易错：若信源仅平稳但非遍历，Birkhoff 定理不适用，时间均值不一定收敛到系综均值。</blockquote>
+
+<h3 id="s61191228">4.3 与 i.i.d. AEP 对比 <span class="tag-key">重点</span></h3>
+<table>
+  <thead><tr><th>对比项</th><th>i.i.d. AEP（Lec 4）</th><th>SMB 定理（Lec 5）</th></tr></thead>
+  <tbody>
+    <tr><td>适用信源</td><td>独立同分布</td><td>平稳遍历信源</td></tr>
+    <tr><td>理论工具</td><td>大数定律（LLN）</td><td>Birkhoff 遍历定理</td></tr>
+    <tr><td>收敛到</td><td>$H(X)$（单符号熵）</td><td>$H(\mathcal{X})=H(X_0\mid X_{-\infty}^{-1})$</td></tr>
+    <tr><td>收敛方式</td><td>依概率（i.p.）</td><td>几乎必然（a.s.）</td></tr>
+    <tr><td>联系</td><td colspan="2">i.i.d. 是平稳遍历的特例，此时 $H(X_0\mid X_{-\infty}^{-1})=H(X_1)$</td></tr>
+  </tbody>
+</table>
+
+
+</body>
+</html>

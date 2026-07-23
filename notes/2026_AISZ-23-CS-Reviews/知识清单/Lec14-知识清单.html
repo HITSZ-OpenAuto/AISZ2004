@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Lecture 14：率失真理论（Rate-Distortion Theory）</title>
+<script>
+MathJax = {
+  tex: {
+    inlineMath: [['$', '$']],
+    displayMath: [['$$', '$$']]
+  }
+};
+</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js"></script>
+<style>
+/* === ExamPass Shared Styles === */
+/* Paper-like warm background, clean typography, responsive */
+
+:root {
+  --paper: #fdf6e3;
+  --paper-dark: #f5ecd7;
+  --ink: #2c2c2c;
+  --ink-light: #555;
+  --accent: #2563eb;
+  --accent-hover: #1d4ed8;
+  --divider: #d6c8a8;
+  --card-bg: #fef9ef;
+  --card-border: #e8dcc8;
+  --correct: #22c55e;
+  --correct-bg: #f0fdf4;
+  --wrong: #ef4444;
+  --wrong-bg: #fef2f2;
+  --tag-bg: #fef3c7;
+  --tag-text: #92400e;
+  --radius: 6px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: "Microsoft YaHei", "Noto Sans SC", "SimSun", sans-serif;
+  font-size: 12pt; line-height: 1.75; color: var(--ink);
+  max-width: 860px; margin: auto; padding: 24px 20px 60px;
+  background: var(--paper);
+}
+
+@media print {
+  body { font-size: 10.5pt; background: #fff; }
+  .no-print { display: none !important; }
+  h1, h2, h3 { page-break-after: avoid; }
+}
+
+/* ── Header ── */
+#exampass-header {
+  display: flex; justify-content: space-between; align-items: baseline;
+  padding: 6px 0; margin-bottom: 0;
+}
+.header-brand { font-size: 1.2em; font-weight: 700; color: #1a1a2e; letter-spacing: 0.3px; }
+.header-url  { font-size: 0.78em; color: #999; }
+.header-divider { border: none; border-top: 2px solid var(--divider); margin: 4px 0 20px 0; }
+
+/* ── Typography ── */
+h1 { font-size: 1.55em; text-align: center; border-bottom: 2px solid var(--divider); padding-bottom: 8px; margin-top: 0; }
+h2 { font-size: 1.25em; border-bottom: 1px solid var(--divider); padding-bottom: 4px; margin-top: 28px; }
+h3 { font-size: 1.08em; margin-top: 20px; color: var(--ink); }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ── Tables ── */
+table { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 0.95em; }
+td, th { border: 1px solid var(--card-border); padding: 5px 9px; text-align: left; }
+th { background: var(--paper-dark); font-weight: 700; }
+
+/* ── Embedded source images ── */
+.embedded-images {
+  margin: 18px 0 24px;
+}
+.embedded-images-intro {
+  color: var(--ink-light);
+  font-size: 0.95em;
+}
+.embedded-image {
+  margin: 14px 0 18px;
+  padding: 10px;
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  background: var(--card-bg);
+  break-inside: avoid;
+}
+.embedded-image img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+  border: 1px solid var(--divider);
+  background: #fff;
+}
+.embedded-image figcaption {
+  margin-top: 8px;
+  color: var(--ink-light);
+  font-size: 0.92em;
+  line-height: 1.5;
+}
+.embedded-image-note::before {
+  content: " - ";
+}
+
+/* ── Knowledge point vs explanation ── */
+.kp { font-weight: 700; color: var(--ink); }           /* key point: bold dark */
+.exp { font-weight: 400; color: var(--ink-light); }    /* explanation: lighter */
+.exp em, .exp strong { color: var(--ink); }             /* emphasis inside explanation */
+
+/* ── Block elements ── */
+blockquote {
+  border-left: 3px solid #c0392b; background: #fef9ef;
+  padding: 6px 14px; margin: 10px 0; font-size: 0.95em;
+}
+code { background: #f0ede0; padding: 2px 5px; border-radius: 3px; font-size: 0.92em; }
+pre { background: #f0ede0; padding: 10px; border-radius: var(--radius); overflow-x: auto; }
+
+/* ── TOC ── */
+div.toc {
+  background: var(--card-bg); padding: 14px 18px;
+  border: 1px solid var(--card-border); border-radius: var(--radius); margin-bottom: 22px;
+}
+div.toc ul { padding-left: 18px; }
+div.toc li { margin: 3px 0; font-size: 0.95em; }
+
+/* ── Priority tags ── */
+.tag-must   { background: #fee2e2; color: #991b1b; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+.tag-key    { background: #fef3c7; color: #92400e; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+.tag-freq   { background: #dbeafe; color: #1e40af; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+.tag-info   { background: #f0fdf4; color: #166534; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+
+
+</style>
+</head>
+<body>
+
+<header id="exampass-header">
+  <div class="header-left"><span class="header-brand">ExamPass Assistant</span></div>
+  <div class="header-right"><span class="header-url">github.com/MIKUZ12/ExamPass-Assistant</span></div>
+</header>
+<hr class="header-divider">
+
+<h1>Lecture 14：率失真理论（Rate-Distortion Theory）</h1>
+<div class="toc">
+<h2>目录</h2>
+<ul>
+<li><a href="#s38423843">一、有损压缩问题建模</a></li>
+  <li><a href="#s76557204">资源-性能权衡 必考</a></li>
+  <li><a href="#s33424730">压缩率（Rate）与失真度（Distortion）定义 必考</a></li>
+  <li><a href="#s40730760">常用失真函数 重点</a></li>
+<li><a href="#s29075750">二、率失真函数</a></li>
+  <li><a href="#s44348982">率失真函数定义 必考</a></li>
+  <li><a href="#s42767047">率失真函数的性质 必考</a></li>
+<li><a href="#s32305491">三、高斯信源率失真函数</a></li>
+  <li><a href="#s64069225">高斯信源 R(D) 计算 必考</a></li>
+  <li><a href="#s52984609">球堆积的几何直觉 常考</a></li>
+</ul>
+</div>
+
+<h2 id="s38423843">一、有损压缩问题建模</h2>
+
+<h3 id="s76557204">资源-性能权衡 <span class="tag-must">必考</span></h3>
+<p>
+  <span class="kp">有损压缩</span>的核心矛盾：同时要求失真小（performance高）和码率低（resource少），两者相互制约。
+</p>
+<p>对偶表述（Dual formulations）：</p>
+<ul>
+  <li><strong>Distortion-rate problem</strong>：minimize distortion，subject to rate &le; R</li>
+  <li><strong>Rate-distortion problem（Shannon）</strong>：minimize rate，subject to distortion &le; D</li>
+</ul>
+<p>应用举例：JPEG/JPEG2000、MP3/AAC、H.264/HEVC/AV1、神经压缩、VAE 表示学习。</p>
+
+<h3 id="s33424730">压缩率（Rate）与失真度（Distortion）定义 <span class="tag-must">必考</span></h3>
+<p>
+  <span class="kp">压缩模型</span>：源序列 $V^N$（长度 $N$）经编码器压缩为 $M$ 个状态，再由解码器还原为 $\hat{V}^N$。
+</p>
+<p>
+  <span class="kp">压缩率</span>（Rate）：
+  $$R = \frac{\log_2 M}{N} = \frac{m}{N} \quad \text{（bits/symbol）}$$
+  $R$ 越小，压缩后占用资源越少。
+</p>
+<p>
+  <span class="kp">失真函数</span>（distortion function）：$d(v, \hat{v}) \to \mathbb{R}$，度量单符号失真。
+</p>
+<p>
+  <span class="kp">序列平均失真度</span>（期望失真）：
+  $$\mathbb{E}\,d(V^N, \hat{V}^N) = \mathbb{E}\!\left[\frac{1}{N}\sum_{i=1}^N d(V_i, \hat{V}_i)\right] \xrightarrow{\text{i.i.d.}} \mathbb{E}\,d(V, \hat{V})$$
+</p>
+<blockquote>易错：Rate 是 bits/symbol（对数底为2），而非总比特数；失真度取期望值，不是最大值。</blockquote>
+
+<h3 id="s40730760">常用失真函数 <span class="tag-key">重点</span></h3>
+<ul>
+  <li>
+    <span class="kp">汉明失真</span>（Hamming distortion，适用于二进制数据）：
+    $$d(x,y) = \begin{cases}0 & x=y \\ 1 & x\neq y\end{cases}$$
+  </li>
+  <li>
+    <span class="kp">平方误差失真</span>（Squared error，适用于图像等连续数据）：
+    $$d(x,y) = (x-y)^2$$
+  </li>
+  <li>
+    <span class="kp">Itakura-Saito 距离</span>（适用于语音数据）：
+    $$D_{IS}(P(\omega), \hat{P}(\omega)) = \frac{1}{2\pi}\int_{-\pi}^{\pi}\!\left(\frac{P(\omega)}{\hat{P}(\omega)} - \log\frac{P(\omega)}{\hat{P}(\omega)} - 1\right)d\omega$$
+  </li>
+</ul>
+
+<h2 id="s29075750">二、率失真函数</h2>
+
+<h3 id="s44348982">率失真函数定义 <span class="tag-must">必考</span></h3>
+<p>
+  <span class="kp">试验信道</span>（test channel）：$p(\hat{V}|V)$，描述编解码器的随机映射关系。
+</p>
+<p>
+  <span class="kp">率失真函数</span>（rate distortion function）：
+  $$R(D) = R^I(D) = \min_{p(\hat{V}|V):\,\mathbb{E}\,d(V,\hat{V})\le D} I(V;\hat{V})$$
+</p>
+<p>
+  <span class="exp">含义</span>：在期望失真不超过 $D$ 的约束下，对试验信道 $p(\hat{V}|V)$ 求互信息的最小值，即<strong>理论可达的最低压缩率下界</strong>。
+</p>
+<p><strong>可达性定理（Rate-Distortion Theorem）</strong>：</p>
+<ul>
+  <li>若 $R &gt; R^I(D)$，则 $(R, D)$ <span class="kp">可达</span>（存在满足要求的编码方案）</li>
+  <li>若 $R &lt; R^I(D)$，则 $(R, D)$ <span class="kp">不可达</span></li>
+</ul>
+<blockquote>易错：国内教材通常记 $R = R(D)$ 为率失真函数（等于 $R^I(D)$ 的最小值），不要与可达速率 $R$ 混淆。</blockquote>
+
+<h3 id="s42767047">率失真函数的性质 <span class="tag-must">必考</span></h3>
+
+<p><strong>性质1：$R^I(D)$ 是关于 $D$ 的凸函数</strong></p>
+<p>对任意 $D_1, D_2$ 和 $0\le\lambda\le1$：
+  $$R^I(\lambda D_1 + (1-\lambda)D_2) \le \lambda R^I(D_1) + (1-\lambda)R^I(D_2)$$
+</p>
+<p><span class="exp">证明思路</span>（混合分布法）：令 $p_\lambda(\hat{v}|v) = \lambda p_1(\hat{v}|v) + (1-\lambda)p_2(\hat{v}|v)$，
+混合分布的失真为 $D_\lambda = \lambda D_1 + (1-\lambda)D_2$；
+互信息是关于 $p(\hat{V}|V)$ 的凸函数，所以
+$I_{p_\lambda}(V;\hat{V}) \le \lambda I_{p_1}(V;\hat{V}) + (1-\lambda)I_{p_2}(V;\hat{V})$，
+取右端最小即得。</p>
+<p><strong>Time-sharing 直觉</strong>：将长度 $N$ 的序列分成两段，分别用失真 $D_1$ 和 $D_2$ 压缩，平均失真为 $\lambda D_1+(1-\lambda)D_2$，平均压缩率不小于 $R(\lambda D_1+(1-\lambda)D_2)$，故凸性成立。</p>
+
+<p><strong>性质2：$R(0) = H(V)$</strong></p>
+<p>
+  $\mathbb{E}\,d(V,\hat{V})=0 \Rightarrow V=\hat{V}$（几乎处处），故 $H(\hat{V}|V)=0$，
+  $$I(V;\hat{V}) = H(V) - H(V|\hat{V}) = H(V)$$
+</p>
+
+<p><strong>性质3：存在 $D_{\max}$ 使得 $R(D)=0$；当 $D\ge D_{\max}$ 时 $R(D)=0$</strong></p>
+<p>
+  $I(V;\hat{V})=0 \Leftrightarrow \hat{V}$ 与 $V$ 独立，此时 $p(\hat{V}|V) = p(\hat{V})$。
+  $$D_{\max} = \min_{p(\hat{V})}\sum_v\sum_{\hat{v}} p(v)p(\hat{v})d(v,\hat{v})$$
+  即选取与 $V$ 完全独立的 $\hat{V}$ 时的最小期望失真。
+</p>
+
+<p><strong>性质4：$R(D)$ 是 $D$ 的单调递减函数</strong></p>
+<p>
+  <span class="exp">证明</span>：若 $D_1 &lt; D_2$，则满足 $\mathbb{E}\,d\le D_1$ 的试验信道集合是满足 $\mathbb{E}\,d\le D_2$ 的子集，
+  故对更大的可行集取最小值，$R(D_1)\ge R(D_2)$。
+</p>
+
+<h2 id="s32305491">三、高斯信源率失真函数</h2>
+
+<h3 id="s64069225">高斯信源 R(D) 计算 <span class="tag-must">必考</span></h3>
+<p>
+  <span class="kp">问题设置</span>：$V\sim\mathcal{N}(0,\sigma^2)$，失真函数 $d(v,\hat{v}) = (v-\hat{v})^2$（平方误差）。
+</p>
+<p><strong>结论：</strong>
+  $$R(D) = \begin{cases}\dfrac{1}{2}\log_2\dfrac{\sigma^2}{D}, & 0 \le D \le \sigma^2 \\ 0, & D &gt; \sigma^2\end{cases}$$
+</p>
+<p><span class="exp">证明核心步骤</span>（高斯最大微分熵原理）：</p>
+<ol>
+  <li>对任意满足 $\mathbb{E}(V-\hat{V})^2 \le D$ 的 $\hat{V}$，令 $G\sim\mathcal{N}(0,D)$ 独立于 $\hat{V}$，构造 $V = \hat{V} + G$，则 $\hat{V}\sim\mathcal{N}(0,\sigma^2-D)$。</li>
+  <li>展开互信息：
+    $$I(V;\hat{V}) = h(V) - h(V|\hat{V}) = h(V) - h(V-\hat{V}|\hat{V})$$
+    $$\ge h(V) - h(V-\hat{V}) \ge h(V) - h(\mathcal{N}(0,D)) = \frac{1}{2}\log_2\frac{\sigma^2}{D}$$
+    （高斯分布在给定方差时最大化微分熵）
+  </li>
+  <li>等号成立条件：$V-\hat{V}$ 与 $\hat{V}$ 独立，且 $V-\hat{V}\sim\mathcal{N}(0,D)$。</li>
+</ol>
+
+<h3 id="s52984609">球堆积的几何直觉 <span class="tag-freq">常考</span></h3>
+<p>
+  对长度 $n$ 的序列：数据球的体积 $\approx (n\sigma^2)^{n/2}$（半径 $\sqrt{n}\sigma$），
+  噪声球的体积 $\approx (nD)^{n/2}$（半径 $\sqrt{n}\cdot\sqrt{D}$）。
+  $$M \ge \frac{\text{data sphere}}{\text{noisy ball}} = \left(\frac{\sigma^2}{D}\right)^{n/2}
+  \Rightarrow R = \frac{\log_2 M}{n} \ge \frac{1}{2}\log_2\frac{\sigma^2}{D}$$
+</p>
+<p>
+  <span class="exp">直觉</span>：每个码字（重建点）对应一个半径 $\sqrt{nD}$ 的"允许失真球"，
+  要覆盖所有可能的源序列点，需要足够多的码字，从而给出率的下界。
+</p>
+<blockquote>易错：高斯信源 R(D) 公式中底为2（单位 bits），不是 nats；当 $D \ge \sigma^2$ 时 $R=0$，因为用常数 $\hat{V}=0$ 即可将失真控制在 $\sigma^2$ 以内。</blockquote>
+
+
+
+</body>
+</html>

@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Lecture 14：率失真理论（Rate-Distortion Theory）</title>
+<script>
+MathJax = {
+  tex: {
+    inlineMath: [['$', '$']],
+    displayMath: [['$$', '$$']]
+  }
+};
+</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js"></script>
+<style>
+/* === ExamPass Shared Styles === */
+/* Paper-like warm background, clean typography, responsive */
+
+:root {
+  --paper: #fdf6e3;
+  --paper-dark: #f5ecd7;
+  --ink: #2c2c2c;
+  --ink-light: #555;
+  --accent: #2563eb;
+  --accent-hover: #1d4ed8;
+  --divider: #d6c8a8;
+  --card-bg: #fef9ef;
+  --card-border: #e8dcc8;
+  --correct: #22c55e;
+  --correct-bg: #f0fdf4;
+  --wrong: #ef4444;
+  --wrong-bg: #fef2f2;
+  --tag-bg: #fef3c7;
+  --tag-text: #92400e;
+  --radius: 6px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: "Microsoft YaHei", "Noto Sans SC", "SimSun", sans-serif;
+  font-size: 12pt; line-height: 1.75; color: var(--ink);
+  max-width: 860px; margin: auto; padding: 24px 20px 60px;
+  background: var(--paper);
+}
+
+@media print {
+  body { font-size: 10.5pt; background: #fff; }
+  .no-print { display: none !important; }
+  h1, h2, h3 { page-break-after: avoid; }
+}
+
+/* ── Header ── */
+#exampass-header {
+  display: flex; justify-content: space-between; align-items: baseline;
+  padding: 6px 0; margin-bottom: 0;
+}
+.header-brand { font-size: 1.2em; font-weight: 700; color: #1a1a2e; letter-spacing: 0.3px; }
+.header-url  { font-size: 0.78em; color: #999; }
+.header-divider { border: none; border-top: 2px solid var(--divider); margin: 4px 0 20px 0; }
+
+/* ── Typography ── */
+h1 { font-size: 1.55em; text-align: center; border-bottom: 2px solid var(--divider); padding-bottom: 8px; margin-top: 0; }
+h2 { font-size: 1.25em; border-bottom: 1px solid var(--divider); padding-bottom: 4px; margin-top: 28px; }
+h3 { font-size: 1.08em; margin-top: 20px; color: var(--ink); }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ── Tables ── */
+table { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 0.95em; }
+td, th { border: 1px solid var(--card-border); padding: 5px 9px; text-align: left; }
+th { background: var(--paper-dark); font-weight: 700; }
+
+/* ── Embedded source images ── */
+.embedded-images {
+  margin: 18px 0 24px;
+}
+.embedded-images-intro {
+  color: var(--ink-light);
+  font-size: 0.95em;
+}
+.embedded-image {
+  margin: 14px 0 18px;
+  padding: 10px;
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  background: var(--card-bg);
+  break-inside: avoid;
+}
+.embedded-image img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+  border: 1px solid var(--divider);
+  background: #fff;
+}
+.embedded-image figcaption {
+  margin-top: 8px;
+  color: var(--ink-light);
+  font-size: 0.92em;
+  line-height: 1.5;
+}
+.embedded-image-note::before {
+  content: " - ";
+}
+
+/* ── Knowledge point vs explanation ── */
+.kp { font-weight: 700; color: var(--ink); }           /* key point: bold dark */
+.exp { font-weight: 400; color: var(--ink-light); }    /* explanation: lighter */
+.exp em, .exp strong { color: var(--ink); }             /* emphasis inside explanation */
+
+/* ── Block elements ── */
+blockquote {
+  border-left: 3px solid #c0392b; background: #fef9ef;
+  padding: 6px 14px; margin: 10px 0; font-size: 0.95em;
+}
+code { background: #f0ede0; padding: 2px 5px; border-radius: 3px; font-size: 0.92em; }
+pre { background: #f0ede0; padding: 10px; border-radius: var(--radius); overflow-x: auto; }
+
+/* ── TOC ── */
+div.toc {
+  background: var(--card-bg); padding: 14px 18px;
+  border: 1px solid var(--card-border); border-radius: var(--radius); margin-bottom: 22px;
+}
+div.toc ul { padding-left: 18px; }
+div.toc li { margin: 3px 0; font-size: 0.95em; }
+
+/* ── Priority tags ── */
+.tag-must   { background: #fee2e2; color: #991b1b; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+.tag-key    { background: #fef3c7; color: #92400e; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+.tag-freq   { background: #dbeafe; color: #1e40af; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+.tag-info   { background: #f0fdf4; color: #166534; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+
+/* === Interactive Test Styles === */
+
+/* ── Score box ── */
+#score-box {
+  display: none; background: var(--paper-dark); color: var(--ink);
+  padding: 16px 20px; border-radius: var(--radius); margin: 14px 0;
+  text-align: center; border: 1px solid var(--card-border);
+}
+#score-box .score-num { font-size: 2.2em; font-weight: 700; }
+#score-box .score-label { font-size: 0.85em; color: var(--ink-light); }
+
+/* ── Question card ── */
+.q-card {
+  background: var(--card-bg); border: 1px solid var(--card-border);
+  border-radius: var(--radius); padding: 12px 14px; margin: 10px 0;
+  transition: all 0.15s;
+}
+.q-card.correct { border-left: 3px solid var(--correct); background: #f7fdf4; }
+.q-card.wrong   { border-left: 3px solid var(--wrong); background: #fef9f9; }
+
+.q-num  { font-weight: 700; font-size: 0.98em; margin-bottom: 4px; }
+.q-text { margin-bottom: 8px; font-size: 0.98em; }
+.q-text pre {
+  background: #f5f5f5; border: 1px solid #ddd; border-radius: 4px;
+  padding: 10px 14px; margin: 8px 0; overflow-x: auto;
+  font-family: 'Consolas', 'Courier New', monospace; font-size: 0.9em;
+  line-height: 1.5; white-space: pre;
+}
+.q-text code {
+  font-family: 'Consolas', 'Courier New', monospace; font-size: 0.9em;
+  background: #f0f0f0; padding: 1px 4px; border-radius: 3px;
+}
+
+/* ── Options (compact) ── */
+.option {
+  display: block; padding: 4px 10px; margin: 3px 0;
+  border: 1px solid var(--card-border); border-radius: 4px;
+  cursor: pointer; transition: all 0.12s; font-size: 0.93em;
+  background: #fefcf5;
+}
+.option:hover            { background: #f0ede0; }
+.option input            { margin-right: 6px; }
+.option.selected         { border-color: var(--accent); background: #eff6ff; }
+.option.correct-answer   { border-color: var(--correct); background: var(--correct-bg); }
+.option.wrong-answer     { border-color: var(--wrong); background: var(--wrong-bg); }
+
+/* ── Textareas (compact) ── */
+.q-textarea {
+  width: 100%; min-height: 56px; border: 1px solid var(--card-border);
+  border-radius: 4px; padding: 6px 10px; font-family: inherit;
+  font-size: 0.93em; background: #fefcf5; resize: vertical;
+}
+.q-textarea:focus { outline: none; border-color: var(--accent); }
+
+/* ── Result after grading ── */
+.result {
+  display: none; margin-top: 8px; padding: 8px 12px;
+  background: #fefcf5; border: 1px solid var(--card-border);
+  border-radius: 4px; font-size: 0.9em; line-height: 1.6;
+}
+.result .badge {
+  display: inline-block; padding: 1px 9px; border-radius: 3px;
+  font-weight: 700; font-size: 0.82em; margin-right: 6px;
+}
+.badge-ok  { background: var(--correct-bg); color: #166534; }
+.badge-no  { background: var(--wrong-bg); color: #991b1b; }
+.badge-ref { background: #dbeafe; color: #1e40af; }
+
+.result .explanation { margin-top: 4px; color: var(--ink); }
+.result .pitfall { color: #b45309; margin-top: 3px; font-size: 0.9em; }
+
+/* ── Grading button ── */
+.grading-bar { text-align: center; margin: 20px 0; }
+.grading-bar button {
+  font-size: 1em; padding: 8px 32px; background: var(--accent);
+  color: #fff; border: none; border-radius: var(--radius);
+  cursor: pointer; font-weight: 600; letter-spacing: 0.3px;
+}
+.grading-bar button:hover     { background: var(--accent-hover); }
+.grading-bar button:disabled  { background: #bbb; cursor: not-allowed; }
+
+/* ── Wrong-question review document ── */
+.wrong-review-box {
+  display: none;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  margin: 18px 0;
+}
+.wrong-review-box h3 {
+  margin-top: 0;
+}
+.wrong-review-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px 0;
+}
+.wrong-review-actions button {
+  font-size: 0.92em;
+  padding: 6px 12px;
+  background: var(--ink);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+.wrong-review-actions button:hover {
+  background: #000;
+}
+#wrong-review-text {
+  width: 100%;
+  min-height: 220px;
+  border: 1px solid var(--card-border);
+  border-radius: 4px;
+  padding: 8px 10px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.84em;
+  line-height: 1.5;
+  background: #fff;
+  resize: vertical;
+}
+
+</style>
+</head>
+<body>
+
+<header id="exampass-header">
+  <div class="header-left"><span class="header-brand">ExamPass Assistant</span></div>
+  <div class="header-right"><span class="header-url">github.com/MIKUZ12/ExamPass-Assistant</span></div>
+</header>
+<hr class="header-divider">
+
+<h1>Lecture 14：率失真理论（Rate-Distortion Theory）</h1>
+<h2 style="text-align:center">章节测试</h2>
+<p style="text-align:center;color:var(--ink-light);font-size:0.95em">满分100分</p>
+
+<div id="score-box"><div class="score-num" id="score-num">0</div><div class="score-label">总分</div></div>
+<div id="questions-container"></div>
+<div class="grading-bar no-print"><button onclick="gradeAll()" id="grade-btn">提交批改</button></div>
+<div id="wrong-review-box" class="wrong-review-box no-print"></div>
+
+<script>
+var Q = [{"type": "choice", "points": 2, "question": "率失真函数 $R(D)$ 的定义是？", "options": ["$\\min_{p(\\hat{V}|V):\\,\\mathbb{E}\\,d(V,\\hat{V})\\le D} I(V;\\hat{V})$", "$\\max_{p(\\hat{V}|V):\\,\\mathbb{E}\\,d(V,\\hat{V})\\le D} I(V;\\hat{V})$", "$\\min_{p(\\hat{V}|V):\\,\\mathbb{E}\\,d(V,\\hat{V})\\le D} H(V|\\hat{V})$", "$\\max_{p(\\hat{V})} I(V;\\hat{V})$"], "answer": 0, "knowledge_point": "率失真函数定义", "diagnosis_hint": "常与信道容量公式混淆（容量是 max，率失真是 min）", "explanation": "<strong>正确答案</strong>：A<br><br><strong>推理过程</strong>：率失真函数是在期望失真约束下对试验信道 $p(\\hat{V}|V)$ 最小化互信息 $I(V;\\hat{V})$，给出理论最小可达压缩率。与信道容量（对 $p(X)$ 求最大互信息）方向相反。", "pitfall": "率失真：min over test channel；信道容量：max over input distribution"}, {"type": "choice", "points": 2, "question": "当失真 $D=0$ 时，率失真函数 $R(0)$ 等于？", "options": ["$H(V)$", "$0$", "$\\log_2|\\mathcal{V}|$", "$I(V;\\hat{V})$"], "answer": 0, "knowledge_point": "率失真函数性质 R(0)=H(V)", "diagnosis_hint": "不清楚零失真时 V 和 V-hat 的关系", "explanation": "<strong>正确答案</strong>：A<br><br><strong>推理过程</strong>：$D=0$ 意味着 $V=\\hat{V}$（a.s.），故 $H(\\hat{V}|V)=0$，$I(V;\\hat{V})=H(V)-H(V|\\hat{V})=H(V)$。", "pitfall": "零失真 --> V=V-hat a.s. --> I(V;V-hat)=H(V)"}, {"type": "choice", "points": 2, "question": "高斯信源 $V\\sim\\mathcal{N}(0,\\sigma^2)$，平方误差失真，当 $D=\\sigma^2/4$ 时，$R(D)$ 等于？", "options": ["$1$ bit", "$2$ bits", "$\\frac{1}{2}$ bit", "$0$"], "answer": 0, "knowledge_point": "高斯信源率失真函数计算", "diagnosis_hint": "代入公式时分子分母弄反或忘记系数 1/2", "explanation": "<strong>正确答案</strong>：A<br><br><strong>推理过程</strong>：$R(D)=\\frac{1}{2}\\log_2\\frac{\\sigma^2}{D}=\\frac{1}{2}\\log_2\\frac{\\sigma^2}{\\sigma^2/4}=\\frac{1}{2}\\log_2 4=1$ bit。", "pitfall": "公式为 (1/2)log2(σ²/D)，注意系数 1/2"}, {"type": "choice", "points": 2, "question": "率失真函数 $R^I(D)$ 是关于 $D$ 的什么类型函数？", "options": ["单调递减的凸函数", "单调递增的凸函数", "单调递减的凹函数", "常数函数"], "answer": 0, "knowledge_point": "率失真函数性质", "diagnosis_hint": "将凸/凹性与单调性混淆", "explanation": "<strong>正确答案</strong>：A<br><br><strong>推理过程</strong>：R(D) 单调递减（允许失真越大，所需最小码率越低）；R(D) 是凸函数（由混合分布证明或 time-sharing 直觉）。", "pitfall": "凸函数不等于单调递增，R(D) 是递减的凸函数"}, {"type": "choice", "points": 2, "question": "互信息 $I(V;\\hat{V})=0$ 等价于？", "options": ["$\\hat{V}$ 与 $V$ 相互独立", "$\\hat{V} = V$（精确重建）", "$H(\\hat{V})=0$", "$R(D)=H(V)$"], "answer": 0, "knowledge_point": "率失真函数性质 D_max", "diagnosis_hint": "互信息为0的充要条件", "explanation": "<strong>正确答案</strong>：A<br><br><strong>推理过程</strong>：$I(V;\\hat{V})=0 \\Leftrightarrow V$ 与 $\\hat{V}$ 相互独立，即 $p(\\hat{V}|V)=p(\\hat{V})$。此时编码器输出与原始数据完全无关，对应 $D_{\\max}$ 情形。", "pitfall": "I=0 等价于独立，不等于 H(V̂)=0"}, {"type": "choice", "points": 2, "question": "Rate-distortion problem 的正式表述是？", "options": ["minimize $R$，subject to distortion $\\le D$", "maximize $R$，subject to distortion $\\le D$", "minimize distortion，subject to $R \\le R_0$", "maximize distortion，subject to $R \\ge D$"], "answer": 0, "knowledge_point": "Rate-distortion 建模", "diagnosis_hint": "将 rate 和 distortion 的角色互换", "explanation": "<strong>正确答案</strong>：A<br><br><strong>推理过程</strong>：Rate-distortion problem（Shannon 表述）在失真约束 $\\le D$ 下求最小可达压缩率 $R$。其对偶是 Distortion-rate problem：在码率约束下最小化失真。", "pitfall": "Shannon 的 R-D problem 是 minimize rate"}, {"type": "choice", "points": 2, "question": "高斯信源平方误差失真，当 $D > \\sigma^2$ 时 $R(D)$ 等于？", "options": ["$0$", "$\\frac{1}{2}\\log_2\\frac{\\sigma^2}{D}$（负值）", "$H(V)$", "$\\frac{1}{2}$"], "answer": 0, "knowledge_point": "高斯信源率失真函数分段", "diagnosis_hint": "忽略 D > σ² 的分段条件", "explanation": "<strong>正确答案</strong>：A<br><br><strong>推理过程</strong>：当 $D\\ge\\sigma^2$ 时，令 $\\hat{V}=0$，则 $\\mathbb{E}(V-0)^2=\\sigma^2\\le D$，$\\hat{V}$ 与 $V$ 独立，$I(V;\\hat{V})=0$，故 $R(D)=0$。", "pitfall": "D ≥ σ² 时 R(D)=0，代入公式得负数应取0"}, {"type": "choice", "points": 2, "question": "汉明失真函数适用于哪类数据？", "options": ["二进制数据", "图像数据", "语音数据", "连续时间信号"], "answer": 0, "knowledge_point": "常用失真函数", "diagnosis_hint": "不了解各失真函数的应用场景", "explanation": "<strong>正确答案</strong>：A<br><br><strong>推理过程</strong>：汉明失真 $d(x,y)=\\mathbf{1}[x\\ne y]$ 专门用于二进制（或离散）数据，度量两个序列的位差异数。平方误差用于图像，Itakura-Saito 用于语音。", "pitfall": "汉明失真 --> 二进制；平方误差 --> 图像；IS距离 --> 语音"}, {"type": "choice", "points": 2, "question": "高斯信源率失真推导中，哪个不等式基于'高斯分布在给定方差时最大化微分熵'？", "options": ["$h(V-\\hat{V}) \\le h(\\mathcal{N}(0,D))$，当 $\\mathbb{E}(V-\\hat{V})^2\\le D$", "$I(V;\\hat{V})\\ge 0$（互信息非负性）", "$h(V|\\hat{V})\\le h(V)$", "$H(V)\\ge H(\\hat{V})$"], "answer": 0, "knowledge_point": "高斯信源率失真推导", "diagnosis_hint": "不清楚推导哪步用到了高斯最大微分熵", "explanation": "<strong>正确答案</strong>：A<br><br><strong>推理过程</strong>：关键步骤：在方差为 $D$ 的约束下，$h(V-\\hat{V})\\le h(\\mathcal{N}(0,D))=\\frac{1}{2}\\log_2(2\\pi eD)$，给出互信息下界 $\\frac{1}{2}\\log_2\\frac{\\sigma^2}{D}$。", "pitfall": "高斯最大微分熵：给定方差，高斯分布使 h(X) 最大"}, {"type": "choice", "points": 2, "question": "Rate-distortion 可达性定理指出，$(R, D)$ 可达的充要条件是？", "options": ["$R \\ge R^I(D)$", "$R \\le R^I(D)$", "$R = R^I(D)$", "$R > 0$ 且 $D > 0$"], "answer": 0, "knowledge_point": "可达性定理", "diagnosis_hint": "不等号方向弄反", "explanation": "<strong>正确答案</strong>：A<br><br><strong>推理过程</strong>：$(R,D)$ 可达 $\\Leftrightarrow R\\ge R^I(D)$，即实际码率不低于理论最小值时编码方案存在。若 $R < R^I(D)$ 则不可达（不存在满足失真约束的编码方案）。", "pitfall": "可达区域在 R^I(D) 曲线上方（R 更大的区域）"}, {"type": "tf", "points": 1, "question": "率失真函数 $R(D)$ 是关于失真度 $D$ 的单调递减函数。", "options": [], "answer": true, "knowledge_point": "率失真函数单调性", "diagnosis_hint": "", "explanation": "<strong>正确答案</strong>：正确（√）<br><br><strong>推理过程</strong>：允许的失真越大，可行的试验信道集合越大，互信息的最小值越小，故 $R(D)$ 单调递减。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "$R^I(D)$ 是关于 $D$ 的凸函数。", "options": [], "answer": true, "knowledge_point": "率失真函数凸性", "diagnosis_hint": "", "explanation": "<strong>正确答案</strong>：正确（√）<br><br><strong>推理过程</strong>：由混合分布论证（互信息关于 $p(\\hat{V}|V)$ 的凸性）可证明 $R^I(D)$ 是凸函数。Time-sharing 直觉：分段压缩平均码率 $\\ge$ 整体最优码率，即凸不等式成立。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "有损压缩中，压缩率（Rate）越大，所需存储/传输资源越少。", "options": [], "answer": false, "knowledge_point": "Rate 定义", "diagnosis_hint": "", "explanation": "<strong>正确答案</strong>：错误（×）<br><br><strong>推理过程</strong>：Rate $R = \\log_2 M / N$ 是每符号所需比特数，$R$ <strong>越小</strong>，压缩后占用资源越少。Rate 越大意味着需要更多比特来表示数据。", "pitfall": "Rate 越小 = 压缩得更好 = 资源占用越少"}, {"type": "tf", "points": 1, "question": "当 $D=0$（零失真）时，率失真函数等于信源熵 $H(V)$。", "options": [], "answer": true, "knowledge_point": "率失真函数性质 R(0)=H(V)", "diagnosis_hint": "", "explanation": "<strong>正确答案</strong>：正确（√）<br><br><strong>推理过程</strong>：$D=0 \\Rightarrow V=\\hat{V}$ a.s. $\\Rightarrow H(V|\\hat{V})=0 \\Rightarrow I(V;\\hat{V})=H(V)$。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "存在一个最大失真度 $D_{\\max}$，使得当 $D\\ge D_{\\max}$ 时 $R(D)=0$。", "options": [], "answer": true, "knowledge_point": "率失真函数性质 D_max", "diagnosis_hint": "", "explanation": "<strong>正确答案</strong>：正确（√）<br><br><strong>推理过程</strong>：当 $\\hat{V}$ 与 $V$ 独立时 $I(V;\\hat{V})=0$，此时期望失真为 $D_{\\max}=\\min_{p(\\hat{V})}\\mathbb{E}\\,d(V,\\hat{V})$，当 $D\\ge D_{\\max}$ 时可达零码率。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "高斯信源 $V\\sim\\mathcal{N}(0,\\sigma^2)$ 的率失真函数为 $R(D) = \\frac{1}{2}\\log_2\\frac{\\sigma^2}{D}$，对所有 $D>0$ 均成立。", "options": [], "answer": false, "knowledge_point": "高斯信源率失真函数分段", "diagnosis_hint": "", "explanation": "<strong>正确答案</strong>：错误（×）<br><br><strong>推理过程</strong>：高斯信源率失真函数是分段的：$D\\le\\sigma^2$ 时 $R(D)=\\frac{1}{2}\\log_2\\frac{\\sigma^2}{D}$；$D>\\sigma^2$ 时 $R(D)=0$。当 $D>\\sigma^2$ 代入公式会得到负值，应取0。", "pitfall": "D > σ² 时 R(D) = 0，不能直接代入对数公式"}, {"type": "tf", "points": 1, "question": "Rate-distortion 理论中，'试验信道' $p(\\hat{V}|V)$ 代表实际物理信道的噪声特性。", "options": [], "answer": false, "knowledge_point": "试验信道概念", "diagnosis_hint": "", "explanation": "<strong>正确答案</strong>：错误（×）<br><br><strong>推理过程</strong>：试验信道是数学优化中的辅助概念，代表编解码器的随机映射关系（设计变量），不是物理传输信道的噪声。$p(\\hat{V}|V)$ 是我们对其优化的对象，而非给定的约束。", "pitfall": "试验信道是设计变量（优化对象），不是物理信道"}, {"type": "tf", "points": 1, "question": "平方误差失真函数 $d(x,y)=(x-y)^2$ 对所有类型的数据（包括二进制序列）都是最优选择。", "options": [], "answer": false, "knowledge_point": "常用失真函数", "diagnosis_hint": "", "explanation": "<strong>正确答案</strong>：错误（×）<br><br><strong>推理过程</strong>：不同数据类型有对应的失真函数：二进制数据用汉明失真，图像用平方误差，语音用 Itakura-Saito 距离。对二进制数据用平方误差与汉明失真等价，但对语音等数据平方误差不能反映感知失真。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "高斯信源率失真推导中，等号成立的条件是 $V-\\hat{V}$ 与 $\\hat{V}$ 独立，且 $V-\\hat{V}\\sim\\mathcal{N}(0,D)$。", "options": [], "answer": true, "knowledge_point": "高斯信源率失真推导", "diagnosis_hint": "", "explanation": "<strong>正确答案</strong>：正确（√）<br><br><strong>推理过程</strong>：推导中用到两个不等式，等号成立的充要条件均与 $V-\\hat{V}$ 的分布有关：(1) $V-\\hat{V}$ 与 $\\hat{V}$ 独立；(2) $V-\\hat{V}\\sim\\mathcal{N}(0,D)$（高斯分布使微分熵最大）。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "Time-sharing scheme 中，对序列进行分段压缩的总码率等于理论最优码率 $R(\\lambda D_1+(1-\\lambda)D_2)$。", "options": [], "answer": false, "knowledge_point": "率失真函数凸性", "diagnosis_hint": "", "explanation": "<strong>正确答案</strong>：错误（×）<br><br><strong>推理过程</strong>：Time-sharing 得到的码率为 $\\lambda R(D_1)+(1-\\lambda)R(D_2)$，由凸性知这 $\\ge R(\\lambda D_1+(1-\\lambda)D_2)$，即分段压缩不优于整体最优，只是给出了可行上界。", "pitfall": "Time sharing 是可行方案（上界），不是最优解"}, {"type": "short", "points": 6, "question": "请写出率失真函数的定义，并说明其几何意义（可达区域）。", "options": [], "answer": "", "knowledge_point": "率失真函数定义", "diagnosis_hint": "", "explanation": "<strong>参考答案</strong>：<br>率失真函数定义：$$R(D) = R^I(D) = \\min_{p(\\hat{V}|V):\\,\\mathbb{E}\\,d(V,\\hat{V})\\le D} I(V;\\hat{V})$$其中 $p(\\hat{V}|V)$ 称为试验信道，$d(\\cdot,\\cdot)$ 为失真函数。<br><br>几何意义：在 $(R, D)$ 平面上，$R=R^I(D)$ 曲线是可达区域的边界。曲线上方区域（$R\\ge R^I(D)$）为<strong>可达</strong>，存在满足失真约束的编码方案；曲线下方（$R &lt; R^I(D)$）为<strong>不可达</strong>，任何编码方案均无法在给定码率内将期望失真控制在 $D$ 以内。", "pitfall": ""}, {"type": "short", "points": 6, "question": "证明：$R(0) = H(V)$（零失真时率失真函数等于信源熵）。", "options": [], "answer": "", "knowledge_point": "率失真函数性质 R(0)=H(V)", "diagnosis_hint": "", "explanation": "<strong>参考答案</strong>：<br>当 $D=0$ 时，失真约束为 $\\mathbb{E}\\,d(V,\\hat{V})\\le 0$。<br>对汉明失真（或平方误差失真），$d(V,\\hat{V})\\ge 0$，故 $\\mathbb{E}\\,d(V,\\hat{V})=0$ 等价于 $d(V,\\hat{V})=0$ a.s.，即 $V=\\hat{V}$ a.s.。<br>因此 $H(\\hat{V}|V)=H(V-\\hat{V}|V)=0$（知道 $V$ 后 $\\hat{V}$ 确定）。<br>从而：$$I(V;\\hat{V}) = H(V) - H(V|\\hat{V}) = H(V) - 0 = H(V)$$<br>取最小值也是 $H(V)$，故 $R(0)=H(V)$。$\\square$", "pitfall": ""}, {"type": "short", "points": 6, "question": "列举率失真函数 $R^I(D)$ 的三条主要性质，并简述其直觉含义（无需严格证明）。", "options": [], "answer": "", "knowledge_point": "率失真函数性质", "diagnosis_hint": "", "explanation": "<strong>参考答案</strong>：<br>1. <strong>单调递减</strong>：$D$ 增大时 $R(D)$ 减小。直觉：允许的失真越大，编码越粗糙，所需码率越低。<br>2. <strong>凸函数</strong>：$R^I(\\lambda D_1+(1-\\lambda)D_2)\\le\\lambda R^I(D_1)+(1-\\lambda)R^I(D_2)$。直觉（Time-sharing）：分段压缩的平均码率不低于整体最优，故 $R^I(D)$ 曲线是凸的。<br>3. <strong>$R(0)=H(V)$，存在 $D_{\\max}$ 使 $R(D_{\\max})=0$</strong>：零失真需要完整传输信源信息（$H(V)$ bits），而当允许足够大的失真时可以用与 $V$ 完全无关的 $\\hat{V}$ 作为重建，此时码率为0。", "pitfall": ""}, {"type": "short", "points": 6, "question": "解释高斯信源率失真函数中'球堆积'几何直觉。", "options": [], "answer": "", "knowledge_point": "高斯信源率失真函数几何直觉", "diagnosis_hint": "", "explanation": "<strong>参考答案</strong>：<br>对长度 $n$ 的高斯序列 $V^n$，其典型集中的序列集中在半径 $\\sqrt{n\\sigma^2}$ 的超球（数据球，data sphere）表面附近，体积 $\\propto (\\sigma^2)^{n/2}$。<br>每个码字 $\\hat{V}^n(i)$ 能覆盖的序列集（允许失真球，noisy ball）半径为 $\\sqrt{nD}$，体积 $\\propto D^{n/2}$。<br>要用 $M$ 个码字覆盖数据球，需要：$$M\\ge\\frac{\\text{volume of data sphere}}{\\text{volume of noisy ball}}=\\left(\\frac{\\sigma^2}{D}\\right)^{n/2}$$<br>因此码率 $R=\\frac{\\log_2 M}{n}\\ge\\frac{1}{2}\\log_2\\frac{\\sigma^2}{D}$，与 $R(D)$ 公式吻合。", "pitfall": ""}, {"type": "essay", "points": 8, "question": "完整描述有损压缩的 Rate-distortion 问题建模，包括：(1) 压缩率 $R$ 的定义；(2) 失真度的定义（失真函数与期望失真）；(3) 问题的对偶表述；(4) Shannon 的率失真函数 $R(D)$。", "options": [], "answer": "", "knowledge_point": "Rate-distortion 问题建模", "diagnosis_hint": "", "explanation": "<strong>参考答案</strong>：<br><strong>(1) 压缩率 $R$</strong>：源序列 $V^N$（长度 $N$）经编码器映射为 $M$ 个状态之一，再由解码器重建为 $\\hat{V}^N$。压缩率定义为：$$R = \\frac{\\log_2 M}{N} \\quad\\text{（bits/symbol）}$$<br><strong>(2) 失真度</strong>：失真函数 $d(v,\\hat{v}):\\mathcal{V}\\times\\hat{\\mathcal{V}}\\to\\mathbb{R}$ 度量单符号失真。期望失真（序列平均）：$$\\mathbb{E}\\,d(V^N,\\hat{V}^N) = \\mathbb{E}\\!\\left[\\frac{1}{N}\\sum_{i=1}^N d(V_i,\\hat{V}_i)\\right]\\xrightarrow{\\text{i.i.d.}}\\mathbb{E}\\,d(V,\\hat{V})$$<br><strong>(3) 对偶表述</strong>：(i) Distortion-rate problem：$\\min$ distortion，s.t. $R\\le R_0$；(ii) Rate-distortion problem（Shannon）：$\\min R$，s.t. distortion $\\le D$。<br><strong>(4) 率失真函数</strong>：$$R(D) = R^I(D) = \\min_{p(\\hat{V}|V):\\,\\mathbb{E}\\,d(V,\\hat{V})\\le D} I(V;\\hat{V})$$可达性定理：$R\\ge R^I(D)$ 可达，$R &lt; R^I(D)$ 不可达。", "pitfall": ""}, {"type": "essay", "points": 8, "question": "证明率失真函数 $R^I(D)$ 是关于 $D$ 的凸函数（混合分布法）。", "options": [], "answer": "", "knowledge_point": "率失真函数凸性证明", "diagnosis_hint": "", "explanation": "<strong>参考答案</strong>：<br>要证：对任意 $D_1, D_2$ 和 $0\\le\\lambda\\le1$，$R^I(\\lambda D_1+(1-\\lambda)D_2)\\le\\lambda R^I(D_1)+(1-\\lambda)R^I(D_2)$。<br><br><strong>证明</strong>：设 $p_1(\\hat{v}|v)$ 和 $p_2(\\hat{v}|v)$ 分别是 $D_1$ 和 $D_2$ 约束下的最优试验信道，对应最小互信息为 $R^I(D_1)=I_{p_1}(V;\\hat{V})$，$R^I(D_2)=I_{p_2}(V;\\hat{V})$。<br><br>构造混合分布 $p_\\lambda(\\hat{v}|v) = \\lambda p_1(\\hat{v}|v)+(1-\\lambda)p_2(\\hat{v}|v)$，其产生的期望失真为：$$D_\\lambda = \\mathbb{E}_{p_\\lambda}\\,d(V,\\hat{V}) = \\lambda D_1+(1-\\lambda)D_2$$故 $p_\\lambda$ 是失真约束 $D_\\lambda$ 的可行解。由互信息关于 $p(\\hat{V}|V)$ 的凸性：$$I_{p_\\lambda}(V;\\hat{V}) \\le \\lambda I_{p_1}(V;\\hat{V})+(1-\\lambda)I_{p_2}(V;\\hat{V})$$因此：$$R^I(D_\\lambda) = \\min_{p:\\mathbb{E}\\,d\\le D_\\lambda} I(V;\\hat{V}) \\le I_{p_\\lambda}(V;\\hat{V}) \\le \\lambda R^I(D_1)+(1-\\lambda)R^I(D_2) \\qquad\\square$$", "pitfall": ""}, {"type": "essay", "points": 10, "question": "推导高斯信源 $V\\sim\\mathcal{N}(0,\\sigma^2)$、平方误差失真的率失真函数 $R(D)$，给出完整推导步骤。", "options": [], "answer": "", "knowledge_point": "高斯信源率失真函数完整推导", "diagnosis_hint": "", "explanation": "<strong>参考答案</strong>：<br><strong>目标</strong>：求 $R(D)=\\min_{p(\\hat{V}|V):\\,\\mathbb{E}(V-\\hat{V})^2\\le D} I(V;\\hat{V})$。<br><br><strong>推导下界</strong>：对任意满足约束的 $\\hat{V}$：<br>$$I(V;\\hat{V}) = h(V)-h(V|\\hat{V}) = h(V)-h(V-\\hat{V}|\\hat{V})$$<br>步骤1：$h(V-\\hat{V}|\\hat{V})\\le h(V-\\hat{V})$（条件微分熵不超过无条件微分熵，等号当 $V-\\hat{V}\\perp\\hat{V}$）<br>步骤2：$h(V-\\hat{V})\\le h(\\mathcal{N}(0,D))=\\frac{1}{2}\\log_2(2\\pi eD)$（高斯分布最大微分熵，等号当 $V-\\hat{V}\\sim\\mathcal{N}(0,D)$）<br>步骤3：$h(V)=\\frac{1}{2}\\log_2(2\\pi e\\sigma^2)$（高斯微分熵）<br>因此：$$I(V;\\hat{V}) \\ge \\frac{1}{2}\\log_2(2\\pi e\\sigma^2)-\\frac{1}{2}\\log_2(2\\pi eD) = \\frac{1}{2}\\log_2\\frac{\\sigma^2}{D}$$<br><br><strong>等号可达构造</strong>：令 $G\\sim\\mathcal{N}(0,D)$ 独立于 $\\hat{V}$，$V=\\hat{V}+G$，$\\hat{V}\\sim\\mathcal{N}(0,\\sigma^2-D)$（需 $D\\le\\sigma^2$）。此构造满足约束且使两个不等式等号成立。<br><br><strong>结论</strong>：$$R(D)=\\begin{cases}\\dfrac{1}{2}\\log_2\\dfrac{\\sigma^2}{D}, & 0\\le D\\le\\sigma^2 \\\\ 0, & D>\\sigma^2\\end{cases}$$", "pitfall": ""}, {"type": "comprehensive", "points": 20, "question": "综合计算题（20分）\n\n设信源 $V$ 服从高斯分布 $V\\sim\\mathcal{N}(0, 4)$（即 $\\sigma^2=4$），失真函数为平方误差 $d(v,\\hat{v})=(v-\\hat{v})^2$。\n\n**(1)** [4分] 写出该信源的率失真函数 $R(D)$（分段形式）。\n\n**(2)** [4分] 计算 $D=1, D=2, D=4$ 时的 $R(D)$ 值（单位：bits）。\n\n**(3)** [4分] 若要求平均失真不超过 $D=1$，则所需最低压缩率 $R$ 是多少？此时平均每个样本需要多少 bits 编码？\n\n**(4)** [4分] 证明：存在 $D_{\\max}=\\min_{p(\\hat{V})}\\mathbb{E}\\,d(V,\\hat{V})$，当 $D\\ge D_{\\max}$ 时 $R(D)=0$，并计算本例中的 $D_{\\max}$。\n\n**(5)** [4分] 若将方差改为 $\\sigma^2=16$（信号功率增加），在相同失真 $D=1$ 下，率失真函数如何变化？定性解释原因。", "options": [], "answer": "", "knowledge_point": "高斯信源率失真综合", "diagnosis_hint": "", "explanation": "<strong>参考答案</strong>：<br>\n<strong>(1)</strong> 高斯信源 $\\sigma^2=4$，平方误差失真的率失真函数：\n$$R(D) = \\begin{cases}\\frac{1}{2}\\log_2\\frac{4}{D}, & 0\\le D\\le 4 \\\\ 0, & D > 4\\end{cases}$$\n\n<strong>(2)</strong> 分别代入：\n<ul>\n<li>$D=1$：$R(1) = \\frac{1}{2}\\log_2\\frac{4}{1} = \\frac{1}{2}\\log_2 4 = 1$ bit</li>\n<li>$D=2$：$R(2) = \\frac{1}{2}\\log_2\\frac{4}{2} = \\frac{1}{2}\\log_2 2 = 0.5$ bits</li>\n<li>$D=4=\\sigma^2$：$R(4) = \\frac{1}{2}\\log_2\\frac{4}{4} = \\frac{1}{2}\\log_2 1 = 0$ bits（即 $D_{\\max}=\\sigma^2=4$）</li>\n</ul>\n\n<strong>(3)</strong> $D=1$ 时，$R(1)=1$ bit/symbol，即平均每个样本至少需要 1 bit 进行编码才能将期望平方误差控制在 1 以内。\n\n<strong>(4)</strong> 当 $I(V;\\hat{V})=0$ 时 $\\hat{V}\\perp V$，此时 $p(\\hat{V}|V)=p(\\hat{V})$，期望失真为：\n$$\\mathbb{E}\\,d(V,\\hat{V}) = \\sum_v\\sum_{\\hat{v}}p(v)p(\\hat{v})d(v,\\hat{v})$$\n选取使其最小的 $p(\\hat{V})$，得 $D_{\\max}$。\n\n对高斯信源平方误差，最优选择是 $\\hat{V}$ 取均值 0（常数），此时：\n$$D_{\\max} = \\mathbb{E}(V-0)^2 = \\mathbb{E}V^2 = \\sigma^2 = 4$$\n故当 $D\\ge 4$ 时令 $\\hat{V}=0$ 即可达到零码率，$R(4)=0$ 验证了这一点。\n\n<strong>(5)</strong> 若 $\\sigma^2=16$，$D=1$ 时：\n$$R(1) = \\frac{1}{2}\\log_2\\frac{16}{1} = \\frac{1}{2}\\times 4 = 2 \\text{ bits}$$\n（比 $\\sigma^2=4$ 时的 1 bit 更高）。<br>\n原因：信号方差更大意味着信源的\"不确定性\"更高，要将重建误差限制在同等水平 $D=1$，需要传输更多信息（更高码率）。Rate-distortion 本质上反映了信息量（熵/方差）与允许压缩误差之间的权衡。", "pitfall": ""}];
+var LABELS = {"page_title": "章节测试", "section": {"choice": "一、选择题", "tf": "二、判断题", "short": "三、简答题", "essay": "四、问答题", "comprehensive": "五、综合题"}, "section_order": ["choice", "tf", "short", "essay", "comprehensive"], "points_suffix": "分", "true_label": "正确", "false_label": "错误", "placeholder": "在此作答...", "pitfall_prefix": "易错提醒：", "correct_label": "正确", "wrong_label": "错误", "answer_prefix": "正确答案：", "reference_label": "参考答案", "graded_label": "已批改", "grade_button": "提交批改", "unanswered_label": "未作答", "wrong_review_title": "错题分析文档", "wrong_review_intro": "本次收录 __COUNT__ 道客观题错题。可以下载 Markdown 文档，或复制整段内容交给模型做错因分析和二次学习规划。", "no_wrong_questions": "本次客观题没有错题。主观题请对照参考答案自行复盘。", "download_wrong_review": "下载错题文档", "copy_wrong_review_prompt": "复制错题分析 Prompt", "score_label": "总分", "duration_prefix": "满分 100 分 | 建议 ", "duration_suffix": " 分钟 | 选择答案后点击提交批改"};
+var WRONG_REVIEW_PROMPT = "";
+var LAST_WRONG_REVIEW = '';
+
+function pointsOf(q) {
+  return q.points || q.score || 0;
+}
+
+function stripHtml(html) {
+  var div = document.createElement('div');
+  div.innerHTML = html || '';
+  return (div.textContent || div.innerText || '').replace(/\s+/g, ' ').trim();
+}
+
+// Convert Markdown fenced code blocks (```lang\n...\n```) and inline `code`
+// to <pre><code> / <code> HTML, then convert \n to <br> for plain text lines.
+function formatQuestion(text) {
+  if (!text) return '';
+  // 1. Replace fenced code blocks: ```lang\ncode\n```
+  text = text.replace(/```(\w*)\n([\s\S]*?)```/g, function(_, lang, code) {
+    var escaped = code
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+    var cls = lang ? ' class="language-' + lang + '"' : '';
+    return '<pre><code' + cls + '>' + escaped + '</code></pre>';
+  });
+  // 2. Replace inline backtick `code`
+  text = text.replace(/`([^`\n]+)`/g, function(_, code) {
+    var escaped = code.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    return '<code>' + escaped + '</code>';
+  });
+  // 3. Convert remaining \n to <br> (outside pre blocks already handled above)
+  // Split on <pre>...</pre> so we don't double-process code blocks
+  var parts = text.split(/(<pre>[\s\S]*?<\/pre>)/);
+  for (var i = 0; i < parts.length; i++) {
+    if (i % 2 === 0) {
+      parts[i] = parts[i].replace(/\n/g, '<br>');
+    }
+  }
+  return parts.join('');
+}
+
+function answerText(q, value) {
+  if (value === null || value === undefined || value === '') return LABELS.unanswered_label;
+  var idx = parseInt(value);
+  if (q.type === 'choice') {
+    return String.fromCharCode(65 + idx) + '. ' + ((q.options && q.options[idx]) ? stripHtml(q.options[idx]) : '');
+  }
+  if (q.type === 'tf') {
+    return idx === 0 ? LABELS.true_label : LABELS.false_label;
+  }
+  return String(value);
+}
+
+function normalizedAnswer(q) {
+  if (q.type === 'tf') {
+    if (q.answer === LABELS.true_label || q.answer === true || q.answer === 'true') return 0;
+    if (q.answer === LABELS.false_label || q.answer === false || q.answer === 'false') return 1;
+  }
+  return parseInt(q.answer);
+}
+
+function questionTypeLabel(type) {
+  return LABELS.section[type] || type;
+}
+
+function build(){
+  var container = document.getElementById('questions-container');
+  if (!container) { console.error('ExamPass: questions-container not found'); return; }
+  var h = '';
+  var sec = '';
+  var titles = LABELS.section;
+
+  for (var i = 0; i < Q.length; i++) {
+    var q = Q[i];
+    var s = q.type;
+    if (s !== sec) {
+      sec = s;
+      if (titles[s]) {
+        h += '<h3>' + titles[s] + '</h3>';
+      }
+    }
+
+    var qid = 'q' + i;
+    h += '<div class="q-card" id="card-' + qid + '">';
+    h += '<div class="q-num">' + (i+1) + '. (' + pointsOf(q) + ' ' + LABELS.points_suffix + ')</div>';
+    h += '<div class="q-text">' + formatQuestion(q.question) + '</div>';
+
+    if (q.type === 'choice') {
+      var opts = q.options || [];
+      for (var j = 0; j < opts.length; j++) {
+        h += '<label class="option" id="opt-' + qid + '-' + j + '" onclick="sel(\'' + qid + '\',' + j + ')">';
+        h += '<input type="radio" name="' + qid + '" value="' + j + '">' + String.fromCharCode(65+j) + '. ' + opts[j] + '</label>';
+      }
+    } else if (q.type === 'tf') {
+      h += '<label class="option" id="opt-' + qid + '-0" onclick="sel(\'' + qid + '\',0)">';
+      h += '<input type="radio" name="' + qid + '" value="0">' + LABELS.true_label + '</label>';
+      h += '<label class="option" id="opt-' + qid + '-1" onclick="sel(\'' + qid + '\',1)">';
+      h += '<input type="radio" name="' + qid + '" value="1">' + LABELS.false_label + '</label>';
+    } else {
+      h += '<textarea class="q-textarea" id="text-' + qid + '" placeholder="' + LABELS.placeholder + '" rows="3"></textarea>';
+    }
+
+    h += '<div class="result" id="result-' + qid + '">';
+    h += '<span class="badge" id="badge-' + qid + '"></span><span id="correct-' + qid + '"></span>';
+    h += '<div class="explanation">' + q.explanation + '</div>';
+    if (q.pitfall) {
+      h += '<div class="pitfall">' + LABELS.pitfall_prefix + q.pitfall + '</div>';
+    }
+    h += '</div></div>';
+  }
+
+  container.innerHTML = h;
+
+  // Re-render MathJax for dynamically inserted formulas
+  if (window.MathJax && MathJax.typesetPromise) {
+    MathJax.typesetPromise([container]).catch(function(err) {
+      console.error('MathJax typeset error:', err);
+    });
+  }
+}
+
+document.addEventListener('DOMContentLoaded', build);
+if (document.readyState === 'interactive' || document.readyState === 'complete') {
+  build();
+}
+
+function sel(qid, idx) {
+  var prefix = 'opt-' + qid + '-';
+  var all = document.querySelectorAll('[id^="' + prefix + '"]');
+  for (var i = 0; i < all.length; i++) {
+    all[i].classList.remove('selected');
+  }
+  var target = document.getElementById('opt-' + qid + '-' + idx);
+  if (target) {
+    target.classList.add('selected');
+  }
+  var radio = document.querySelector('input[name="' + qid + '"][value="' + idx + '"]');
+  if (radio) {
+    radio.checked = true;
+  }
+}
+
+function gradeAll() {
+  var score = 0;
+  var wrongItems = [];
+  for (var i = 0; i < Q.length; i++) {
+    var q = Q[i];
+    var qid = 'q' + i;
+    var card = document.getElementById('card-' + qid);
+    var result = document.getElementById('result-' + qid);
+    var badge = document.getElementById('badge-' + qid);
+    var correctEl = document.getElementById('correct-' + qid);
+    if (!card || !result) continue;
+
+    result.style.display = 'block';
+
+    if (q.type === 'choice' || q.type === 'tf') {
+      var radio = document.querySelector('input[name="' + qid + '"]:checked');
+      var correctIndex = normalizedAnswer(q);
+      if (radio && parseInt(radio.value) === correctIndex) {
+        score += pointsOf(q);
+        card.classList.add('correct');
+        badge.className = 'badge badge-ok';
+        badge.textContent = LABELS.correct_label;
+        correctEl.innerHTML = '';
+        var correctOpt = document.getElementById('opt-' + qid + '-' + correctIndex);
+        if (correctOpt) correctOpt.classList.add('correct-answer');
+      } else {
+        card.classList.add('wrong');
+        badge.className = 'badge badge-no';
+        badge.textContent = LABELS.wrong_label;
+        var ansText = answerText(q, correctIndex);
+        correctEl.innerHTML = LABELS.answer_prefix + ansText;
+        if (radio) {
+          var wrongOpt = document.getElementById('opt-' + qid + '-' + radio.value);
+          if (wrongOpt) wrongOpt.classList.add('wrong-answer');
+        }
+        var correctOpt = document.getElementById('opt-' + qid + '-' + correctIndex);
+        if (correctOpt) correctOpt.classList.add('correct-answer');
+        wrongItems.push({
+          number: i + 1,
+          type: questionTypeLabel(q.type),
+          points: pointsOf(q),
+          question: stripHtml(q.question),
+          options: (q.options || []).map(stripHtml),
+          userAnswer: answerText(q, radio ? radio.value : null),
+          correctAnswer: ansText,
+          explanation: stripHtml(q.explanation),
+          pitfall: stripHtml(q.pitfall || ''),
+          knowledgePoint: stripHtml(q.knowledge_point || q.knowledgePoint || '')
+        });
+      }
+    } else {
+      card.classList.add('correct');
+      badge.className = 'badge badge-ref';
+      badge.textContent = LABELS.reference_label;
+    }
+  }
+
+  var sb = document.getElementById('score-box');
+  if (sb) {
+    sb.style.display = 'block';
+    document.getElementById('score-num').textContent = score;
+    sb.scrollIntoView({behavior:'smooth'});
+  }
+
+  var opts = document.querySelectorAll('.option');
+  for (var i = 0; i < opts.length; i++) opts[i].style.pointerEvents = 'none';
+  var tas = document.querySelectorAll('.q-textarea');
+  for (var i = 0; i < tas.length; i++) tas[i].disabled = true;
+
+  var btn = document.getElementById('grade-btn');
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = LABELS.graded_label;
+  }
+
+  buildWrongReview(wrongItems);
+
+  // Re-render MathJax for revealed explanations
+  if (window.MathJax && MathJax.typesetPromise) {
+    MathJax.typesetPromise().catch(function(err) {
+      console.error('MathJax typeset error:', err);
+    });
+  }
+}
+
+function buildWrongReview(wrongItems) {
+  var box = document.getElementById('wrong-review-box');
+  if (!box) return;
+
+  LAST_WRONG_REVIEW = renderWrongReviewMarkdown(wrongItems);
+
+  if (!wrongItems.length) {
+    box.style.display = 'block';
+    box.innerHTML = '<h3>' + LABELS.wrong_review_title + '</h3><p>' + LABELS.no_wrong_questions + '</p>';
+    return;
+  }
+
+  box.style.display = 'block';
+  box.innerHTML = [
+    '<h3>' + LABELS.wrong_review_title + '</h3>',
+    '<p>' + LABELS.wrong_review_intro.replace('__COUNT__', wrongItems.length) + '</p>',
+    '<div class="wrong-review-actions">',
+    '<button type="button" onclick="downloadWrongReview()">' + LABELS.download_wrong_review + '</button>',
+    '<button type="button" onclick="copyWrongReviewPrompt()">' + LABELS.copy_wrong_review_prompt + '</button>',
+    '</div>',
+    '<textarea id="wrong-review-text" readonly rows="12">' + LAST_WRONG_REVIEW.replace(/&/g, '&amp;').replace(/</g, '&lt;') + '</textarea>'
+  ].join('');
+}
+
+function renderWrongReviewMarkdown(wrongItems) {
+  var now = new Date().toLocaleString();
+  var lines = [];
+
+  lines.push('# ExamPass 错题分析文档');
+  lines.push('');
+  lines.push('- 生成时间：' + now);
+  lines.push('- 错题数量：' + wrongItems.length);
+  lines.push('');
+  lines.push('## 给模型的错题分析 Prompt');
+  lines.push('');
+  if (WRONG_REVIEW_PROMPT) {
+    lines.push(WRONG_REVIEW_PROMPT);
+  } else {
+    lines.push('请根据下面的错题记录，分析我的错因，并给出继续学习方案。要求：');
+    lines.push('1. 按知识模块归类错题，不要只逐题复述答案；');
+    lines.push('2. 判断每道题错在概念定义、公式推导、图表理解、条件适用、计算步骤、概念混淆还是审题；');
+    lines.push('3. 对涉及公式或推导的错题，补全从前提到结论的推导链条，不能跳步；');
+    lines.push('4. 对选择题，解释我选错选项为什么有迷惑性，以及正确选项和错误选项的关键边界；');
+    lines.push('5. 给出需要回看课件的具体知识点、图表、公式和页/章节线索；');
+    lines.push('6. 最后生成一份二次学习清单和 5 道针对这些薄弱点的进阶训练题。');
+  }
+  lines.push('');
+  lines.push('## 错题记录');
+  lines.push('');
+
+  if (!wrongItems.length) {
+    lines.push('本次没有客观题错题。');
+    return lines.join('\n');
+  }
+
+  for (var i = 0; i < wrongItems.length; i++) {
+    var item = wrongItems[i];
+    lines.push('### 错题 ' + (i + 1) + '：第 ' + item.number + ' 题');
+    lines.push('');
+    lines.push('- 题型：' + item.type);
+    lines.push('- 分值：' + item.points);
+    lines.push('- 题干：' + item.question);
+    if (item.options.length) {
+      lines.push('- 选项：');
+      for (var j = 0; j < item.options.length; j++) {
+        lines.push('  - ' + String.fromCharCode(65 + j) + '. ' + item.options[j]);
+      }
+    }
+    lines.push('- 我的答案：' + item.userAnswer);
+    lines.push('- 正确答案：' + item.correctAnswer);
+    lines.push('- 解析：' + item.explanation);
+    if (item.pitfall) lines.push('- 易错点：' + item.pitfall);
+    if (item.knowledgePoint) lines.push('- 对应知识点：' + item.knowledgePoint);
+    lines.push('');
+  }
+
+  return lines.join('\n');
+}
+
+function downloadWrongReview() {
+  if (!LAST_WRONG_REVIEW) return;
+  var blob = new Blob([LAST_WRONG_REVIEW], {type: 'text/markdown;charset=utf-8'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = '错题分析文档.md';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function copyWrongReviewPrompt() {
+  var text = LAST_WRONG_REVIEW || '';
+  if (!text) return;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text);
+  } else {
+    var ta = document.getElementById('wrong-review-text');
+    if (ta) {
+      ta.focus();
+      ta.select();
+      document.execCommand('copy');
+    }
+  }
+}
+
+</script>
+</body>
+</html>

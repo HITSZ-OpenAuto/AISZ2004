@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Lecture 11：噪声信道编码定理证明</title>
+<script>
+MathJax = {
+  tex: {
+    inlineMath: [['$', '$']],
+    displayMath: [['$$', '$$']]
+  }
+};
+</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js"></script>
+<style>
+/* === ExamPass Shared Styles === */
+/* Paper-like warm background, clean typography, responsive */
+
+:root {
+  --paper: #fdf6e3;
+  --paper-dark: #f5ecd7;
+  --ink: #2c2c2c;
+  --ink-light: #555;
+  --accent: #2563eb;
+  --accent-hover: #1d4ed8;
+  --divider: #d6c8a8;
+  --card-bg: #fef9ef;
+  --card-border: #e8dcc8;
+  --correct: #22c55e;
+  --correct-bg: #f0fdf4;
+  --wrong: #ef4444;
+  --wrong-bg: #fef2f2;
+  --tag-bg: #fef3c7;
+  --tag-text: #92400e;
+  --radius: 6px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: "Microsoft YaHei", "Noto Sans SC", "SimSun", sans-serif;
+  font-size: 12pt; line-height: 1.75; color: var(--ink);
+  max-width: 860px; margin: auto; padding: 24px 20px 60px;
+  background: var(--paper);
+}
+
+@media print {
+  body { font-size: 10.5pt; background: #fff; }
+  .no-print { display: none !important; }
+  h1, h2, h3 { page-break-after: avoid; }
+}
+
+/* ── Header ── */
+#exampass-header {
+  display: flex; justify-content: space-between; align-items: baseline;
+  padding: 6px 0; margin-bottom: 0;
+}
+.header-brand { font-size: 1.2em; font-weight: 700; color: #1a1a2e; letter-spacing: 0.3px; }
+.header-url  { font-size: 0.78em; color: #999; }
+.header-divider { border: none; border-top: 2px solid var(--divider); margin: 4px 0 20px 0; }
+
+/* ── Typography ── */
+h1 { font-size: 1.55em; text-align: center; border-bottom: 2px solid var(--divider); padding-bottom: 8px; margin-top: 0; }
+h2 { font-size: 1.25em; border-bottom: 1px solid var(--divider); padding-bottom: 4px; margin-top: 28px; }
+h3 { font-size: 1.08em; margin-top: 20px; color: var(--ink); }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ── Tables ── */
+table { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 0.95em; }
+td, th { border: 1px solid var(--card-border); padding: 5px 9px; text-align: left; }
+th { background: var(--paper-dark); font-weight: 700; }
+
+/* ── Embedded source images ── */
+.embedded-images {
+  margin: 18px 0 24px;
+}
+.embedded-images-intro {
+  color: var(--ink-light);
+  font-size: 0.95em;
+}
+.embedded-image {
+  margin: 14px 0 18px;
+  padding: 10px;
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  background: var(--card-bg);
+  break-inside: avoid;
+}
+.embedded-image img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+  border: 1px solid var(--divider);
+  background: #fff;
+}
+.embedded-image figcaption {
+  margin-top: 8px;
+  color: var(--ink-light);
+  font-size: 0.92em;
+  line-height: 1.5;
+}
+.embedded-image-note::before {
+  content: " - ";
+}
+
+/* ── Knowledge point vs explanation ── */
+.kp { font-weight: 700; color: var(--ink); }           /* key point: bold dark */
+.exp { font-weight: 400; color: var(--ink-light); }    /* explanation: lighter */
+.exp em, .exp strong { color: var(--ink); }             /* emphasis inside explanation */
+
+/* ── Block elements ── */
+blockquote {
+  border-left: 3px solid #c0392b; background: #fef9ef;
+  padding: 6px 14px; margin: 10px 0; font-size: 0.95em;
+}
+code { background: #f0ede0; padding: 2px 5px; border-radius: 3px; font-size: 0.92em; }
+pre { background: #f0ede0; padding: 10px; border-radius: var(--radius); overflow-x: auto; }
+
+/* ── TOC ── */
+div.toc {
+  background: var(--card-bg); padding: 14px 18px;
+  border: 1px solid var(--card-border); border-radius: var(--radius); margin-bottom: 22px;
+}
+div.toc ul { padding-left: 18px; }
+div.toc li { margin: 3px 0; font-size: 0.95em; }
+
+/* ── Priority tags ── */
+.tag-must   { background: #fee2e2; color: #991b1b; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+.tag-key    { background: #fef3c7; color: #92400e; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+.tag-freq   { background: #dbeafe; color: #1e40af; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+.tag-info   { background: #f0fdf4; color: #166534; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+
+/* === Interactive Test Styles === */
+
+/* ── Score box ── */
+#score-box {
+  display: none; background: var(--paper-dark); color: var(--ink);
+  padding: 16px 20px; border-radius: var(--radius); margin: 14px 0;
+  text-align: center; border: 1px solid var(--card-border);
+}
+#score-box .score-num { font-size: 2.2em; font-weight: 700; }
+#score-box .score-label { font-size: 0.85em; color: var(--ink-light); }
+
+/* ── Question card ── */
+.q-card {
+  background: var(--card-bg); border: 1px solid var(--card-border);
+  border-radius: var(--radius); padding: 12px 14px; margin: 10px 0;
+  transition: all 0.15s;
+}
+.q-card.correct { border-left: 3px solid var(--correct); background: #f7fdf4; }
+.q-card.wrong   { border-left: 3px solid var(--wrong); background: #fef9f9; }
+
+.q-num  { font-weight: 700; font-size: 0.98em; margin-bottom: 4px; }
+.q-text { margin-bottom: 8px; font-size: 0.98em; }
+.q-text pre {
+  background: #f5f5f5; border: 1px solid #ddd; border-radius: 4px;
+  padding: 10px 14px; margin: 8px 0; overflow-x: auto;
+  font-family: 'Consolas', 'Courier New', monospace; font-size: 0.9em;
+  line-height: 1.5; white-space: pre;
+}
+.q-text code {
+  font-family: 'Consolas', 'Courier New', monospace; font-size: 0.9em;
+  background: #f0f0f0; padding: 1px 4px; border-radius: 3px;
+}
+
+/* ── Options (compact) ── */
+.option {
+  display: block; padding: 4px 10px; margin: 3px 0;
+  border: 1px solid var(--card-border); border-radius: 4px;
+  cursor: pointer; transition: all 0.12s; font-size: 0.93em;
+  background: #fefcf5;
+}
+.option:hover            { background: #f0ede0; }
+.option input            { margin-right: 6px; }
+.option.selected         { border-color: var(--accent); background: #eff6ff; }
+.option.correct-answer   { border-color: var(--correct); background: var(--correct-bg); }
+.option.wrong-answer     { border-color: var(--wrong); background: var(--wrong-bg); }
+
+/* ── Textareas (compact) ── */
+.q-textarea {
+  width: 100%; min-height: 56px; border: 1px solid var(--card-border);
+  border-radius: 4px; padding: 6px 10px; font-family: inherit;
+  font-size: 0.93em; background: #fefcf5; resize: vertical;
+}
+.q-textarea:focus { outline: none; border-color: var(--accent); }
+
+/* ── Result after grading ── */
+.result {
+  display: none; margin-top: 8px; padding: 8px 12px;
+  background: #fefcf5; border: 1px solid var(--card-border);
+  border-radius: 4px; font-size: 0.9em; line-height: 1.6;
+}
+.result .badge {
+  display: inline-block; padding: 1px 9px; border-radius: 3px;
+  font-weight: 700; font-size: 0.82em; margin-right: 6px;
+}
+.badge-ok  { background: var(--correct-bg); color: #166534; }
+.badge-no  { background: var(--wrong-bg); color: #991b1b; }
+.badge-ref { background: #dbeafe; color: #1e40af; }
+
+.result .explanation { margin-top: 4px; color: var(--ink); }
+.result .pitfall { color: #b45309; margin-top: 3px; font-size: 0.9em; }
+
+/* ── Grading button ── */
+.grading-bar { text-align: center; margin: 20px 0; }
+.grading-bar button {
+  font-size: 1em; padding: 8px 32px; background: var(--accent);
+  color: #fff; border: none; border-radius: var(--radius);
+  cursor: pointer; font-weight: 600; letter-spacing: 0.3px;
+}
+.grading-bar button:hover     { background: var(--accent-hover); }
+.grading-bar button:disabled  { background: #bbb; cursor: not-allowed; }
+
+/* ── Wrong-question review document ── */
+.wrong-review-box {
+  display: none;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  margin: 18px 0;
+}
+.wrong-review-box h3 {
+  margin-top: 0;
+}
+.wrong-review-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px 0;
+}
+.wrong-review-actions button {
+  font-size: 0.92em;
+  padding: 6px 12px;
+  background: var(--ink);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+.wrong-review-actions button:hover {
+  background: #000;
+}
+#wrong-review-text {
+  width: 100%;
+  min-height: 220px;
+  border: 1px solid var(--card-border);
+  border-radius: 4px;
+  padding: 8px 10px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.84em;
+  line-height: 1.5;
+  background: #fff;
+  resize: vertical;
+}
+
+</style>
+</head>
+<body>
+
+<header id="exampass-header">
+  <div class="header-left"><span class="header-brand">ExamPass Assistant</span></div>
+  <div class="header-right"><span class="header-url">github.com/MIKUZ12/ExamPass-Assistant</span></div>
+</header>
+<hr class="header-divider">
+
+<h1>Lecture 11：噪声信道编码定理证明</h1>
+<h2 style="text-align:center">章节测试</h2>
+<p style="text-align:center;color:var(--ink-light);font-size:0.95em">满分100分</p>
+
+<div id="score-box"><div class="score-num" id="score-num">0</div><div class="score-label">总分</div></div>
+<div id="questions-container"></div>
+<div class="grading-bar no-print"><button onclick="gradeAll()" id="grade-btn">提交批改</button></div>
+<div id="wrong-review-box" class="wrong-review-box no-print"></div>
+
+<script>
+var Q = [{"type": "choice", "points": 2, "question": "噪声信道编码定理正向部分说明，当 $R < C_I$ 时：", "options": ["误差必须大于零", "存在编码方案使误差趋于零", "所有编码方案使误差趋于零", "误差等于零"], "answer": 1, "knowledge_point": "噪声信道编码定理", "diagnosis_hint": "混淆存在性与全称性", "explanation": "<strong>正确答案</strong>：B<br><br><strong>推理过程</strong>：正向定理是存在性（存在某编码方案使误差趋于零），不是所有方案都满足。", "pitfall": ""}, {"type": "choice", "points": 2, "question": "Joint Typicality Lemma 中，独立采样得到的 $(\tilde{x}^n, \tilde{y}^n)$ 落在联合典型集中的概率上界为：", "options": ["$2^{-n(H(X,Y)-3\\epsilon)}$", "$2^{-n(I(X;Y)-3\\epsilon)}$", "$2^{n(I(X;Y)+3\\epsilon)}$", "$1 - 2^{-n\\epsilon}$"], "answer": 1, "knowledge_point": "Joint Typicality Lemma", "diagnosis_hint": "混淆联合熵与互信息", "explanation": "<strong>正确答案</strong>：B<br><br><strong>推理过程</strong>：利用典型集大小 $\\le 2^{n(H(X,Y)+\\epsilon)}$ 与独立概率乘积 $\\le 2^{-n(H(X)+H(Y)-2\\epsilon)}$，乘积得 $2^{-n(I(X;Y)-3\\epsilon)}$。", "pitfall": ""}, {"type": "choice", "points": 2, "question": "正向证明中，Union Bound 的应用对象是：", "options": ["所有可能的编码方案", "$M-1$ 个干扰码字与接收序列形成联合典型的事件", "所有可能的发送序列", "信道转移概率"], "answer": 1, "knowledge_point": "正向证明", "diagnosis_hint": "", "explanation": "<strong>正确答案</strong>：B<br><br><strong>推理过程</strong>：Union Bound 用于对 $M-1$ 个干扰码字事件求和，得误差上界 $\\le \\epsilon + (M-1) \\cdot 2^{-n(I(X;Y)-3\\epsilon)}$。", "pitfall": ""}, {"type": "choice", "points": 2, "question": "正向证明中，$x^n(k)$（$k \\neq u$）与 $y^n$ 相互独立的原因是：", "options": ["DMC 的无记忆性", "不同码字在生成码本时独立随机选取", "$R < C_I$", "联合典型集的性质"], "answer": 1, "knowledge_point": "正向证明", "diagnosis_hint": "", "explanation": "<strong>正确答案</strong>：B<br><br><strong>推理过程</strong>：码本中不同码字在生成时相互独立，且 $k \\neq u$ 的码字与发送 $u$ 对应的信道输出 $y^n$ 无关。", "pitfall": ""}, {"type": "choice", "points": 2, "question": "反向证明中，$I(U; Y^n) \\le I(X^n; Y^n)$ 的依据是：", "options": ["Fano 不等式", "数据处理不等式（马尔可夫链 $U \\to X^n \\to Y^n$）", "联合典型集性质", "信道无记忆性"], "answer": 1, "knowledge_point": "反向证明", "diagnosis_hint": "混淆各不等式来源", "explanation": "<strong>正确答案</strong>：B<br><br><strong>推理过程</strong>：$U \\to X^n \\to Y^n$ 是马尔可夫链，DPI 给出 $I(U;Y^n) \\le I(X^n;Y^n)$。", "pitfall": ""}, {"type": "choice", "points": 2, "question": "反向证明中，$I(X^n; Y^n) \\le nC_I$ 使用了：", "options": ["AEP 定理", "DMC 无记忆性 + $I(X_i;Y_i) \\le C_I$", "Fano 不等式", "Union Bound"], "answer": 1, "knowledge_point": "反向证明", "diagnosis_hint": "", "explanation": "<strong>正确答案</strong>：B<br><br><strong>推理过程</strong>：DMC 无记忆性 $\\Rightarrow$ $I(X^n;Y^n) \\le \\sum I(X_i;Y_i)$，每项 $I(X_i;Y_i) \\le C_I$，故 $\\sum I(X_i;Y_i) \\le nC_I$。", "pitfall": ""}, {"type": "choice", "points": 2, "question": "反向证明中，Fano 不等式给出的误差下界是（$H(U)=nR$，$I(U;Y^n) \\le nC_I$）：", "options": ["$P_e \\ge 1 - C_I/R - 1/(nR)$", "$P_e \\le C_I/R$", "$P_e = 0$", "$P_e \\ge nC_I$"], "answer": 0, "knowledge_point": "反向证明", "diagnosis_hint": "", "explanation": "<strong>正确答案</strong>：A<br><br><strong>推理过程</strong>：Fano: $P_e \\ge (H(U|Y^n)-1)/H(U) = (nR - nC_I - 1)/(nR) = 1 - C_I/R - 1/(nR)$，当 $R > C_I$ 时 $>0$。", "pitfall": ""}, {"type": "choice", "points": 2, "question": "几何解释中，噪声球填充给出 $R \\le C_I$ 的原因是：", "options": ["$2^{nR} \\cdot 2^{nH(Y|X)} \\le 2^{nH(Y)}$，即噪声球不重叠", "$2^{nR} \\ge 2^{nH(Y)}$", "$H(Y|X) = 0$", "$R = H(X)$"], "answer": 0, "knowledge_point": "几何解释", "diagnosis_hint": "", "explanation": "<strong>正确答案</strong>：A<br><br><strong>推理过程</strong>：$2^{nR}$ 个噪声球每个大小 $2^{nH(Y|X)}$，总大小不超过输出空间 $2^{nH(Y)}$，化简得 $R \\le I(X;Y) \\le C_I$。", "pitfall": ""}, {"type": "choice", "points": 2, "question": "Expurgation 论证（删除最差一半状态）后，最大误差满足：", "options": ["$\\max_u P(\\hat{U}\\neq U|U=u) \\le 2P(\\hat{U}\\neq U|C_n)$", "$\\max_u P(\\hat{U}\\neq U|U=u) = 0$", "$\\max_u P(\\hat{U}\\neq U|U=u) \\le P(\\hat{U}\\neq U|C_n)/2$", "$\\max_u P(\\hat{U}\\neq U|U=u) = 1$"], "answer": 0, "knowledge_point": "平均误差与最大误差", "diagnosis_hint": "", "explanation": "<strong>正确答案</strong>：A<br><br><strong>推理过程</strong>：删去误差最大一半后，剩余最大误差 $\\le$ 原平均误差的 2 倍（若某元素 $> 2 \\cdot \\mathbb{E}$，则平均值不能趋于零，矛盾）。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "噪声信道编码定理的正向部分证明了所有满足 $R < C_I$ 的编码方案误差均趋于零。", "options": [], "answer": false, "knowledge_point": "噪声信道编码定理", "diagnosis_hint": "", "explanation": "<strong>正确答案</strong>：错误（×）<br><br><strong>推理过程</strong>：正向定理是存在性，只保证存在至少一个方案使误差趋于零。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "Joint Typicality Lemma 中，联合采样的序列对落在联合典型集中的概率趋于 1。", "options": [], "answer": true, "knowledge_point": "Joint Typicality Lemma", "diagnosis_hint": "", "explanation": "<strong>正确答案</strong>：正确（√）<br><br><strong>推理过程</strong>：由 AEP，$(X_i, Y_i) \\sim P_{XY}$ i.i.d. 时，$P((x^n,y^n) \\in A_\\epsilon^n) \\to 1$。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "反向证明中可以假设 $X^n$ 满足独立同分布条件。", "options": [], "answer": false, "knowledge_point": "反向证明", "diagnosis_hint": "", "explanation": "<strong>正确答案</strong>：错误（×）<br><br><strong>推理过程</strong>：反向证明只能假设 DMC，不能假设 $X^n$ 满足 i.i.d.——这是与正向证明的关键区别。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "香农期望论证的关键点是：若所有编码方案平均误差趋于零，则最小误差也趋于零。", "options": [], "answer": true, "knowledge_point": "香农证明思路", "diagnosis_hint": "", "explanation": "<strong>正确答案</strong>：正确（√）<br><br><strong>推理过程</strong>：$f_{\\min} \\le \\mathbb{E}[f]$，若 $\\mathbb{E} \\to 0$ 且 $f_{\\min} \\ge 0$，则 $f_{\\min} \\to 0$。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "典型集译码中，若存在多个 $k$ 使 $(x^n(k), y^n) \\in A_\\epsilon^n$，宣告译码错误。", "options": [], "answer": true, "knowledge_point": "典型集编码方案", "diagnosis_hint": "", "explanation": "<strong>正确答案</strong>：正确（√）<br><br><strong>推理过程</strong>：译码成功要求联合典型对唯一，若多个码字与接收序列联合典型则无法确定原始状态。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "几何解释中，噪声球大小 $2^{nH(Y|X)}$ 表示给定码字 $x^n$ 时信道输出的典型序列数目。", "options": [], "answer": true, "knowledge_point": "几何解释", "diagnosis_hint": "", "explanation": "<strong>正确答案</strong>：正确（√）<br><br><strong>推理过程</strong>：给定 $x^n$，输出 $y^n$ 约有 $2^{nH(Y|X)}$ 个可能值（条件典型集大小），构成噪声球。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "Expurgation 后速率从 $R$ 变为 $R - 1/n$，当 $n \\to \\infty$ 时速率损失可忽略。", "options": [], "answer": true, "knowledge_point": "平均误差与最大误差", "diagnosis_hint": "", "explanation": "<strong>正确答案</strong>：正确（√）<br><br><strong>推理过程</strong>：删去一半状态后 $R' = R - 1/n \\to R$，损失 $1/n \\to 0$。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "反向证明中使用的 Fano 不等式形式为 $P_e \\ge (H(U|Y^n)-1)/H(U)$。", "options": [], "answer": true, "knowledge_point": "反向证明", "diagnosis_hint": "", "explanation": "<strong>正确答案</strong>：正确（√）<br><br><strong>推理过程</strong>：这是 Fano 不等式对 $U \\to Y^n \\to \\hat{U}$ 的应用，分子为 $H(U|\\hat{U})-1$，可改写为 $H(U|Y^n)-1$（因 $\\hat{U}$ 是 $Y^n$ 的函数）。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "联合典型集大小 $|A_\\epsilon^n(X,Y)| \\le 2^{n(H(X,Y)+\\epsilon)}$ 对所有 $n$ 成立。", "options": [], "answer": true, "knowledge_point": "Joint Typicality Lemma", "diagnosis_hint": "", "explanation": "<strong>正确答案</strong>：正确（√）<br><br><strong>推理过程</strong>：每个联合典型序列 $p(x^n,y^n) \\ge 2^{-n(H(X,Y)+\\epsilon)}$，概率总和 $\\le 1$，故 $|A_\\epsilon^n| \\le 2^{n(H(X,Y)+\\epsilon)}$。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "正向证明取 $P_X$ 为最优分布时，$I(X;Y) = C_I$，此时 $R < C_I$ 保证误差趋于零。", "options": [], "answer": true, "knowledge_point": "正向证明", "diagnosis_hint": "", "explanation": "<strong>正确答案</strong>：正确（√）<br><br><strong>推理过程</strong>：对任意 $P_X$ 当 $R < I(X;Y)$ 时成立，选最优 $P_X^*$ 使 $I(X;Y) = C_I$，得 $R < C_I$ 时可靠传输。", "pitfall": ""}, {"type": "short", "points": 6, "question": "简述香农噪声信道编码定理正向证明的主要步骤（随机编码 + Union Bound 思路）。", "options": [], "answer": "", "knowledge_point": "正向证明", "diagnosis_hint": "", "explanation": "<strong>参考答案</strong>：(1) 随机生成码本：从 $A_\\epsilon^n(X)$ 中随机独立选 $M=2^{nR}$ 个码字。(2) 典型集译码：接收 $y^n$ 后，找唯一 $u$ 使 $(x^n(u), y^n) \\in A_\\epsilon^n(X,Y)$。(3) 期望论证：对随机码本取期望，得 $\\mathbb{E}[P_e] = P(\\hat{U}\\neq U)$。(4) Union Bound：对每个状态，$P_e \\le \\epsilon + (M-1) \\cdot 2^{-n(I(X;Y)-3\\epsilon)}$；取 $R < I(X;Y)-3\\epsilon$，误差指数趋零。(5) 存在性：平均误差趋零 $\\Rightarrow$ 存在至少一个码本使误差趋零。", "pitfall": ""}, {"type": "short", "points": 6, "question": "说明反向证明中不等式链 $I(U;Y^n) \\le I(X^n;Y^n) \\le nC_I$ 的推导，并指出各步依据。", "options": [], "answer": "", "knowledge_point": "反向证明", "diagnosis_hint": "", "explanation": "<strong>参考答案</strong>：第一步：$U \\to X^n \\to Y^n$ 构成马尔可夫链（$X^n$ 是 $U$ 的函数，$Y^n$ 仅依赖 $X^n$），由 DPI: $I(U;Y^n) \\le I(X^n;Y^n)$。第二步：$I(X^n;Y^n) = H(Y^n) - H(Y^n|X^n)$，DMC 无记忆性 $H(Y^n|X^n) = \\sum H(Y_i|X_i)$，故 $I(X^n;Y^n) \\le \\sum H(Y_i) - \\sum H(Y_i|X_i) = \\sum I(X_i;Y_i) \\le nC_I$。", "pitfall": ""}, {"type": "short", "points": 6, "question": "解释 Expurgation 论证：为何删去误差最大一半状态后，剩余最大误差 $\\le 2P_e$？", "options": [], "answer": "", "knowledge_point": "平均误差与最大误差", "diagnosis_hint": "", "explanation": "<strong>参考答案</strong>：设 $M$ 个状态均匀分布，平均误差 $P_e = \\frac{1}{M}\\sum P_e(u)$。若某状态 $P_e(u) > 2P_e$，则对均匀分布，超过此阈值的状态最多占一半（若超过一半，均值 $> P_e$，矛盾）。删去误差最大一半（最多 $M/2$ 个），剩余每个状态 $P_e(u) \\le 2P_e$，故最大误差 $\\le 2P_e \\to 0$。代价：速率 $R' = R - 1/n \\to R$。", "pitfall": ""}, {"type": "short", "points": 6, "question": "用几何语言（噪声球模型）直觉解释为何 $R > C_I$ 时无法可靠传输。", "options": [], "answer": "", "knowledge_point": "几何解释", "diagnosis_hint": "", "explanation": "<strong>参考答案</strong>：发送 $2^{nR}$ 个码字，每个在接收端形成噪声球大小约 $2^{nH(Y|X)}$。输出空间约大小 $2^{nH(Y)}$。若要区分所有输入，噪声球不能重叠：$2^{nR} \\cdot 2^{nH(Y|X)} \\le 2^{nH(Y)}$，即 $R \\le H(Y) - H(Y|X) = I(X;Y) \\le C_I$。当 $R > C_I$ 时，噪声球必然重叠，接收端无法唯一区分发送内容，误差不为零。", "pitfall": ""}, {"type": "essay", "points": 8, "question": "论述噪声信道编码定理正向证明的完整框架，包括随机编码、典型集译码、Union Bound 推导和存在性论证。", "options": [], "answer": "", "knowledge_point": "正向证明", "diagnosis_hint": "", "explanation": "<strong>参考答案</strong>：(1) 随机编码：固定 $n$，随机独立从 $A_\\epsilon^n(X)$ 选 $M=2^{nR}$ 个码字，构成随机码本。(2) 典型集译码：收到 $y^n$ 后，搜索唯一 $u$ 满足 $(x^n(u),y^n) \\in A_\\epsilon^n(X,Y)$，否则错误。(3) 期望论证：$\\mathbb{E}_{C_n}[P_e|C_n] = P(\\hat{U}\\neq U)$（因码本随机性可以和误差期望交换）。(4) Union Bound：$P(\\hat{U}\\neq U|U=u) \\le \\underbrace{P(\\text{真实对不典型})}_{\\le \\epsilon} + \\sum_{k\\neq u} P((x^n(k),y^n)\\in A_\\epsilon^n)$；独立性给出后者每项 $\\le 2^{-n(I(X;Y)-3\\epsilon)}$；共 $M-1$ 项故总 $\\le (M-1) \\cdot 2^{-n(I(X;Y)-3\\epsilon)} \\le 2^{nR} \\cdot 2^{-n(I(X;Y)-3\\epsilon)} = 2^{-n(I(X;Y)-R-3\\epsilon)}$。(5) 当 $R < I(X;Y)-3\\epsilon$，误差 $\\to 0$；取最优 $P_X$ 得 $R < C_I$ 即可。(6) 存在性：$\\mathbb{E}[P_e] \\to 0 \\Rightarrow \\exists C_n: P_e(C_n) \\to 0$。", "pitfall": ""}, {"type": "essay", "points": 8, "question": "论述噪声信道编码定理反向证明的完整框架（马尔可夫链 + DPI + Fano 不等式），并说明为何不能假设 $X^n$ 满足 i.i.d.。", "options": [], "answer": "", "knowledge_point": "反向证明", "diagnosis_hint": "", "explanation": "<strong>参考答案</strong>：(1) 系统马尔可夫链：$U \\to X^n \\to Y^n \\to \\hat{U}$，其中 $X^n = f_n(U)$ 是编码函数，$Y^n$ 只通过 DMC 依赖 $X^n$。(2) DPI 给出：$I(U;Y^n) \\le I(X^n;Y^n)$。(3) DMC 无记忆性：$I(X^n;Y^n) = H(Y^n) - H(Y^n|X^n) = H(Y^n) - \\sum H(Y_i|X_i) \\le \\sum H(Y_i) - \\sum H(Y_i|X_i) = \\sum I(X_i;Y_i) \\le nC_I$。(4) Fano 不等式：$P_e \\ge (H(U|Y^n)-1)/H(U)$；$H(U|Y^n) = H(U) - I(U;Y^n) \\ge nR - nC_I$；$H(U) = nR$（均匀分布）；故 $P_e \\ge 1 - C_I/R - 1/(nR)$。(5) 当 $R > C_I$，$n$ 充分大，$P_e > 0$。(6) 为何不假设 i.i.d.：正向用随机码本从典型集选，自然满足；反向要对任意编码方案成立，不能限制 $X^n$ 的分布形式。", "pitfall": ""}, {"type": "essay", "points": 10, "question": "比较正向证明与反向证明的关键工具和假设，并论述 Joint Typicality Lemma 在正向证明中起到的核心作用。", "options": [], "answer": "", "knowledge_point": "噪声信道编码定理", "diagnosis_hint": "", "explanation": "<strong>参考答案</strong>：正向 vs 反向对比：正向用随机编码 + 典型集译码 + Union Bound，证明存在性；反向用 DPI + Fano，证明必要条件。正向可假设 i.i.d. 输入（随机码本即满足）；反向只能假设 DMC。JTL 在正向中的核心作用：(1) 确保真实码字联合典型（JTL 性质1）：$P((x^n(u), y^n) \\notin A_\\epsilon^n|U=u) \\to 0$，真实码字误差消除；(2) 限制干扰码字概率（JTL 性质3）：干扰码字与 $y^n$ 独立，故 $P((x^n(k),y^n) \\in A_\\epsilon^n) \\le 2^{-n(I(X;Y)-3\\epsilon)}$，给出每项干扰的指数下降概率；(3) 三性质合力：典型集大小有界（性质2）是性质3证明的基础，三条性质缺一不可。Union Bound 将 $M-1$ 项干扰合并为 $M \\cdot 2^{-n(I-3\\epsilon)} = 2^{-n(I-R-3\\epsilon)} \\to 0$（当 $R < I - 3\\epsilon$）。", "pitfall": ""}, {"type": "comprehensive", "points": 20, "question": "考虑二进制对称信道 BSC($p$)（$p < 1/2$），信道容量 $C = 1 - H_b(p)$。\n(1) 写出正向证明中 Union Bound 的误差上界表达式，用 $n$、$R$、$I(X;Y)$、$\\epsilon$ 表示。(4分)\n(2) 证明当 $R < C - 3\\epsilon$ 时，取 $P_X$ 为均匀分布（此时 $I(X;Y) = C$），误差上界趋于零。(4分)\n(3) 写出反向证明的误差下界表达式（用 $R$、$C$、$n$ 表示），并说明当 $R > C$ 时为何 $P_e > 0$。(6分)\n(4) 当 $p = 0.1$ 时，$C \\approx 0.531$ bits。若希望速率 $R = 0.4$ bits/use 可靠传输，分析是否可行，并说明 $n$ 需要多大才能使误差上界 $\\le 0.01$。(6分)", "options": [], "answer": "", "knowledge_point": "噪声信道编码定理综合", "diagnosis_hint": "", "explanation": "<strong>参考答案</strong>：<br>(1) Union Bound 误差上界：$P(\\hat{U}\\neq U|U=u) \\le \\epsilon + 2^{nR} \\cdot 2^{-n(I(X;Y)-3\\epsilon)} = \\epsilon + 2^{-n(I(X;Y)-R-3\\epsilon)}$<br><br>(2) 取均匀分布 $P_X$，$I(X;Y) = C$；误差 $\\le \\epsilon + 2^{-n(C-R-3\\epsilon)}$；当 $R < C - 3\\epsilon$ 时，指数 $C-R-3\\epsilon > 0$，故 $2^{-n(C-R-3\\epsilon)} \\to 0$；对任意 $\\delta > 0$ 取 $\\epsilon < (C-R)/3$，再取 $n$ 充分大，误差 $\\to 0$。<br><br>(3) 反向误差下界：$P_e \\ge 1 - C/R - 1/(nR)$；当 $R > C$ 时，$1 - C/R > 0$，对充分大 $n$，$1/(nR) \\to 0$，故 $P_e > 0$，无法无误差传输。<br><br>(4) $p=0.1$，$C \\approx 0.531 > 0.4 = R$，故 $R < C$，理论上可靠传输可行。由正向证明，误差 $\\le \\epsilon + 2^{-n(0.531-0.4-3\\epsilon)}$；取 $\\epsilon = 0.02$，$C - R - 3\\epsilon = 0.531 - 0.4 - 0.06 = 0.071$；误差 $\\le 0.02 + 2^{-0.071n}$；要使 $\\le 0.01$，需 $2^{-0.071n} \\le -0.01$（不合理，应取 $\\epsilon$ 更小）；取 $\\epsilon = 0.005$，指数 $= 0.131 - 0.015 = 0.116$；$2^{-0.116n} \\le 0.005$，$n \\ge \\frac{\\log_2(200)}{0.116} \\approx \\frac{7.64}{0.116} \\approx 66$。故 $n \\approx 66$ 即可（数量级估算）。", "pitfall": ""}];
+var LABELS = {"page_title": "章节测试", "section": {"choice": "一、选择题", "tf": "二、判断题", "short": "三、简答题", "essay": "四、问答题", "comprehensive": "五、综合题"}, "section_order": ["choice", "tf", "short", "essay", "comprehensive"], "points_suffix": "分", "true_label": "正确", "false_label": "错误", "placeholder": "在此作答...", "pitfall_prefix": "易错提醒：", "correct_label": "正确", "wrong_label": "错误", "answer_prefix": "正确答案：", "reference_label": "参考答案", "graded_label": "已批改", "grade_button": "提交批改", "unanswered_label": "未作答", "wrong_review_title": "错题分析文档", "wrong_review_intro": "本次收录 __COUNT__ 道客观题错题。可以下载 Markdown 文档，或复制整段内容交给模型做错因分析和二次学习规划。", "no_wrong_questions": "本次客观题没有错题。主观题请对照参考答案自行复盘。", "download_wrong_review": "下载错题文档", "copy_wrong_review_prompt": "复制错题分析 Prompt", "score_label": "总分", "duration_prefix": "满分 100 分 | 建议 ", "duration_suffix": " 分钟 | 选择答案后点击提交批改"};
+var WRONG_REVIEW_PROMPT = "";
+var LAST_WRONG_REVIEW = '';
+
+function pointsOf(q) {
+  return q.points || q.score || 0;
+}
+
+function stripHtml(html) {
+  var div = document.createElement('div');
+  div.innerHTML = html || '';
+  return (div.textContent || div.innerText || '').replace(/\s+/g, ' ').trim();
+}
+
+// Convert Markdown fenced code blocks (```lang\n...\n```) and inline `code`
+// to <pre><code> / <code> HTML, then convert \n to <br> for plain text lines.
+function formatQuestion(text) {
+  if (!text) return '';
+  // 1. Replace fenced code blocks: ```lang\ncode\n```
+  text = text.replace(/```(\w*)\n([\s\S]*?)```/g, function(_, lang, code) {
+    var escaped = code
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+    var cls = lang ? ' class="language-' + lang + '"' : '';
+    return '<pre><code' + cls + '>' + escaped + '</code></pre>';
+  });
+  // 2. Replace inline backtick `code`
+  text = text.replace(/`([^`\n]+)`/g, function(_, code) {
+    var escaped = code.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    return '<code>' + escaped + '</code>';
+  });
+  // 3. Convert remaining \n to <br> (outside pre blocks already handled above)
+  // Split on <pre>...</pre> so we don't double-process code blocks
+  var parts = text.split(/(<pre>[\s\S]*?<\/pre>)/);
+  for (var i = 0; i < parts.length; i++) {
+    if (i % 2 === 0) {
+      parts[i] = parts[i].replace(/\n/g, '<br>');
+    }
+  }
+  return parts.join('');
+}
+
+function answerText(q, value) {
+  if (value === null || value === undefined || value === '') return LABELS.unanswered_label;
+  var idx = parseInt(value);
+  if (q.type === 'choice') {
+    return String.fromCharCode(65 + idx) + '. ' + ((q.options && q.options[idx]) ? stripHtml(q.options[idx]) : '');
+  }
+  if (q.type === 'tf') {
+    return idx === 0 ? LABELS.true_label : LABELS.false_label;
+  }
+  return String(value);
+}
+
+function normalizedAnswer(q) {
+  if (q.type === 'tf') {
+    if (q.answer === LABELS.true_label || q.answer === true || q.answer === 'true') return 0;
+    if (q.answer === LABELS.false_label || q.answer === false || q.answer === 'false') return 1;
+  }
+  return parseInt(q.answer);
+}
+
+function questionTypeLabel(type) {
+  return LABELS.section[type] || type;
+}
+
+function build(){
+  var container = document.getElementById('questions-container');
+  if (!container) { console.error('ExamPass: questions-container not found'); return; }
+  var h = '';
+  var sec = '';
+  var titles = LABELS.section;
+
+  for (var i = 0; i < Q.length; i++) {
+    var q = Q[i];
+    var s = q.type;
+    if (s !== sec) {
+      sec = s;
+      if (titles[s]) {
+        h += '<h3>' + titles[s] + '</h3>';
+      }
+    }
+
+    var qid = 'q' + i;
+    h += '<div class="q-card" id="card-' + qid + '">';
+    h += '<div class="q-num">' + (i+1) + '. (' + pointsOf(q) + ' ' + LABELS.points_suffix + ')</div>';
+    h += '<div class="q-text">' + formatQuestion(q.question) + '</div>';
+
+    if (q.type === 'choice') {
+      var opts = q.options || [];
+      for (var j = 0; j < opts.length; j++) {
+        h += '<label class="option" id="opt-' + qid + '-' + j + '" onclick="sel(\'' + qid + '\',' + j + ')">';
+        h += '<input type="radio" name="' + qid + '" value="' + j + '">' + String.fromCharCode(65+j) + '. ' + opts[j] + '</label>';
+      }
+    } else if (q.type === 'tf') {
+      h += '<label class="option" id="opt-' + qid + '-0" onclick="sel(\'' + qid + '\',0)">';
+      h += '<input type="radio" name="' + qid + '" value="0">' + LABELS.true_label + '</label>';
+      h += '<label class="option" id="opt-' + qid + '-1" onclick="sel(\'' + qid + '\',1)">';
+      h += '<input type="radio" name="' + qid + '" value="1">' + LABELS.false_label + '</label>';
+    } else {
+      h += '<textarea class="q-textarea" id="text-' + qid + '" placeholder="' + LABELS.placeholder + '" rows="3"></textarea>';
+    }
+
+    h += '<div class="result" id="result-' + qid + '">';
+    h += '<span class="badge" id="badge-' + qid + '"></span><span id="correct-' + qid + '"></span>';
+    h += '<div class="explanation">' + q.explanation + '</div>';
+    if (q.pitfall) {
+      h += '<div class="pitfall">' + LABELS.pitfall_prefix + q.pitfall + '</div>';
+    }
+    h += '</div></div>';
+  }
+
+  container.innerHTML = h;
+
+  // Re-render MathJax for dynamically inserted formulas
+  if (window.MathJax && MathJax.typesetPromise) {
+    MathJax.typesetPromise([container]).catch(function(err) {
+      console.error('MathJax typeset error:', err);
+    });
+  }
+}
+
+document.addEventListener('DOMContentLoaded', build);
+if (document.readyState === 'interactive' || document.readyState === 'complete') {
+  build();
+}
+
+function sel(qid, idx) {
+  var prefix = 'opt-' + qid + '-';
+  var all = document.querySelectorAll('[id^="' + prefix + '"]');
+  for (var i = 0; i < all.length; i++) {
+    all[i].classList.remove('selected');
+  }
+  var target = document.getElementById('opt-' + qid + '-' + idx);
+  if (target) {
+    target.classList.add('selected');
+  }
+  var radio = document.querySelector('input[name="' + qid + '"][value="' + idx + '"]');
+  if (radio) {
+    radio.checked = true;
+  }
+}
+
+function gradeAll() {
+  var score = 0;
+  var wrongItems = [];
+  for (var i = 0; i < Q.length; i++) {
+    var q = Q[i];
+    var qid = 'q' + i;
+    var card = document.getElementById('card-' + qid);
+    var result = document.getElementById('result-' + qid);
+    var badge = document.getElementById('badge-' + qid);
+    var correctEl = document.getElementById('correct-' + qid);
+    if (!card || !result) continue;
+
+    result.style.display = 'block';
+
+    if (q.type === 'choice' || q.type === 'tf') {
+      var radio = document.querySelector('input[name="' + qid + '"]:checked');
+      var correctIndex = normalizedAnswer(q);
+      if (radio && parseInt(radio.value) === correctIndex) {
+        score += pointsOf(q);
+        card.classList.add('correct');
+        badge.className = 'badge badge-ok';
+        badge.textContent = LABELS.correct_label;
+        correctEl.innerHTML = '';
+        var correctOpt = document.getElementById('opt-' + qid + '-' + correctIndex);
+        if (correctOpt) correctOpt.classList.add('correct-answer');
+      } else {
+        card.classList.add('wrong');
+        badge.className = 'badge badge-no';
+        badge.textContent = LABELS.wrong_label;
+        var ansText = answerText(q, correctIndex);
+        correctEl.innerHTML = LABELS.answer_prefix + ansText;
+        if (radio) {
+          var wrongOpt = document.getElementById('opt-' + qid + '-' + radio.value);
+          if (wrongOpt) wrongOpt.classList.add('wrong-answer');
+        }
+        var correctOpt = document.getElementById('opt-' + qid + '-' + correctIndex);
+        if (correctOpt) correctOpt.classList.add('correct-answer');
+        wrongItems.push({
+          number: i + 1,
+          type: questionTypeLabel(q.type),
+          points: pointsOf(q),
+          question: stripHtml(q.question),
+          options: (q.options || []).map(stripHtml),
+          userAnswer: answerText(q, radio ? radio.value : null),
+          correctAnswer: ansText,
+          explanation: stripHtml(q.explanation),
+          pitfall: stripHtml(q.pitfall || ''),
+          knowledgePoint: stripHtml(q.knowledge_point || q.knowledgePoint || '')
+        });
+      }
+    } else {
+      card.classList.add('correct');
+      badge.className = 'badge badge-ref';
+      badge.textContent = LABELS.reference_label;
+    }
+  }
+
+  var sb = document.getElementById('score-box');
+  if (sb) {
+    sb.style.display = 'block';
+    document.getElementById('score-num').textContent = score;
+    sb.scrollIntoView({behavior:'smooth'});
+  }
+
+  var opts = document.querySelectorAll('.option');
+  for (var i = 0; i < opts.length; i++) opts[i].style.pointerEvents = 'none';
+  var tas = document.querySelectorAll('.q-textarea');
+  for (var i = 0; i < tas.length; i++) tas[i].disabled = true;
+
+  var btn = document.getElementById('grade-btn');
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = LABELS.graded_label;
+  }
+
+  buildWrongReview(wrongItems);
+
+  // Re-render MathJax for revealed explanations
+  if (window.MathJax && MathJax.typesetPromise) {
+    MathJax.typesetPromise().catch(function(err) {
+      console.error('MathJax typeset error:', err);
+    });
+  }
+}
+
+function buildWrongReview(wrongItems) {
+  var box = document.getElementById('wrong-review-box');
+  if (!box) return;
+
+  LAST_WRONG_REVIEW = renderWrongReviewMarkdown(wrongItems);
+
+  if (!wrongItems.length) {
+    box.style.display = 'block';
+    box.innerHTML = '<h3>' + LABELS.wrong_review_title + '</h3><p>' + LABELS.no_wrong_questions + '</p>';
+    return;
+  }
+
+  box.style.display = 'block';
+  box.innerHTML = [
+    '<h3>' + LABELS.wrong_review_title + '</h3>',
+    '<p>' + LABELS.wrong_review_intro.replace('__COUNT__', wrongItems.length) + '</p>',
+    '<div class="wrong-review-actions">',
+    '<button type="button" onclick="downloadWrongReview()">' + LABELS.download_wrong_review + '</button>',
+    '<button type="button" onclick="copyWrongReviewPrompt()">' + LABELS.copy_wrong_review_prompt + '</button>',
+    '</div>',
+    '<textarea id="wrong-review-text" readonly rows="12">' + LAST_WRONG_REVIEW.replace(/&/g, '&amp;').replace(/</g, '&lt;') + '</textarea>'
+  ].join('');
+}
+
+function renderWrongReviewMarkdown(wrongItems) {
+  var now = new Date().toLocaleString();
+  var lines = [];
+
+  lines.push('# ExamPass 错题分析文档');
+  lines.push('');
+  lines.push('- 生成时间：' + now);
+  lines.push('- 错题数量：' + wrongItems.length);
+  lines.push('');
+  lines.push('## 给模型的错题分析 Prompt');
+  lines.push('');
+  if (WRONG_REVIEW_PROMPT) {
+    lines.push(WRONG_REVIEW_PROMPT);
+  } else {
+    lines.push('请根据下面的错题记录，分析我的错因，并给出继续学习方案。要求：');
+    lines.push('1. 按知识模块归类错题，不要只逐题复述答案；');
+    lines.push('2. 判断每道题错在概念定义、公式推导、图表理解、条件适用、计算步骤、概念混淆还是审题；');
+    lines.push('3. 对涉及公式或推导的错题，补全从前提到结论的推导链条，不能跳步；');
+    lines.push('4. 对选择题，解释我选错选项为什么有迷惑性，以及正确选项和错误选项的关键边界；');
+    lines.push('5. 给出需要回看课件的具体知识点、图表、公式和页/章节线索；');
+    lines.push('6. 最后生成一份二次学习清单和 5 道针对这些薄弱点的进阶训练题。');
+  }
+  lines.push('');
+  lines.push('## 错题记录');
+  lines.push('');
+
+  if (!wrongItems.length) {
+    lines.push('本次没有客观题错题。');
+    return lines.join('\n');
+  }
+
+  for (var i = 0; i < wrongItems.length; i++) {
+    var item = wrongItems[i];
+    lines.push('### 错题 ' + (i + 1) + '：第 ' + item.number + ' 题');
+    lines.push('');
+    lines.push('- 题型：' + item.type);
+    lines.push('- 分值：' + item.points);
+    lines.push('- 题干：' + item.question);
+    if (item.options.length) {
+      lines.push('- 选项：');
+      for (var j = 0; j < item.options.length; j++) {
+        lines.push('  - ' + String.fromCharCode(65 + j) + '. ' + item.options[j]);
+      }
+    }
+    lines.push('- 我的答案：' + item.userAnswer);
+    lines.push('- 正确答案：' + item.correctAnswer);
+    lines.push('- 解析：' + item.explanation);
+    if (item.pitfall) lines.push('- 易错点：' + item.pitfall);
+    if (item.knowledgePoint) lines.push('- 对应知识点：' + item.knowledgePoint);
+    lines.push('');
+  }
+
+  return lines.join('\n');
+}
+
+function downloadWrongReview() {
+  if (!LAST_WRONG_REVIEW) return;
+  var blob = new Blob([LAST_WRONG_REVIEW], {type: 'text/markdown;charset=utf-8'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = '错题分析文档.md';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function copyWrongReviewPrompt() {
+  var text = LAST_WRONG_REVIEW || '';
+  if (!text) return;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text);
+  } else {
+    var ta = document.getElementById('wrong-review-text');
+    if (ta) {
+      ta.focus();
+      ta.select();
+      document.execCommand('copy');
+    }
+  }
+}
+
+</script>
+</body>
+</html>

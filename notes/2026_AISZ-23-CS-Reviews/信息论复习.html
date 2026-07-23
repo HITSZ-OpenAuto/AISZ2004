@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>信息论复习 · 知识图谱与考点</title>
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$','$'],['\\(','\\)']], displayMath: [['$$','$$'],['\\[','\\]']] },
+  svg: { fontCache: 'global' }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" id="MathJax-script" async></script>
+<style>
+:root{
+  --bg:#0f1419; --panel:#171e26; --panel2:#1d262f; --line:#2a3744;
+  --txt:#e6edf3; --muted:#8b97a3; --accent:#4aa3df;
+  --proof:#e5484d; --calc:#f5a623; --concept:#3fb950;
+  --proofbg:#3a1417; --calcbg:#3a2a0d; --conceptbg:#11331c;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,"PingFang SC","Microsoft YaHei",Segoe UI,sans-serif;
+  background:var(--bg);color:var(--txt);line-height:1.6;font-size:15px}
+a{color:var(--accent)}
+header{padding:28px 24px 18px;border-bottom:1px solid var(--line);
+  background:linear-gradient(180deg,#172230,#0f1419)}
+h1{margin:0 0 6px;font-size:26px}
+.sub{color:var(--muted);font-size:14px}
+.wrap{max-width:1180px;margin:0 auto;padding:0 24px}
+.bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:16px 0}
+.btn{background:var(--panel);border:1px solid var(--line);color:var(--txt);
+  padding:7px 13px;border-radius:8px;cursor:pointer;font-size:13px;transition:.15s}
+.btn:hover{border-color:var(--accent)}
+.btn.active{background:var(--accent);border-color:var(--accent);color:#06121c;font-weight:600}
+.btn.pf.active{background:var(--proof);border-color:var(--proof);color:#fff}
+.btn.ca.active{background:var(--calc);border-color:var(--calc);color:#1a1206}
+.btn.co.active{background:var(--concept);border-color:var(--concept);color:#06210e}
+.legend{display:flex;gap:16px;flex-wrap:wrap;margin:8px 0 0;font-size:13px;color:var(--muted)}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:middle}
+.d-pf{background:var(--proof)}.d-ca{background:var(--calc)}.d-co{background:var(--concept)}
+
+section.module{margin:26px 0}
+.mod-head{display:flex;align-items:baseline;gap:12px;border-left:4px solid var(--accent);
+  padding-left:12px;margin-bottom:6px}
+.mod-head h2{margin:0;font-size:20px}
+.mod-head .tag{color:var(--muted);font-size:13px}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;
+  margin:12px 0;overflow:hidden}
+.card-head{display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer;user-select:none}
+.card-head:hover{background:var(--panel2)}
+.card-head .lec{font-weight:700;font-size:16px;flex:1}
+.card-head .code{font-size:12px;color:var(--muted);background:#0d1318;border:1px solid var(--line);
+  padding:2px 8px;border-radius:20px}
+.chev{transition:.2s;color:var(--muted)}
+.card.open .chev{transform:rotate(90deg)}
+.mini{display:flex;gap:6px;margin-right:4px}
+.mini span{width:8px;height:8px;border-radius:50%}
+.card-body{display:none;padding:0 16px 16px;border-top:1px solid var(--line)}
+.card.open .card-body{display:block}
+
+.kp{border:1px solid var(--line);border-left-width:4px;border-radius:8px;
+  padding:10px 13px;margin:10px 0;background:var(--panel2)}
+.kp.pf{border-left-color:var(--proof)}
+.kp.ca{border-left-color:var(--calc)}
+.kp.co{border-left-color:var(--concept)}
+.kp-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.kp-title{font-weight:600}
+.badge{font-size:11px;padding:1px 7px;border-radius:20px;font-weight:600}
+.badge.pf{background:var(--proofbg);color:#ff8a8d;border:1px solid #5a2024}
+.badge.ca{background:var(--calcbg);color:#ffce7a;border:1px solid #5a4410}
+.badge.co{background:var(--conceptbg);color:#74e08c;border:1px solid #1f5430}
+.star{color:#ffd24a;font-weight:700}
+.kp p{margin:6px 0 0;color:#cdd6df;font-size:14px}
+.kp .formula{margin:6px 0 0;overflow-x:auto}
+.check{margin-left:auto;cursor:pointer;accent-color:var(--accent);width:17px;height:17px}
+.kp.done{opacity:.5}
+.kp.done .kp-title{text-decoration:line-through}
+
+.exam{background:linear-gradient(135deg,#2a1216,#1a0c0e);border:1px solid #5a2024;
+  border-radius:12px;padding:18px 20px;margin:20px 0}
+.exam h2{margin:0 0 4px;color:#ff8a8d}
+.exam ol{margin:10px 0 0;padding-left:22px}
+.exam li{margin:6px 0}
+.flow{font-size:13px;color:var(--muted);background:#0d1318;border:1px solid var(--line);
+  border-radius:6px;padding:8px 11px;margin-top:6px;font-family:ui-monospace,monospace}
+
+.map{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px;margin:14px 0}
+.map svg{width:100%;height:auto;display:block}
+.note{color:var(--muted);font-size:13px}
+
+table.sched{width:100%;border-collapse:collapse;margin-top:10px;font-size:13.5px}
+table.sched th,table.sched td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+table.sched th{background:var(--panel2);color:var(--accent)}
+table.sched td:first-child{white-space:nowrap;color:var(--muted);font-weight:600}
+
+.progress-wrap{position:sticky;top:0;z-index:5;background:rgba(15,20,25,.92);
+  backdrop-filter:blur(6px);border-bottom:1px solid var(--line);padding:8px 0}
+.pbar{height:8px;background:var(--panel2);border-radius:6px;overflow:hidden}
+.pbar > i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--concept),var(--accent));transition:.3s}
+.ptext{font-size:12px;color:var(--muted);margin-top:4px}
+footer{color:var(--muted);font-size:12px;text-align:center;padding:30px 0}
+.hidden{display:none!important}
+.pill{display:inline-block;font-size:11px;color:var(--muted);border:1px solid var(--line);
+  border-radius:20px;padding:1px 8px;margin:2px 3px 0 0}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <h1>信息论 · 复习知识图谱</h1>
+    <div class="sub">哈工深 / 白方教授 · 覆盖 Lecture 2–14 · 难度排序：<b style="color:var(--proof)">掌握证明</b> &gt; <b style="color:var(--calc)">计算结果</b> &gt; <b style="color:var(--concept)">掌握概念</b></div>
+  </div>
+</header>
+
+<div class="progress-wrap">
+  <div class="wrap">
+    <div class="pbar"><i id="pbar"></i></div>
+    <div class="ptext"><span id="ptext">已掌握 0 / 0</span> · 勾选每个知识点右侧复选框记录进度（自动保存到本机）</div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <div class="bar">
+    <span class="note" style="margin-right:4px">筛选难度：</span>
+    <button class="btn flt active" data-f="all">全部</button>
+    <button class="btn flt pf" data-f="pf">★ 证明</button>
+    <button class="btn flt ca" data-f="ca">计算</button>
+    <button class="btn flt co" data-f="co">概念</button>
+    <span style="flex:1"></span>
+    <button class="btn" id="expandAll">展开全部</button>
+    <button class="btn" id="collapseAll">收起全部</button>
+    <button class="btn" id="resetProg">清空进度</button>
+  </div>
+  <div class="legend">
+    <span><span class="dot d-pf"></span>证明（最难，必须能自己写出推导）</span>
+    <span><span class="dot d-ca"></span>计算（会套公式算数）</span>
+    <span><span class="dot d-co"></span>概念（理解定义与直觉）</span>
+    <span><span class="star">★</span> = 老师明确点名的必考证明</span>
+  </div>
+
+  <!-- ============ 讲解型阅读材料入口 ============ -->
+  <div class="exam" style="background:#13202b;border-color:#2d4a63">
+    <h2>📖 讲解型复习资料（看不懂 PDF 就先读这里）</h2>
+    <div class="note">这三份是把 PDF 里讲得太简略的内容，用大白话 + 逐步推导重写的<strong>可阅读讲义</strong>。每个必考证明都拆成了可背诵的台阶。建议先读完这三份，再回到本页用筛选/进度功能查漏。</div>
+    <ol style="list-style:none;padding-left:0">
+      <li style="margin:8px 0"><a href="模块一_基础工具.html" style="color:#4ea1ff;font-size:18px;font-weight:600;text-decoration:none">① 模块一 · 基础工具 →</a><br><span class="note">信息度量、熵/互信息、KL 散度、Jensen/Log-sum/Gibbs、凹凸性</span></li>
+      <li style="margin:8px 0"><a href="模块二_信源编码.html" style="color:#4ea1ff;font-size:18px;font-weight:600;text-decoration:none">② 模块二 · 信源编码 →</a><br><span class="note">AEP/典型集、熵率、Kraft/变长码、Huffman 最优性、DPI/Fano　<span class="star">含 3 个必考证明</span></span></li>
+      <li style="margin:8px 0"><a href="模块三_信道编码.html" style="color:#4ea1ff;font-size:18px;font-weight:600;text-decoration:none">③ 模块三 · 信道编码 →</a><br><span class="note">信道容量、噪声信道编码定理正反证明、高斯/注水、Hamming、率失真　<span class="star">含最重必考证明</span></span></li>
+    </ol>
+  </div>
+
+  <!-- ============ 考试重点 ============ -->
+  <div class="exam">
+    <h2>🎯 考试重点对照表（按老师 revise 提纲）</h2>
+    <div class="note">老师明确：<b>基本概念不直接考证明</b>；要默写的证明只有 <span class="star">AEP</span> 和 <span class="star">噪声信道编码定理</span>。带 ★★★ 的是老师重点强调项。下表按老师的 8 个板块对应到讲义位置。</div>
+    <ol>
+      <li><b>① 不等式</b> — Jensen；数据处理不等式 DPI（马氏链）；Fano（特殊马氏链，引申 <b>Fisher 信息</b>）。<span class="tag">→ 模块一 §4 / 模块二 L9</span></li>
+      <li><b>② 长序列特性</b> — <span class="star">AEP（必默写证明）</span>、典型集、定长编码方案；<b>了解</b> SMB 定理 + 经验分布。<span class="tag">→ 模块二 L4</span>
+        <div class="flow">大数定理 → AEP → 典型集概率≈1 → 典型集大小界 → 定长编码定理</div></li>
+      <li><b>③ ★★★ 几何理解（老师重点）</b> — 传输极限 = <b>噪声球（打包）</b>；压缩极限 = <b>失真球（覆盖）</b>。<span class="tag">→ 模块三 §几何理解</span></li>
+      <li><b>④ 噪声信道编码定理</b> — <span class="star">正向 + 反向，证明过程务必掌握，最重</span>。
+        <div class="flow">正向：随机编码 + 联合典型译码 + Joint Typicality Lemma + Union bound&nbsp;&nbsp;|&nbsp;&nbsp;反向：DPI + Fano</div></li>
+      <li><b>⑤ 编码</b> — Kraft–McMillan；Huffman；最优前缀码性质 → Huffman 最优性；<span class="star">★★★ Hamming</span>（GF(2) 零空间 + 分组奇偶校验、检错/纠错、校验位如何分组）。<span class="tag">→ 模块二 L7/L8 + 模块三 L13</span></li>
+      <li><b>⑥ 率失真</b> — 两个假设、强典型集控制、覆盖引理；$R(D)=\min I$ 及其性质。<span class="tag">→ 模块三 L14</span></li>
+      <li><b>⑦ 马尔可夫性</b> — 状态转移矩阵/图；<b>稳态分布（特征值法）</b>、熵率计算；平稳遍历性（不可约 + 非周期 ⟹ 遍历）；指数族充分统计量判断。<span class="tag">→ 模块二 L6</span></li>
+      <li><b>⑧ 连续情况</b> — 微分熵；高斯（闭式、<b>微分熵只与协方差行列式有关</b>、最大熵、互信息与线性相关）；<b>水填充（要求计算）</b>。<span class="tag">→ 模块三 L12</span></li>
+    </ol>
+    <div class="note" style="margin-top:10px">📌 必须能在白纸默写的两个证明：<b>AEP + 典型集大小界</b>、<b>噪声信道编码定理正反向</b>。其余证明（Huffman、变长、Kraft）理解思路即可，老师说基本概念不直接考证明。</div>
+  </div>
+
+  <!-- ============ 知识地图 ============ -->
+  <div class="map">
+    <div class="mod-head" style="border:none;padding:0;margin-bottom:8px"><h2>🗺️ 全局依赖图</h2><span class="tag">箭头 = “被用到 / 推出”；点击节点跳转</span></div>
+    <svg id="depmap" viewBox="0 0 1140 430" xmlns="http://www.w3.org/2000/svg" font-family="inherit">
+      <defs>
+        <marker id="ar" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto">
+          <path d="M0,0 L7,3 L0,6 Z" fill="#5b6b7a"/>
+        </marker>
+      </defs>
+      <style>
+        .nd rect{rx:9;cursor:pointer;stroke-width:1.5}
+        .nd text{fill:#e6edf3;font-size:12.5px;font-weight:600;pointer-events:none}
+        .nd .t2{fill:#9fb0bf;font-size:10.5px;font-weight:400}
+        .edge{stroke:#5b6b7a;stroke-width:1.5;fill:none;marker-end:url(#ar)}
+        .grp{fill:#9fb0bf;font-size:12px;font-weight:700;letter-spacing:1px}
+      </style>
+      <!-- group labels -->
+      <text class="grp" x="30" y="26">基础工具</text>
+      <text class="grp" x="30" y="170">信源编码 / 压缩</text>
+      <text class="grp" x="30" y="316">信道编码 / 通信</text>
+
+      <!-- edges -->
+      <path class="edge" d="M205,60 L300,60"/>            <!-- L2->L3 -->
+      <path class="edge" d="M150,82 L150,150"/>           <!-- L2->L4 -->
+      <path class="edge" d="M360,82 L420,150"/>           <!-- L3->L7 -->
+      <path class="edge" d="M150,200 L150,150" transform="translate(0,0)"/>
+      <path class="edge" d="M245,178 L300,178"/>          <!-- L4->L6 -->
+      <path class="edge" d="M245,178 L420,178"/>          <!-- L4->L7 -->
+      <path class="edge" d="M515,178 L600,178"/>          <!-- L7->L8 -->
+      <path class="edge" d="M150,200 L150,300"/>          <!-- L4->L9 (typical->channel) -->
+      <path class="edge" d="M360,200 L470,300"/>          <!-- L9 from L3? actually L2/9 -->
+      <path class="edge" d="M245,322 L300,322"/>          <!-- L9->L10 -->
+      <path class="edge" d="M515,322 L600,322"/>          <!-- L10->L11 -->
+      <path class="edge" d="M720,322 L800,322"/>          <!-- L11->L12 -->
+      <path class="edge" d="M920,322 L1000,322"/>         <!-- L12->L13? keep -->
+      <path class="edge" d="M205,200 L470,305"/>          <!-- L4 typical -> L10 jointly typical -->
+
+      <!-- nodes -->
+      <g class="nd" data-go="L2"><rect x="60" y="40" width="145" height="44" fill="#16252f" stroke="#2f4a5c"/><text x="72" y="60">L2 信息度量</text><text class="t2" x="72" y="76">H,I,KL,链式法则</text></g>
+      <g class="nd" data-go="L3"><rect x="300" y="40" width="160" height="44" fill="#16252f" stroke="#2f4a5c"/><text x="312" y="60">L3 不等式·凹凸</text><text class="t2" x="312" y="76">Jensen / Log-sum</text></g>
+
+      <g class="nd" data-go="L4"><rect x="100" y="156" width="145" height="44" fill="#2a1f12" stroke="#5a4410"/><text x="112" y="176">L4 AEP·典型集</text><text class="t2" x="112" y="192">★定长编码定理</text></g>
+      <g class="nd" data-go="L6"><rect x="300" y="156" width="120" height="44" fill="#1d262f" stroke="#3a4a5a"/><text x="312" y="176">L6 熵率</text><text class="t2" x="312" y="192">Markov 稳态</text></g>
+      <g class="nd" data-go="L7"><rect x="420" y="156" width="95" height="44" fill="#2a1f12" stroke="#5a4410"/><text x="432" y="176">L7 Kraft</text><text class="t2" x="432" y="192">★变长码</text></g>
+      <g class="nd" data-go="L8"><rect x="600" y="156" width="120" height="44" fill="#2a1212" stroke="#5a2024"/><text x="612" y="176">L8 Huffman</text><text class="t2" x="612" y="192">★最优性证明</text></g>
+
+      <g class="nd" data-go="L9"><rect x="100" y="300" width="145" height="44" fill="#1d262f" stroke="#3a4a5a"/><text x="112" y="320">L9 DPI·Fano</text><text class="t2" x="112" y="336">数据处理/估计界</text></g>
+      <g class="nd" data-go="L10"><rect x="300" y="300" width="170" height="44" fill="#2a1f12" stroke="#5a4410"/><text x="312" y="320">L10 信道容量</text><text class="t2" x="312" y="336">联合典型集</text></g>
+      <g class="nd" data-go="L11"><rect x="600" y="300" width="120" height="44" fill="#2a1212" stroke="#5a2024"/><text x="610" y="320">L11 编码定理</text><text class="t2" x="610" y="336">★★正反证明</text></g>
+      <g class="nd" data-go="L12"><rect x="800" y="300" width="120" height="44" fill="#2a1f12" stroke="#5a4410"/><text x="810" y="320">L12 高斯信道</text><text class="t2" x="810" y="336">水填充</text></g>
+      <g class="nd" data-go="L13"><rect x="1000" y="300" width="115" height="44" fill="#1d262f" stroke="#3a4a5a"/><text x="1010" y="320">L13 Hamming</text><text class="t2" x="1010" y="336">Viterbi/GF(2)</text></g>
+      <g class="nd" data-go="L14"><rect x="1000" y="156" width="115" height="44" fill="#1d262f" stroke="#3a4a5a"/><text x="1010" y="176">L14 率失真</text><text class="t2" x="1010" y="192">R(D) 有损压缩</text></g>
+    </svg>
+    <div class="note" style="margin-top:8px">主线两条：<b>压缩</b>（L4典型集 → L7/L8编码 → L14率失真）与 <b>通信</b>（L10联合典型集 → L11编码定理 → L12高斯）。基础 L2/L3 贯穿一切；L9 的 DPI+Fano 是 L11 反向证明的工具。</div>
+  </div>
+
+  <!-- ============ 模块与卡片由 JS 渲染 ============ -->
+  <div id="cards"></div>
+
+  <!-- ============ 两周计划 ============ -->
+  <section class="module">
+    <div class="mod-head"><h2>📅 两周复习计划</h2><span class="tag">证明优先，每天先默写一个必考证明</span></div>
+    <table class="sched">
+      <tr><th>时段</th><th>重点</th><th>产出</th></tr>
+      <tr><td>第1天</td><td>L2 信息度量 + L3 不等式凹凸性</td><td>背熟所有度量定义与 Venn 图；会用 Jensen / Log-sum 证 KL≥0、熵凹凸</td></tr>
+      <tr><td>第2–3天</td><td>L4 AEP·典型集 <span class="star">★</span></td><td>独立默写 AEP 推导 + 典型集大小界 + 定长编码定理</td></tr>
+      <tr><td>第4天</td><td>L7 Kraft·变长编码 <span class="star">★</span></td><td>默写 Kraft 充分/必要性、变长编码定理、$l^*=-\log p$</td></tr>
+      <tr><td>第5天</td><td>L8 Huffman <span class="star">★</span></td><td>默写最优性递归证明；手算几个 Huffman 树</td></tr>
+      <tr><td>第6天</td><td>L6 熵率 + L9 DPI·Fano</td><td>会算 Markov 稳态熵率；推 DPI、Fano 不等式</td></tr>
+      <tr><td>第7天</td><td>阶段复盘 + 重做压缩部分证明</td><td>把 L4/L7/L8 三个证明连写一遍</td></tr>
+      <tr><td>第8–9天</td><td>L10 信道容量 + 联合典型集</td><td>会算 BSC/BEC/对称信道容量；默写 Joint Typicality Lemma</td></tr>
+      <tr><td>第10–11天</td><td>L11 噪声信道编码定理 <span class="star">★★</span></td><td>正向（随机编码+联合典型）与反向（DPI+Fano）各默写一遍</td></tr>
+      <tr><td>第12天</td><td>L12 高斯信道 + 水填充</td><td>推 $\frac12\log(1+P/\sigma^2)$；会做并行信道水填充</td></tr>
+      <tr><td>第13天</td><td>L13 Hamming + L14 率失真</td><td>理解 GF(2) 校验、汉明码；会算高斯信源 $R(D)$</td></tr>
+      <tr><td>第14天</td><td>全真模拟：默写全部必考证明</td><td>查漏补缺，回到本页未勾选项</td></tr>
+    </table>
+  </section>
+
+  <footer>本页离线可用 · 进度保存在浏览器 localStorage · 数学公式由 MathJax 渲染</footer>
+</div>
+
+<script>
+// ---------- 数据：所有讲义知识点 ----------
+const DATA = [
+ { mod:"基础工具", tag:"L2–L3 · 贯穿全程", lectures:[
+   { id:"L2", name:"信息度量", code:"Lecture 2", points:[
+     {d:"co",t:"单事件信息量（公理化）",x:"单调递减 + 独立可加 + 连续性 $\\Rightarrow I(x)=-\\log p(x)$；bit/nat/hart 仅差底数。"},
+     {d:"co",t:"信息熵 H(X)",x:"$$H(X)=\\mathbb{E}\\big[\\log\\tfrac1{p(X)}\\big]=\\sum_x p(x)\\log\\tfrac1{p(x)}=H(p)$$ 只与分布有关，是泛函；非负、与取值顺序无关。"},
+     {d:"co",t:"条件熵 H(X|Y)",x:"$$H(X|Y)=\\sum_y p(y)H(X|Y{=}y)$$ “充分观测 Y 后 X 剩余的不确定性”。"},
+     {d:"co",t:"互信息 I(X;Y)",x:"$$I(X;Y)=H(X)-H(X|Y)=\\sum p(x,y)\\log\\tfrac{p(x,y)}{p(x)p(y)}$$ 对称；$I(X;X)=H(X)$；信息增益。"},
+     {d:"pf",t:"联合熵与链式法则",x:"$$H(X,Y)=H(X)+H(Y|X)$$ 证明用 $p(x,y)=p(x)p(y|x)$ 拆 log；推广 $H(X_1..X_n)=\\sum_i H(X_i|X_{i-1}..X_1)$。"},
+     {d:"co",t:"KL 散度 / 相对熵",x:"$$D_{KL}(p\\|q)=\\sum_x p(x)\\log\\tfrac{p(x)}{q(x)}\\ge 0$$ 非对称、不满足三角不等式；$I(X;Y)=D_{KL}(p(x,y)\\|p(x)p(y))$。"},
+     {d:"co",t:"交叉熵",x:"$$CE(p\\|q)=H(p)+D_{KL}(p\\|q)$$ 用 q 近似 p 的编码总开销；p 固定时 min CE ⟺ min KL。"},
+   ]},
+   { id:"L3", name:"不等式与凹凸性", code:"Lecture 3", points:[
+     {d:"co",t:"凸函数定义与切线支撑",x:"$\\lambda f(x_1)+(1-\\lambda)f(x_2)\\ge f(\\lambda x_1+(1-\\lambda)x_2)$；凸函数恒在其线性支撑之上 $f(x)\\ge f(x_0)+f'(x_0)(x-x_0)$。"},
+     {d:"pf",t:"Jensen 不等式",x:"由切线支撑取期望：$$\\mathbb{E}[f(X)]\\ge f(\\mathbb{E}[X])\\;(f\\text{ 凸})$$ 严格凸时等号 ⟺ X 为常数。常用：$-\\log$、$x\\log x$。"},
+     {d:"pf",t:"Log-sum 不等式",x:"$$\\sum_i a_i\\log\\tfrac{a_i}{b_i}\\ge\\Big(\\sum_i a_i\\Big)\\log\\tfrac{\\sum a_i}{\\sum b_i}$$ 信息论证明利器；等号 ⟺ $a_i/b_i$ 为常数。"},
+     {d:"pf",t:"KL 非负性（Gibbs）",x:"用 Jensen（$-\\log$ 凸）或 Log-sum：$D_{KL}\\ge0$，等号 ⟺ $p=q$。推论：$I(X;Y)\\ge0$、$H(X|Y)\\le H(X)$、$H(X)+H(Y)\\ge H(X,Y)$。"},
+     {d:"co",t:"均匀分布熵最大",x:"$$H(p)=\\log|\\mathcal X|-D_{KL}(p\\|u)\\le\\log|\\mathcal X|$$ 等号 ⟺ 均匀分布。"},
+     {d:"pf",t:"熵 / KL / 互信息的凹凸性",x:"$H(p)$ 关于 p 是凹函数（Log-sum 或“混合增加熵”$H(X|Y)\\le H(X)$）；$D_{KL}(p\\|q)$ 关于 $(p,q)$ 凸；给定 $p(y|x)$，$I$ 关于 $p(x)$ 凹；给定 $p(x)$，$I$ 关于 $p(y|x)$ 凸。"},
+   ]},
+ ]},
+ { mod:"信源编码 / 数据压缩", tag:"L4 · L6 · L7 · L8 · L9", lectures:[
+   { id:"L4", name:"AEP 与典型集", code:"Lecture 4", points:[
+     {d:"co",t:"大数定理 & 切比雪夫不等式",x:"$\\bar X\\to\\mathbb E[X]$（依概率）；$p(|\\bar X-\\mathbb E[X]|\\ge\\epsilon)\\le\\frac{\\sigma^2}{n\\epsilon^2}$。AEP 的概率收敛基石。"},
+     {d:"pf",t:"渐近等分性 AEP",x:"$$\\tfrac1n\\log\\tfrac1{p(X^n)}=\\tfrac1n\\sum_i\\log\\tfrac1{p(X_i)}\\xrightarrow{\\text{LLN}}H(X)$$ 即 $p(X^n\\in A_\\epsilon^{(n)})\\to1$。",star:true},
+     {d:"pf",t:"典型集定义与大小界",x:"$A_\\epsilon^{(n)}=\\{x^n:|\\frac1n\\log\\frac1{p(x^n)}-H|\\le\\epsilon\\}$，元素概率 $2^{-n(H+\\epsilon)}\\!\\le p\\le 2^{-n(H-\\epsilon)}$；大小 $(1-\\epsilon)2^{n(H-\\epsilon)}\\le|A_\\epsilon^{(n)}|\\le 2^{n(H+\\epsilon)}$（上界用 $\\sum p\\le1$，下界用 $\\sum p\\ge1-\\epsilon$）。",star:true},
+     {d:"co",t:"典型集占比与可压缩性",x:"$|A_\\epsilon|/|\\mathcal X|^n\\approx 2^{-nD_{KL}(p\\|u)}$；H 越小 / KL 越大，典型集越小（越可压缩）。"},
+     {d:"pf",t:"信源定长编码定理",x:"误差 δ 内最小集合 $S_\\delta$ 满足 $|\\frac1n\\log_2|S_\\delta|-H(X)|<\\epsilon$。典型集只需 $\\lceil n(H+\\epsilon)\\rceil+1$ bit；任何更小集合（$|B|\\le2^{n(H-\\delta)}$）概率 →0。",star:true},
+   ]},
+   { id:"L6", name:"熵率与马尔可夫信源", code:"Lecture 6", points:[
+     {d:"co",t:"平稳 / 平稳遍历过程",x:"平稳：联合分布时间平移不变。遍历：时间平均 = 空间平均（Birkhoff）。AEP 推广为 SMB 定理 $\\frac1n\\log\\frac1{p(X^n)}\\to\\frac1n H(X^n)$。"},
+     {d:"co",t:"马尔可夫性",x:"$p(X_n|X_{n-1}..X_1)=p(X_n|X_{n-1})$；过去与未来在给定现在时条件独立；反向链也是马尔可夫链。"},
+     {d:"ca",t:"状态转移矩阵与稳态分布",x:"$p_{X_0}=p_{X_{-1}}P$；稳态 $u=uP$（解 $u_j=\\sum_i u_iP_{ij}$，或细致平衡 $u_iP_{ij}=u_jP_{ji}$）。"},
+     {d:"ca",t:"马尔可夫熵率",x:"$$\\lim_n\\tfrac1n H(X^n)=H(X_0|X_{-1})=\\sum_i u_i\\sum_j P_{ij}\\log\\tfrac1{P_{ij}}$$ 例：稳态 $(5/14,1/7,1/7,5/14)$ 算得 0.80 bit/符号。"},
+     {d:"co",t:"遍历性条件",x:"有限状态：不可约（$\\exists N,(P^N)_{ij}>0$）+ 非周期（回环长度 gcd=1，看自环）⇒ 遍历；Perron–Frobenius 保证唯一正稳态。"},
+   ]},
+   { id:"L7", name:"Kraft 不等式与变长编码", code:"Lecture 7", points:[
+     {d:"co",t:"唯一可译码 / 即时码 = 前缀码",x:"前缀码：无码字是另一码字前缀 ⟺ 即时可译 ⟺ 码树“根-叶”路径。前缀码必唯一可译。"},
+     {d:"pf",t:"二分分布性质",x:"$p(x)=2^{-n_x}$；最小概率元素必为偶数个（$2^{n_{max}}=\\sum A_n2^{n_{max}-n}$ 两偶相消）；可反复融合构造前缀树。"},
+     {d:"pf",t:"Kraft–McMillan 不等式",x:"$\\sum_x D^{-l(x)}\\le1$ ⟺ 存在该长度前缀码（充分性：二分分布构造树；必要性：完全二叉树叶子计数 $\\sum 2^{l_{max}-l_i}\\le2^{l_{max}}$）。McMillan：唯一可译码用 $S^N$ 展开同样得 $S\\le1$，说明前缀码已最优。",star:true},
+     {d:"pf",t:"最优编码长度（拉格朗日）",x:"min $\\sum p_il_i$ s.t. $\\sum D^{-l_i}\\le1$ ⇒ $l^*(x)=-\\log_D p(x)$，$L^*=H(X)$（D=2）。或用 KL≥0 + Kraft 直接证 $\\sum p_il_i\\ge\\sum p_i\\log_D\\frac1{p_i}$。",star:true},
+     {d:"pf",t:"变长编码定理",x:"取 $l(x)=\\lceil-\\log p(x)\\rceil$，Kraft 成立，$$H(X)\\le L<H(X)+1$$",star:true},
+     {d:"co",t:"Shannon 码 & 编码开销",x:"$l_{Shannon}=\\lceil-\\log p\\rceil$；用错分布 q 编码额外开销 $L(q)=H(X)+D_{KL}(p\\|q)$。"},
+   ]},
+   { id:"L8", name:"Huffman 码", code:"Lecture 8", points:[
+     {d:"ca",t:"Huffman 构造（贪心）",x:"反复取两个最小概率符号合并；得最优前缀码树。手算要熟练。"},
+     {d:"pf",t:"Huffman 最优性证明",x:"① 最优码树性质：$p_i$ 大 ⇒ $l_i$ 小；两最小概率符号码长相等且为兄弟。② 扩展/融合：$L_U^*=L_V^*+(p_{r-1}+p_r)$ ⇒ 原问题与子问题同时最优，对符号数归纳。",star:true},
+     {d:"co",t:"Huffman vs Shannon vs 最优",x:"最优 $l^*=-\\log p$（分数取不到）；Shannon 取上整为近似解；Huffman 是整数约束下的精确最优解，$L_{Huff}\\le L_{Shannon}$。"},
+     {d:"co",t:"块编码与冗余界",x:"$\\frac1N H(X^N)\\le L_{Huff}<\\frac1N H(X^N)+\\frac1N$；Gallager 冗余界。Huffman 与 “最少 YES/NO 问题” 等价。"},
+   ]},
+   { id:"L9", name:"数据处理与 Fano 不等式", code:"Lecture 9", points:[
+     {d:"pf",t:"数据处理不等式 DPI",x:"马尔可夫链 $X\\to Y\\to Z$：$I(X;Y)\\ge I(X;Z)$。证明用 $I(X;Y,Z)$ 两种链式展开，$I(X;Y|Z)\\ge0$ 且 $I(X;Z|Y)=0$。含义：处理观测无法增加关于 X 的信息。"},
+     {d:"co",t:"充分统计量",x:"$I(\\theta;T(X))=I(\\theta;X)$ ⟺ $\\theta\\to T(X)\\to X$；Fisher–Neyman 分解 $f(x;\\theta)=h(x)g(T(x);\\theta)$；指数族 $T=\\sum\\tau(x_i)$。"},
+     {d:"pf",t:"Fano 不等式",x:"$X\\to Y\\to\\hat X$，$P_e=P(X\\ne\\hat X)$：$$H(X|Y)\\le 1+P_e\\log|\\mathcal X|\\;\\Rightarrow\\;P_e\\ge\\tfrac{H(X|Y)-1}{\\log|\\mathcal X|}$$ 用 $H(\\hat X|X)=H(E|\\hat X)+P_eH(X|\\hat X,E{=}1)$ + DPI。是 L11 反向证明的关键。"},
+     {d:"co",t:"压缩感知联系",x:"无噪 $y=Ax$（k 稀疏）最低维数 $m\\approx k\\log\\frac nk$；有噪 $y=Ax+w$ 用 Fano 判可否复原；最优投影 $A^*=\\arg\\max I(x;Ax+w)$。"},
+   ]},
+ ]},
+ { mod:"信道编码 / 可靠通信", tag:"L10 · L11 · L12 · L13 · L14", lectures:[
+   { id:"L10", name:"信道容量与联合典型集", code:"Lecture 10", points:[
+     {d:"co",t:"DMC 与可达速率",x:"离散无记忆信道 $P_{Y^n|X^n}=\\prod_i P_{Y|X}$；速率 $R=\\frac{\\log_2 M}{n}$；可达 = 存在编码方案使误差→0。"},
+     {d:"co",t:"信道容量定义",x:"$$C=\\max_{p_X} I(X;Y)$$ 给定信道矩阵，$I$ 关于 $p_X$ 凹 ⇒ 存在极大值（一阶最优即全局）。"},
+     {d:"ca",t:"信道容量计算",x:"KKT：$\\frac{\\partial I}{\\partial p_i}=D_{KL}(p(y|x_i)\\|p(y))-1=\\lambda$；对称信道最优输入是均匀分布。BSC：$C=1-H(p)$；BEC：$C=1-\\alpha$。数值用 Blahut–Arimoto。"},
+     {d:"co",t:"ε-联合典型集",x:"$(x^n,y^n)$ 三条件：$x^n$ 典型、$y^n$ 典型、$(x^n,y^n)$ 联合典型。$|A_\\epsilon^{(n)}(X,Y)|\\le 2^{n(H(X,Y)+\\epsilon)}$。"},
+     {d:"pf",t:"Joint Typicality Lemma",x:"联合采样 $(x^n,y^n)$：$p\\to1$。独立采样 $(\\tilde x^n,\\tilde y^n)$（$\\tilde X\\sim X,\\tilde Y\\sim Y$ 独立）：$$p\\big((\\tilde x^n,\\tilde y^n)\\in A_\\epsilon^{(n)}\\big)\\le 2^{-n(I(X;Y)-3\\epsilon)}\\to0$$ 这是编码定理正向证明的核心引理。",star:true},
+   ]},
+   { id:"L11", name:"噪声信道编码定理证明", code:"Lecture 11", points:[
+     {d:"co",t:"定理陈述",x:"$$R_{max}=\\max_{p_X}I(X;Y)=C$$ 正：$R<C$ 存在编码使误差→0；反：$R>C$ 误差必 >0。"},
+     {d:"pf",t:"正向证明（可达性）",x:"① 随机编码：从 $A_\\epsilon^{(n)}(X)$ 随机选 $M=2^{nR}$ 个码字。② 联合典型译码：唯一与 $y^n$ 联合典型则译码成功。③ 平均误差 $\\mathbb E_{C_n}[P_e]\\le p((x^n(u),y^n)\\notin A_\\epsilon) + \\sum_{k\\ne u}p((x^n(k),y^n)\\in A_\\epsilon)\\le \\epsilon+(M-1)2^{-n(I-3\\epsilon)}=\\epsilon+2^{-n(I-R-3\\epsilon)}\\to0$（当 $R<I-3\\epsilon$）。④ 存在性 + expurgation 把平均误差转为最大误差。",star:true},
+     {d:"pf",t:"反向证明（不可达性）",x:"$U\\to X^n\\to Y^n\\to\\hat U$。DPI：$I(U;Y^n)\\le I(X^n;Y^n)\\le\\sum_i I(X_i;Y_i)\\le nC$。Fano：$P_e\\ge\\frac{H(U)-I(U;Y^n)-1}{H(U)}\\ge 1-\\frac{C}{R}-\\frac1{nR}$。$R>C$ ⇒ $P_e>0$。注意反向只能假设信道无记忆，不能假设 $X^n,Y^n$ 独立同分布。",star:true},
+     {d:"co",t:"几何解释（噪声球）",x:"每个码字输出端形成大小 $2^{nH(Y|X)}$ 的噪声球，输出空间总大小 $2^{nH(Y)}$，可区分要求 $2^{nR}\\cdot2^{nH(Y|X)}\\le2^{nH(Y)}$ ⇒ $R\\le I(X;Y)$。"},
+     {d:"co",t:"香浓的两个技巧",x:"① 用“平均”代替寻找好码（$\\mathbb E_{C}[P_e]\\to0\\Rightarrow\\exists C_n$）；② $f_{min}\\le\\mathbb E[f]$，非负元素期望→0 则最小元→0。"},
+   ]},
+   { id:"L12", name:"连续情况 · 高斯信道 · 水填充", code:"Lecture 12", points:[
+     {d:"co",t:"微分熵",x:"$h(X)=-\\int f\\log f$，可为负（均匀 $U(a,b)$：$h=\\log(b-a)$）；变量替换 $h(AX+c)=h(X)+\\log|\\det A|$；量化 $H(X^\\Delta)\\approx h(X)+\\log\\frac1\\Delta$。"},
+     {d:"pf",t:"高斯是最大微分熵分布",x:"$h(X^n)=\\frac n2\\log(2\\pi e)+\\frac12\\log|\\Sigma|$；同协方差下任意分布 $h\\le$ 此值（用 $D_{KL}(f\\|g)\\ge0$，g 为高斯）。"},
+     {d:"pf",t:"高斯信道容量",x:"$Y=X+W,W\\sim N(0,\\sigma^2)$，功率约束 $\\mathbb E[X^2]\\le P$：$I=h(Y)-h(W)$，$h(Y)\\le h(N(0,P+\\sigma^2))$ ⇒ $$C=\\tfrac12\\log\\!\\Big(1+\\tfrac{P}{\\sigma^2}\\Big)$$ 信噪比 $P/\\sigma^2$；几何=数球/噪声球数。"},
+     {d:"ca",t:"并行高斯信道 · 水填充",x:"$\\max\\sum\\frac12\\log(1+\\frac{P_i}{N_i})$ s.t. $\\sum P_i=P$；KKT ⇒ $P_i^*=(\\mu-N_i)^+$，$\\sum(\\mu-N_i)^+=P$。噪声 $N_i$ 为池底，注水到统一水位 μ。"},
+     {d:"ca",t:"高斯 KL 与互信息",x:"$I(X_1;X_2)=-\\frac12\\log(1-\\rho^2)$（线性不相关 ⟺ 独立）；多元高斯 KL 有闭式。"},
+   ]},
+   { id:"L13", name:"Hamming 码与 Viterbi", code:"Lecture 13", points:[
+     {d:"co",t:"零空间编码思想",x:"码字 = 校验矩阵 H 的零空间 $\\{x:Hx=0\\}$；正确数据在“流形”上，错误数据 $Hx\\ne0$ ⇒ 错误检测。"},
+     {d:"co",t:"GF(2) 算术",x:"加法=异或(XOR)；$Hx=0$ 即一组分组奇偶校验方程。"},
+     {d:"ca",t:"汉明码 Hamming(n,n−m)",x:"H 的列向量是位置编码；单错 $H(x+e_k)=\\eta_k$ 直接指出错误位置。$n=2^m-1$，可编码 $n-m$ bit；检 1~2 错、纠 1 错。例 Hamming(7,4)。"},
+     {d:"co",t:"奇偶校验算法化",x:"GF(2) 方程组 ⟺ 分组奇偶校验；校验位置于 $2^k$ 处，避免存储 H 与查表。"},
+   ]},
+   { id:"L14", name:"率失真理论（有损压缩）", code:"Lecture 14", points:[
+     {d:"co",t:"率失真权衡",x:"Rate（压缩率）↓ 与 Distortion（失真）↓ 不可兼得；R-D 与 D-R 互为对偶。常用失真：Hamming、平方误差、Itakura–Saito。"},
+     {d:"co",t:"率失真函数定义",x:"$$R(D)=R^I(D)=\\min_{p(\\hat v|v):\\mathbb E[d]\\le D} I(V;\\hat V)$$ 给定 D 的最小可达压缩率；描述可达区域边界。"},
+     {d:"pf",t:"R(D) 性质",x:"$R^I(D)$ 凸（互信息关于 $p(\\hat v|v)$ 凸 + time-sharing）；$R(0)=H(V)$；存在 $D_{max}$ 使 $R=0$；单调递减。"},
+     {d:"ca",t:"高斯信源 R(D)",x:"$V\\sim N(0,\\sigma^2)$，平方失真：$$R(D)=\\begin{cases}\\frac12\\log\\frac{\\sigma^2}{D}&0\\le D\\le\\sigma^2\\\\0&D>\\sigma^2\\end{cases}$$ 证明用 $V=\\hat V+G$、$h(N(0,D))$ 上界。"},
+   ]},
+ ]},
+];
+
+// ---------- 渲染 ----------
+const DLBL={pf:"证明",ca:"计算",co:"概念"};
+const cardsEl=document.getElementById('cards');
+let allKP=[];
+DATA.forEach((mod,mi)=>{
+  const sec=document.createElement('section'); sec.className='module';
+  sec.innerHTML=`<div class="mod-head"><h2>${mod.mod}</h2><span class="tag">${mod.tag}</span></div>`;
+  mod.lectures.forEach(lec=>{
+    const card=document.createElement('div'); card.className='card'; card.id=lec.id;
+    const counts={pf:0,ca:0,co:0}; lec.points.forEach(p=>counts[p.d]++);
+    const mini=`<span class="mini">${['pf','ca','co'].map(d=>counts[d]?`<span style="background:var(--${d=='pf'?'proof':d=='ca'?'calc':'concept'})" title="${DLBL[d]}×${counts[d]}"></span>`:'').join('')}</span>`;
+    let body='';
+    lec.points.forEach((p,pi)=>{
+      const kpid=`${lec.id}-${pi}`; allKP.push(kpid);
+      body+=`<div class="kp ${p.d}" data-d="${p.d}" data-id="${kpid}">
+        <div class="kp-head">
+          <span class="badge ${p.d}">${DLBL[p.d]}</span>
+          <span class="kp-title">${p.star?'<span class="star">★</span> ':''}${p.t}</span>
+          <input type="checkbox" class="check" data-id="${kpid}">
+        </div>
+        <div class="formula">${p.x}</div>
+      </div>`;
+    });
+    card.innerHTML=`<div class="card-head">${mini}
+        <span class="lec">${lec.name}</span>
+        <span class="code">${lec.code}</span>
+        <span class="chev">▶</span></div>
+      <div class="card-body">${body}</div>`;
+    sec.appendChild(card);
+  });
+  cardsEl.appendChild(sec);
+});
+
+// ---------- 交互 ----------
+document.querySelectorAll('.card-head').forEach(h=>h.addEventListener('click',e=>{
+  if(e.target.classList.contains('check'))return;
+  h.parentElement.classList.toggle('open');
+}));
+document.getElementById('expandAll').onclick=()=>document.querySelectorAll('.card').forEach(c=>c.classList.add('open'));
+document.getElementById('collapseAll').onclick=()=>document.querySelectorAll('.card').forEach(c=>c.classList.remove('open'));
+
+// 难度筛选
+document.querySelectorAll('.btn.flt').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('.btn.flt').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');
+  const f=b.dataset.f;
+  document.querySelectorAll('.kp').forEach(kp=>{
+    kp.classList.toggle('hidden', f!=='all' && kp.dataset.d!==f);
+  });
+  // 隐藏无可见知识点的卡片
+  document.querySelectorAll('.card').forEach(c=>{
+    const vis=[...c.querySelectorAll('.kp')].some(k=>!k.classList.contains('hidden'));
+    c.classList.toggle('hidden',!vis);
+    if(f!=='all'&&vis)c.classList.add('open');
+  });
+}));
+
+// 跳转
+document.querySelectorAll('#depmap .nd').forEach(n=>n.addEventListener('click',()=>{
+  const el=document.getElementById(n.dataset.go);
+  if(el){el.classList.add('open');el.scrollIntoView({behavior:'smooth',block:'center'});
+    el.style.transition='box-shadow .3s';el.style.boxShadow='0 0 0 2px var(--accent)';
+    setTimeout(()=>el.style.boxShadow='',1200);}
+}));
+
+// 进度（localStorage）
+const KEY='it_review_progress_v1';
+let done=JSON.parse(localStorage.getItem(KEY)||'{}');
+function applyProgress(){
+  document.querySelectorAll('.check').forEach(c=>{
+    const on=!!done[c.dataset.id]; c.checked=on;
+    c.closest('.kp').classList.toggle('done',on);
+  });
+  const total=allKP.length, n=Object.values(done).filter(Boolean).length;
+  document.getElementById('pbar').style.width=(total?100*n/total:0)+'%';
+  document.getElementById('ptext').textContent=`已掌握 ${n} / ${total}`;
+}
+document.querySelectorAll('.check').forEach(c=>c.addEventListener('change',()=>{
+  done[c.dataset.id]=c.checked; localStorage.setItem(KEY,JSON.stringify(done)); applyProgress();
+}));
+document.getElementById('resetProg').onclick=()=>{
+  if(confirm('确定清空所有进度？')){done={};localStorage.removeItem(KEY);applyProgress();}
+};
+applyProgress();
+</script>
+</body>
+</html>

@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Lecture 15：反馈信道与率失真定理证明</title>
+<script>
+MathJax = {
+  tex: {
+    inlineMath: [['$', '$']],
+    displayMath: [['$$', '$$']]
+  }
+};
+</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js"></script>
+<style>
+/* === ExamPass Shared Styles === */
+/* Paper-like warm background, clean typography, responsive */
+
+:root {
+  --paper: #fdf6e3;
+  --paper-dark: #f5ecd7;
+  --ink: #2c2c2c;
+  --ink-light: #555;
+  --accent: #2563eb;
+  --accent-hover: #1d4ed8;
+  --divider: #d6c8a8;
+  --card-bg: #fef9ef;
+  --card-border: #e8dcc8;
+  --correct: #22c55e;
+  --correct-bg: #f0fdf4;
+  --wrong: #ef4444;
+  --wrong-bg: #fef2f2;
+  --tag-bg: #fef3c7;
+  --tag-text: #92400e;
+  --radius: 6px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: "Microsoft YaHei", "Noto Sans SC", "SimSun", sans-serif;
+  font-size: 12pt; line-height: 1.75; color: var(--ink);
+  max-width: 860px; margin: auto; padding: 24px 20px 60px;
+  background: var(--paper);
+}
+
+@media print {
+  body { font-size: 10.5pt; background: #fff; }
+  .no-print { display: none !important; }
+  h1, h2, h3 { page-break-after: avoid; }
+}
+
+/* ── Header ── */
+#exampass-header {
+  display: flex; justify-content: space-between; align-items: baseline;
+  padding: 6px 0; margin-bottom: 0;
+}
+.header-brand { font-size: 1.2em; font-weight: 700; color: #1a1a2e; letter-spacing: 0.3px; }
+.header-url  { font-size: 0.78em; color: #999; }
+.header-divider { border: none; border-top: 2px solid var(--divider); margin: 4px 0 20px 0; }
+
+/* ── Typography ── */
+h1 { font-size: 1.55em; text-align: center; border-bottom: 2px solid var(--divider); padding-bottom: 8px; margin-top: 0; }
+h2 { font-size: 1.25em; border-bottom: 1px solid var(--divider); padding-bottom: 4px; margin-top: 28px; }
+h3 { font-size: 1.08em; margin-top: 20px; color: var(--ink); }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ── Tables ── */
+table { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 0.95em; }
+td, th { border: 1px solid var(--card-border); padding: 5px 9px; text-align: left; }
+th { background: var(--paper-dark); font-weight: 700; }
+
+/* ── Embedded source images ── */
+.embedded-images {
+  margin: 18px 0 24px;
+}
+.embedded-images-intro {
+  color: var(--ink-light);
+  font-size: 0.95em;
+}
+.embedded-image {
+  margin: 14px 0 18px;
+  padding: 10px;
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  background: var(--card-bg);
+  break-inside: avoid;
+}
+.embedded-image img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+  border: 1px solid var(--divider);
+  background: #fff;
+}
+.embedded-image figcaption {
+  margin-top: 8px;
+  color: var(--ink-light);
+  font-size: 0.92em;
+  line-height: 1.5;
+}
+.embedded-image-note::before {
+  content: " - ";
+}
+
+/* ── Knowledge point vs explanation ── */
+.kp { font-weight: 700; color: var(--ink); }           /* key point: bold dark */
+.exp { font-weight: 400; color: var(--ink-light); }    /* explanation: lighter */
+.exp em, .exp strong { color: var(--ink); }             /* emphasis inside explanation */
+
+/* ── Block elements ── */
+blockquote {
+  border-left: 3px solid #c0392b; background: #fef9ef;
+  padding: 6px 14px; margin: 10px 0; font-size: 0.95em;
+}
+code { background: #f0ede0; padding: 2px 5px; border-radius: 3px; font-size: 0.92em; }
+pre { background: #f0ede0; padding: 10px; border-radius: var(--radius); overflow-x: auto; }
+
+/* ── TOC ── */
+div.toc {
+  background: var(--card-bg); padding: 14px 18px;
+  border: 1px solid var(--card-border); border-radius: var(--radius); margin-bottom: 22px;
+}
+div.toc ul { padding-left: 18px; }
+div.toc li { margin: 3px 0; font-size: 0.95em; }
+
+/* ── Priority tags ── */
+.tag-must   { background: #fee2e2; color: #991b1b; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+.tag-key    { background: #fef3c7; color: #92400e; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+.tag-freq   { background: #dbeafe; color: #1e40af; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+.tag-info   { background: #f0fdf4; color: #166534; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+
+
+</style>
+</head>
+<body>
+
+<header id="exampass-header">
+  <div class="header-left"><span class="header-brand">ExamPass Assistant</span></div>
+  <div class="header-right"><span class="header-url">github.com/MIKUZ12/ExamPass-Assistant</span></div>
+</header>
+<hr class="header-divider">
+
+<h1>Lecture 15：反馈信道与率失真定理证明</h1>
+<div class="toc">
+<h2>目录</h2>
+<ul>
+<li><a href="#s10944699">一、独立同假设与证明策略</a></li>
+  <li><a href="#s60809274">可达性与反向证明的假设差异 必考</a></li>
+<li><a href="#s46966268">二、反馈信道（Feedback Channel）</a></li>
+  <li><a href="#s65144300">反馈信道模型 核心</a></li>
+  <li><a href="#s99048886">反馈不增加信道容量 必考</a></li>
+  <li><a href="#s38230130">序列互信息不等式 核心</a></li>
+<li><a href="#s46552684">三、率失真定理</a></li>
+  <li><a href="#s96377016">可达性定义 必考</a></li>
+  <li><a href="#s37095366">率失真定理陈述 必考</a></li>
+<li><a href="#s69560152">四、率失真定理：反向证明</a></li>
+  <li><a href="#s76085312">反向证明不等式链 必考</a></li>
+  <li><a href="#s68591411">关键步骤：$I(V^N;\hat{V}^N) \geq \sum I(V_i;\hat{V}_i)$ 核心</a></li>
+<li><a href="#s29174236">五、率失真定理：正向证明</a></li>
+  <li><a href="#s52216599">正向证明策略 必考</a></li>
+  <li><a href="#s37717717">弱典型序列的局限性 高频</a></li>
+<li><a href="#s21441398">六、强典型序列</a></li>
+  <li><a href="#s16461802">经验分布 核心</a></li>
+  <li><a href="#s59237168">强 $\delta$-典型序列定义 必考</a></li>
+  <li><a href="#s67675000">强典型集性质 必考</a></li>
+<li><a href="#s64242694">七、覆盖引理（Covering Lemma）</a></li>
+  <li><a href="#s56063058">强联合典型序列保证失真约束 必考</a></li>
+  <li><a href="#s19987617">覆盖引理（Covering Lemma） 必考</a></li>
+  <li><a href="#s45356700">条件强典型集与失真球 核心</a></li>
+  <li><a href="#s85493425">率失真定理几何解释 高频</a></li>
+</ul>
+</div>
+
+<h2 id="s10944699">一、独立同假设与证明策略</h2>
+
+<h3 id="s60809274">可达性与反向证明的假设差异 <span class="tag-must">必考</span></h3>
+<p>信道编码定理与率失真定理的证明均分为<span class="kp">正向（可达性）</span>和<span class="kp">反向（逆定理）</span>两部分，两者对独立同分布的假设要求不同：</p>
+<table border="1" style="border-collapse:collapse;width:100%;font-size:0.95em">
+  <tr><th>定理</th><th>正向（可达性）</th><th>反向（逆）</th></tr>
+  <tr><td>噪声信道编码定理</td>
+    <td>需假设 $X^n, Y^n$ i.i.d.</td>
+    <td>只假设离散无记忆信道；不假设 $X^n$ 或 $Y^n$ i.i.d.</td>
+  </tr>
+  <tr><td>率失真定理</td>
+    <td>需假设 $V^N, \hat{V}^N$ i.i.d.</td>
+    <td>只需假设输入 $V^N$ i.i.d.；不假设输出 $\hat{V}^N$ i.i.d.</td>
+  </tr>
+</table>
+<blockquote>易错：反向证明更强，不需要对编码输出做独立同假设，因此反向结论适用于所有编码方案。</blockquote>
+
+<h2 id="s46966268">二、反馈信道（Feedback Channel）</h2>
+
+<h3 id="s65144300">反馈信道模型 <span class="tag-key">核心</span></h3>
+<p>在<span class="kp">离散无记忆反馈信道</span>中，编码器在每步编码时可以利用之前接收端的输出 $Y^{i-1}$：</p>
+<ul>
+  <li>无反馈编码器：$x^n(u)$，码字只依赖消息 $u$</li>
+  <li>有反馈编码器：$x_i(u, y^{i-1})$，每个符号可依赖历史接收信号</li>
+</ul>
+<p><span class="kp">关键性质</span>：无论是否有反馈，离散无记忆信道的马尔可夫性始终成立：
+$$p(Y_i \mid Y^{i-1}, U, X_i) = p(Y_i \mid X_i)$$
+<span class="exp">信道当前输出只依赖当前输入，与之前历史无关，这是"无记忆"的核心含义。</span></p>
+
+<h3 id="s99048886">反馈不增加信道容量 <span class="tag-must">必考</span></h3>
+<p><strong>结论</strong>：使用反馈，<span class="kp">离散无记忆信道的最高传输率仍然为 $C^I$</span>，即反馈不增加信道容量。</p>
+<p><strong>证明思路</strong>：</p>
+<ol>
+  <li>即使有反馈，仍有
+    $$I(U; Y^n) = H(Y^n) - H(Y^n|U) \leq \sum_{i=1}^n I(X_i; Y_i) \leq nC^I$$
+  </li>
+  <li>由 Fano 不等式，若 $R > C^I$，则错误率 $P(\hat{U} \neq U) > 0$</li>
+</ol>
+<blockquote>易错：有些同学认为反馈能"告诉"发送方重传，因此能提高容量。实际上反馈提升的是可靠性（降低编码复杂度），而非信息论容量。</blockquote>
+<p><strong>证明中的不等式推导</strong>（有反馈情形）：</p>
+$$I(U;Y^n) = H(Y^n) - H(Y^n|U)
+= \sum_i H(Y_i|Y^{i-1}) - \sum_i H(Y_i|Y^{i-1},U)
+\leq \sum_i H(Y_i) - \sum_i H(Y_i|Y^{i-1},U,X_i)
+= \sum_i H(Y_i) - \sum_i H(Y_i|X_i)
+= \sum_i I(X_i;Y_i) \leq nC^I$$
+<span class="exp">第一个不等号：条件降低熵 $H(Y_i|Y^{i-1}) \leq H(Y_i)$；第二个等号：DMC马尔可夫性 $p(Y_i|Y^{i-1},U,X_i)=p(Y_i|X_i)$。</span>
+
+<h3 id="s38230130">序列互信息不等式 <span class="tag-key">核心</span></h3>
+<p>对于序列 $X^n, Y^n$，互信息 $I(X^n;Y^n)$ 与边缘互信息之和的关系：</p>
+<table border="1" style="border-collapse:collapse;width:100%">
+  <tr><th>条件</th><th>不等号方向</th><th>应用</th></tr>
+  <tr><td>离散无记忆信道（$Y^n$ 不一定 i.i.d.）</td>
+    <td>$I(X^n;Y^n) \leq \sum I(X_i;Y_i)$</td>
+    <td>信道编码定理反向证明</td>
+  </tr>
+  <tr><td>$X^n$ 或 $Y^n$ 满足 i.i.d.</td>
+    <td>$I(X^n;Y^n) \geq \sum I(X_i;Y_i)$</td>
+    <td>率失真定理反向证明</td>
+  </tr>
+</table>
+
+<h2 id="s46552684">三、率失真定理</h2>
+
+<h3 id="s96377016">可达性定义 <span class="tag-must">必考</span></h3>
+<p><span class="kp">$(R,D)$ 可达</span>：对任意 $\epsilon > 0$，存在编码方案 $C_m$ 满足：
+$$\frac{\log_2 M}{N} \leq R + \epsilon, \quad \mathbb{E}\,d(V^N, \hat{V}^N) \leq D + \epsilon$$</p>
+
+<h3 id="s37095366">率失真定理陈述 <span class="tag-must">必考</span></h3>
+<ul>
+  <li><strong>正向</strong>：若 $R > R^I(D)$，则 $(R,D)$ 可达</li>
+  <li><strong>反向</strong>：若 $R < R^I(D)$，则 $(R,D)$ 不可达</li>
+</ul>
+<p>其中 $R^I(D) = \min_{p(\hat{V}|V):\,\mathbb{E}\,d(V,\hat{V})\leq D} I(V;\hat{V})$</p>
+
+<h2 id="s69560152">四、率失真定理：反向证明</h2>
+
+<h3 id="s76085312">反向证明不等式链 <span class="tag-must">必考</span></h3>
+<p><strong>命题</strong>：若 $(R,D)$ 可达（存在编码方案使失真 $\leq D$），则 $R \geq R^I(D)$。</p>
+<p><strong>证明</strong>：对任意编码方案，有不等式链：
+$$\log M \geq H(V^N) \geq I(V^N;\hat{V}^N) \geq \sum_{i=1}^N I(V_i;\hat{V}_i) \geq \sum_{i=1}^N R^I\!\left(\mathbb{E}\,d(V_i,\hat{V}_i)\right)$$</p>
+<p>因此：
+$$R = \frac{\log M}{N} \geq \frac{1}{N}\sum_i R^I\!\left(\mathbb{E}\,d(V_i,\hat{V}_i)\right) \geq R^I\!\!\left(\frac{1}{N}\sum_i \mathbb{E}\,d(V_i,\hat{V}_i)\right) = R^I\!\!\left(\mathbb{E}\,d(V^N,\hat{V}^N)\right) \geq R^I(D)$$</p>
+<p>最后两步分别用到：$R^I$ 是<span class="kp">凸函数</span>（Jensen不等式），$R^I$ 是<span class="kp">单调递减函数</span>（$\mathbb{E}\,d \leq D$）。</p>
+
+<h3 id="s68591411">关键步骤：$I(V^N;\hat{V}^N) \geq \sum I(V_i;\hat{V}_i)$ <span class="tag-key">核心</span></h3>
+<p>因为 $V^N$ 是 i.i.d. 输入，故：
+$$I(V^N;\hat{V}^N) = H(V^N) - H(V^N|\hat{V}^N)
+= \sum_i H(V_i) - H(V^N|\hat{V}^N)
+\geq \sum_i H(V_i) - \sum_i H(V_i|\hat{V}^N)
+\geq \sum_i H(V_i) - \sum_i H(V_i|\hat{V}_i)
+= \sum_i I(V_i;\hat{V}_i)$$</p>
+<blockquote>易错：此处用到 i.i.d. 输入 $V^N$ 使 $H(V^N) = \sum H(V_i)$；输出 $\hat{V}^N$ 不需要 i.i.d.。</blockquote>
+
+<h2 id="s29174236">五、率失真定理：正向证明</h2>
+
+<h3 id="s52216599">正向证明策略 <span class="tag-must">必考</span></h3>
+<p>等价命题：若独立同分布序列 $V^N, \hat{V}^N$ 满足 $\mathbb{E}\,d(V,\hat{V}) \leq D$ 且 $I(V;\hat{V}) < R$，则 $(R,D)$ 可达。</p>
+<p><strong>构造方法</strong>：</p>
+<ol>
+  <li>给定 $p(V)$，选取测试信道 $p(\hat{V}|V)$ 使 $\mathbb{E}\,d(V,\hat{V}) \leq D$</li>
+  <li>由 $\hat{V}$ 的边缘分布 i.i.d. 采样，生成 $M = 2^{NR}$ 个码字 $\hat{v}^N(1),\dots,\hat{v}^N(M)$，构成<span class="kp">码书（codebook）</span></li>
+  <li>编码：对输入 $v^N$，寻找码书中与之构成<span class="kp">联合强典型序列</span>的 $\hat{v}^N(i^*)$，输出索引 $i^*$</li>
+  <li>译码：收到 $i^*$，查码书输出 $\hat{v}^N(i^*)$</li>
+</ol>
+
+<h3 id="s37717717">弱典型序列的局限性 <span class="tag-freq">高频</span></h3>
+<p>弱典型序列条件控制的是 $-\log p(\cdot)$ 的平均，而非任意失真函数：
+$$\frac{1}{n}\sum_{i=1}^n \log\frac{1}{p(v_i,\hat{v}_i)} \approx H(V,\hat{V}) \quad \text{(弱典型)}$$
+$$\frac{1}{n}\sum_{i=1}^n d(v_i,\hat{v}_i) \approx \mathbb{E}\,d(V,\hat{V}) \quad \text{(需要强典型)}$$</p>
+<blockquote>易错：弱典型序列不能保证失真约束成立，必须使用强典型序列。</blockquote>
+
+<h2 id="s21441398">六、强典型序列</h2>
+
+<h3 id="s16461802">经验分布 <span class="tag-key">核心</span></h3>
+<p><span class="kp">经验分布（empirical distribution）</span>：符号 $a$ 在序列 $x^n$ 中出现的频率：
+$$\hat{P}_{x^n}(a) = \frac{\#\{a \text{ in } x^n\}}{n} = \frac{1}{n}\sum_{i=1}^n \mathbf{1}\{x_i = a\} \triangleq \frac{N(a|x^n)}{n}$$</p>
+
+<h3 id="s59237168">强 $\delta$-典型序列定义 <span class="tag-must">必考</span></h3>
+<p>序列 $x^n$ 是<span class="kp">强 $\delta$-典型序列</span>当且仅当其经验分布与真实分布高度吻合：
+$$\forall a \in \mathcal{X},\quad |\hat{P}_{x^n}(a) - P_X(a)| < \delta P_X(a)$$</p>
+<p>强 $\delta$-典型集：$T^n_\delta(X) \triangleq \{x^n : \hat{P}_{x^n}(a) \approx P_X(a),\ \forall a\}$</p>
+<blockquote>对比弱典型：弱典型只控制 $|-\frac{1}{n}\log p(x^n) - H(X)| \leq \epsilon$；强典型控制每个符号的出现频率，条件更强。</blockquote>
+
+<h3 id="s67675000">强典型集性质 <span class="tag-must">必考</span></h3>
+<ul>
+  <li><strong>概率</strong>：$n \to \infty$ 时，强 $\delta$-典型集中序列的总概率趋近于1（大数定律）</li>
+  <li><strong>大小</strong>：$2^{n(H(X)-\epsilon_\delta)} \leq |T^n_\delta(X)| \leq 2^{n(H(X)+\epsilon_\delta)}$，与弱典型集相同量级</li>
+  <li><strong>任意函数平均（关键！）</strong>：对任意函数 $g:\mathcal{X}\to\mathbb{R}$，若 $x^n \in T^n_\delta(X)$，则：
+    $$(1-\delta)\mathbb{E}[g(X)] \leq \frac{1}{n}\sum_{i=1}^n g(x_i) \leq (1+\delta)\mathbb{E}[g(X)]$$
+  </li>
+  <li><strong>与弱典型的关系</strong>：$T^n_\delta(X) \subseteq A^n_\epsilon(X)$，其中 $\epsilon = \delta H(X)$（强 $\Rightarrow$ 弱）</li>
+  <li><strong>联合典型引理</strong>仍然成立（类似弱典型情形）</li>
+</ul>
+
+<h2 id="s64242694">七、覆盖引理（Covering Lemma）</h2>
+
+<h3 id="s56063058">强联合典型序列保证失真约束 <span class="tag-must">必考</span></h3>
+<p>若 $v^N, \hat{v}^N$ 是联合分布 $(V,\hat{V})$ 的<span class="kp">联合强典型序列</span>，则由强典型集性质（取 $g = d(\cdot,\cdot)$）：
+$$\frac{1}{N}\sum_{i=1}^N d(v_i,\hat{v}_i) \leq (1+\delta)\,\mathbb{E}\,d(V,\hat{V}) \leq (1+\delta)D = D + \delta'$$</p>
+<p>因此，只要找到强联合典型的码字，失真约束自动满足。</p>
+
+<h3 id="s19987617">覆盖引理（Covering Lemma） <span class="tag-must">必考</span></h3>
+<p><strong>陈述</strong>：若码书含 $M = 2^{NR}$ 个由 $p(\hat{V})$ 独立采样的码字 $\hat{v}^N(i)$，且 $R > I(V;\hat{V})$，则：
+$$p\!\left(\exists\,i: (v^N, \hat{v}^N(i)) \in T^N_\epsilon(V,\hat{V})\right) \xrightarrow{N\to\infty} 1$$</p>
+<p><strong>证明直觉</strong>：
+$$p(\text{找到}) \approx 1 - \left(1 - 2^{-NI(V;\hat{V})}\right)^M \approx 1 - e^{-2^{N(R - I(V;\hat{V}))}} \xrightarrow{R > I} 1$$</p>
+
+<h3 id="s45356700">条件强典型集与失真球 <span class="tag-key">核心</span></h3>
+<p><span class="kp">条件强典型集（失真球）</span>：与码字 $\hat{v}^N(i)$ 构成联合强典型序列的所有原序列构成的集合：
+$$T^N_\epsilon(V|\hat{v}^N(i)) = \{v^N: (v^N, \hat{v}^N(i)) \in T^N_\epsilon(V,\hat{V})\}$$</p>
+<ul>
+  <li><strong>大小</strong>：$|T^N_\epsilon(V|\hat{v}^N(i))| \approx 2^{NH(V|\hat{V})}$</li>
+  <li><strong>失真度</strong>：球内序列满足 $d(v^N, \hat{v}^N(i)) \leq D$</li>
+</ul>
+<p>覆盖引理等价表述：若 $R > I(V;\hat{V})$，则 $M = 2^{NR}$ 个失真球可覆盖 $V^N$ 的强典型集。</p>
+
+<h3 id="s85493425">率失真定理几何解释 <span class="tag-freq">高频</span></h3>
+<p>所需码字数量（失真球数量）：
+$$M \geq \frac{2^{NH(V)}}{2^{NH(V|\hat{V})}} = 2^{NI(V;\hat{V})}$$
+$$R = \frac{\log_2 M}{N} \geq I(V;\hat{V})$$</p>
+<p>高斯信源几何解释（$V \sim \mathcal{N}(0,\sigma^2)$，平方误差失真）：</p>
+<ul>
+  <li>数据球半径 $\approx \sqrt{n}\sigma$（数据典型集大小 $\approx n\sigma^2$）</li>
+  <li>失真球半径 $\approx \sqrt{n}\cdot\sqrt{D}$（失真球大小 $\approx nD$）</li>
+  <li>所需球数 $M \geq (n\sigma^2/nD)^{n/2} = (\sigma^2/D)^{n/2}$，故 $R \geq \frac{1}{2}\log_2\frac{\sigma^2}{D}$</li>
+</ul>
+
+
+
+</body>
+</html>

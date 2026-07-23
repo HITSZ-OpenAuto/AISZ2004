@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Lecture 2 – 信息度量</title>
+<script>
+MathJax = {
+  tex: {
+    inlineMath: [['$', '$']],
+    displayMath: [['$$', '$$']]
+  }
+};
+</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js"></script>
+<style>
+/* === ExamPass Shared Styles === */
+/* Paper-like warm background, clean typography, responsive */
+
+:root {
+  --paper: #fdf6e3;
+  --paper-dark: #f5ecd7;
+  --ink: #2c2c2c;
+  --ink-light: #555;
+  --accent: #2563eb;
+  --accent-hover: #1d4ed8;
+  --divider: #d6c8a8;
+  --card-bg: #fef9ef;
+  --card-border: #e8dcc8;
+  --correct: #22c55e;
+  --correct-bg: #f0fdf4;
+  --wrong: #ef4444;
+  --wrong-bg: #fef2f2;
+  --tag-bg: #fef3c7;
+  --tag-text: #92400e;
+  --radius: 6px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: "Microsoft YaHei", "Noto Sans SC", "SimSun", sans-serif;
+  font-size: 12pt; line-height: 1.75; color: var(--ink);
+  max-width: 860px; margin: auto; padding: 24px 20px 60px;
+  background: var(--paper);
+}
+
+@media print {
+  body { font-size: 10.5pt; background: #fff; }
+  .no-print { display: none !important; }
+  h1, h2, h3 { page-break-after: avoid; }
+}
+
+/* ── Header ── */
+#exampass-header {
+  display: flex; justify-content: space-between; align-items: baseline;
+  padding: 6px 0; margin-bottom: 0;
+}
+.header-brand { font-size: 1.2em; font-weight: 700; color: #1a1a2e; letter-spacing: 0.3px; }
+.header-url  { font-size: 0.78em; color: #999; }
+.header-divider { border: none; border-top: 2px solid var(--divider); margin: 4px 0 20px 0; }
+
+/* ── Typography ── */
+h1 { font-size: 1.55em; text-align: center; border-bottom: 2px solid var(--divider); padding-bottom: 8px; margin-top: 0; }
+h2 { font-size: 1.25em; border-bottom: 1px solid var(--divider); padding-bottom: 4px; margin-top: 28px; }
+h3 { font-size: 1.08em; margin-top: 20px; color: var(--ink); }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ── Tables ── */
+table { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 0.95em; }
+td, th { border: 1px solid var(--card-border); padding: 5px 9px; text-align: left; }
+th { background: var(--paper-dark); font-weight: 700; }
+
+/* ── Embedded source images ── */
+.embedded-images {
+  margin: 18px 0 24px;
+}
+.embedded-images-intro {
+  color: var(--ink-light);
+  font-size: 0.95em;
+}
+.embedded-image {
+  margin: 14px 0 18px;
+  padding: 10px;
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  background: var(--card-bg);
+  break-inside: avoid;
+}
+.embedded-image img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+  border: 1px solid var(--divider);
+  background: #fff;
+}
+.embedded-image figcaption {
+  margin-top: 8px;
+  color: var(--ink-light);
+  font-size: 0.92em;
+  line-height: 1.5;
+}
+.embedded-image-note::before {
+  content: " - ";
+}
+
+/* ── Knowledge point vs explanation ── */
+.kp { font-weight: 700; color: var(--ink); }           /* key point: bold dark */
+.exp { font-weight: 400; color: var(--ink-light); }    /* explanation: lighter */
+.exp em, .exp strong { color: var(--ink); }             /* emphasis inside explanation */
+
+/* ── Block elements ── */
+blockquote {
+  border-left: 3px solid #c0392b; background: #fef9ef;
+  padding: 6px 14px; margin: 10px 0; font-size: 0.95em;
+}
+code { background: #f0ede0; padding: 2px 5px; border-radius: 3px; font-size: 0.92em; }
+pre { background: #f0ede0; padding: 10px; border-radius: var(--radius); overflow-x: auto; }
+
+/* ── TOC ── */
+div.toc {
+  background: var(--card-bg); padding: 14px 18px;
+  border: 1px solid var(--card-border); border-radius: var(--radius); margin-bottom: 22px;
+}
+div.toc ul { padding-left: 18px; }
+div.toc li { margin: 3px 0; font-size: 0.95em; }
+
+/* ── Priority tags ── */
+.tag-must   { background: #fee2e2; color: #991b1b; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+.tag-key    { background: #fef3c7; color: #92400e; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+.tag-freq   { background: #dbeafe; color: #1e40af; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+.tag-info   { background: #f0fdf4; color: #166534; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+
+/* === Interactive Test Styles === */
+
+/* ── Score box ── */
+#score-box {
+  display: none; background: var(--paper-dark); color: var(--ink);
+  padding: 16px 20px; border-radius: var(--radius); margin: 14px 0;
+  text-align: center; border: 1px solid var(--card-border);
+}
+#score-box .score-num { font-size: 2.2em; font-weight: 700; }
+#score-box .score-label { font-size: 0.85em; color: var(--ink-light); }
+
+/* ── Question card ── */
+.q-card {
+  background: var(--card-bg); border: 1px solid var(--card-border);
+  border-radius: var(--radius); padding: 12px 14px; margin: 10px 0;
+  transition: all 0.15s;
+}
+.q-card.correct { border-left: 3px solid var(--correct); background: #f7fdf4; }
+.q-card.wrong   { border-left: 3px solid var(--wrong); background: #fef9f9; }
+
+.q-num  { font-weight: 700; font-size: 0.98em; margin-bottom: 4px; }
+.q-text { margin-bottom: 8px; font-size: 0.98em; }
+.q-text pre {
+  background: #f5f5f5; border: 1px solid #ddd; border-radius: 4px;
+  padding: 10px 14px; margin: 8px 0; overflow-x: auto;
+  font-family: 'Consolas', 'Courier New', monospace; font-size: 0.9em;
+  line-height: 1.5; white-space: pre;
+}
+.q-text code {
+  font-family: 'Consolas', 'Courier New', monospace; font-size: 0.9em;
+  background: #f0f0f0; padding: 1px 4px; border-radius: 3px;
+}
+
+/* ── Options (compact) ── */
+.option {
+  display: block; padding: 4px 10px; margin: 3px 0;
+  border: 1px solid var(--card-border); border-radius: 4px;
+  cursor: pointer; transition: all 0.12s; font-size: 0.93em;
+  background: #fefcf5;
+}
+.option:hover            { background: #f0ede0; }
+.option input            { margin-right: 6px; }
+.option.selected         { border-color: var(--accent); background: #eff6ff; }
+.option.correct-answer   { border-color: var(--correct); background: var(--correct-bg); }
+.option.wrong-answer     { border-color: var(--wrong); background: var(--wrong-bg); }
+
+/* ── Textareas (compact) ── */
+.q-textarea {
+  width: 100%; min-height: 56px; border: 1px solid var(--card-border);
+  border-radius: 4px; padding: 6px 10px; font-family: inherit;
+  font-size: 0.93em; background: #fefcf5; resize: vertical;
+}
+.q-textarea:focus { outline: none; border-color: var(--accent); }
+
+/* ── Result after grading ── */
+.result {
+  display: none; margin-top: 8px; padding: 8px 12px;
+  background: #fefcf5; border: 1px solid var(--card-border);
+  border-radius: 4px; font-size: 0.9em; line-height: 1.6;
+}
+.result .badge {
+  display: inline-block; padding: 1px 9px; border-radius: 3px;
+  font-weight: 700; font-size: 0.82em; margin-right: 6px;
+}
+.badge-ok  { background: var(--correct-bg); color: #166534; }
+.badge-no  { background: var(--wrong-bg); color: #991b1b; }
+.badge-ref { background: #dbeafe; color: #1e40af; }
+
+.result .explanation { margin-top: 4px; color: var(--ink); }
+.result .pitfall { color: #b45309; margin-top: 3px; font-size: 0.9em; }
+
+/* ── Grading button ── */
+.grading-bar { text-align: center; margin: 20px 0; }
+.grading-bar button {
+  font-size: 1em; padding: 8px 32px; background: var(--accent);
+  color: #fff; border: none; border-radius: var(--radius);
+  cursor: pointer; font-weight: 600; letter-spacing: 0.3px;
+}
+.grading-bar button:hover     { background: var(--accent-hover); }
+.grading-bar button:disabled  { background: #bbb; cursor: not-allowed; }
+
+/* ── Wrong-question review document ── */
+.wrong-review-box {
+  display: none;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  margin: 18px 0;
+}
+.wrong-review-box h3 {
+  margin-top: 0;
+}
+.wrong-review-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px 0;
+}
+.wrong-review-actions button {
+  font-size: 0.92em;
+  padding: 6px 12px;
+  background: var(--ink);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+.wrong-review-actions button:hover {
+  background: #000;
+}
+#wrong-review-text {
+  width: 100%;
+  min-height: 220px;
+  border: 1px solid var(--card-border);
+  border-radius: 4px;
+  padding: 8px 10px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.84em;
+  line-height: 1.5;
+  background: #fff;
+  resize: vertical;
+}
+
+</style>
+</head>
+<body>
+
+<header id="exampass-header">
+  <div class="header-left"><span class="header-brand">ExamPass Assistant</span></div>
+  <div class="header-right"><span class="header-url">github.com/MIKUZ12/ExamPass-Assistant</span></div>
+</header>
+<hr class="header-divider">
+
+<h1>Lecture 2 – 信息度量</h1>
+<h2 style="text-align:center">章节测试</h2>
+<p style="text-align:center;color:var(--ink-light);font-size:0.95em">满分100分</p>
+
+<div id="score-box"><div class="score-num" id="score-num">0</div><div class="score-label">总分</div></div>
+<div id="questions-container"></div>
+<div class="grading-bar no-print"><button onclick="gradeAll()" id="grade-btn">提交批改</button></div>
+<div id="wrong-review-box" class="wrong-review-box no-print"></div>
+
+<script>
+var Q = [{"type": "choice", "points": 2, "question": "自信息量的公理化推导中，\"两个独立事件联合的信息量等于各自信息量之和\"这一可加性公理，要求 $I$ 满足什么函数方程？", "options": ["$f(p_1 + p_2) = f(p_1) + f(p_2)$", "$f(p_1 \\cdot p_2) = f(p_1) + f(p_2)$", "$f(p_1 \\cdot p_2) = f(p_1) \\cdot f(p_2)$", "$f(p_1 + p_2) = f(p_1) \\cdot f(p_2)$"], "answer": 1, "knowledge_point": "自信息量公理化推导", "diagnosis_hint": "混淆独立事件的概率关系（乘法）与信息量关系（加法）", "explanation": "<strong>正确答案</strong>：B<br><br><strong>推理过程</strong>：独立事件 $x_1, x_2$ 的联合概率为 $p(x_1,x_2) = p_1 \\cdot p_2$（乘法），但信息量应可加：$I(x_1,x_2) = I(x_1) + I(x_2)$。令 $f(t) = I$ 作为概率 $t$ 的函数，则公理要求 $f(p_1 p_2) = f(p_1) + f(p_2)$。满足此方程且连续的函数唯一形式为 $f(t) = c \\log t$，从而 $I(x) = -c \\log p(x)$。<br><br><strong>干扰项分析</strong>：A 混淆了概率的加法（非独立事件关系）；C 要求信息量相乘（不符合直觉）；D 两者都错误。<br><br><strong>复盘建议</strong>：记住核心结构\"概率相乘 --> 信息量相加\"，这正是对数函数的定义性质。", "pitfall": "概率独立 --> 联合概率用乘法；信息可加 --> 信息量用加法；这两个方向组合唯一确定对数。"}, {"type": "choice", "points": 2, "question": "1 奈特（nat）等于多少比特（bit）？", "options": ["$\\ln 2 \\approx 0.693$ bit", "$\\log_{10} 2 \\approx 0.301$ bit", "$\\log_2 e \\approx 1.443$ bit", "$1$ bit"], "answer": 2, "knowledge_point": "信息量单位换算", "diagnosis_hint": "混淆 1 nat 与 1 bit 的大小关系，或混淆换算方向", "explanation": "<strong>正确答案</strong>：C<br><br><strong>推理过程</strong>：nat 使用自然对数 $\\ln$，bit 使用以 2 为底的对数 $\\log_2$。换底公式：$\\ln p = \\log_2 p \\cdot \\ln 2$，因此 $-\\ln p = -\\log_2 p \\cdot \\ln 2$，即 nat 值 = bit 值 $\\times \\ln 2$，从而 1 bit $= 1/\\ln 2$ nat，1 nat $= \\ln 2$ bit 是错的（那是1 bit 用 nat 表示）。正确换算：$1 \\text{ nat} = \\log_2 e \\approx 1.443 \\text{ bit}$。<br><br><strong>干扰项分析</strong>：A 是 1 bit 对应多少 nat（方向反了）；B 是 $\\log_{10}2$（hart 单位相关）；D 显然错误。<br><br><strong>复盘建议</strong>：nat 比 bit 粗，所以 1 nat > 1 bit，记住 $1 \\text{ nat} \\approx 1.443 \\text{ bit}$。", "pitfall": "容易把 $\\ln 2$ 和 $\\log_2 e$ 搞反。nat 的粒度更粗，故 1 nat 对应约 1.443 个 bit。"}, {"type": "choice", "points": 2, "question": "若随机变量 $X$ 在大小为 $N$ 的字母表上均匀分布（$X \\sim \\text{Uniform}(N)$），则 $H(X)$ 等于多少 bit？", "options": ["$N$", "$\\log_2 N$", "$N \\log_2 N$", "$1/N$"], "answer": 1, "knowledge_point": "信息熵计算——均匀分布", "diagnosis_hint": "不记得均匀分布的熵公式，或混淆 N 与 log N", "explanation": "<strong>正确答案</strong>：B<br><br><strong>推理过程</strong>：均匀分布 $p(x) = 1/N$，故 $H(X) = -\\sum_{x=1}^N \\frac{1}{N} \\log_2 \\frac{1}{N} = -N \\cdot \\frac{1}{N} \\cdot (-\\log_2 N) = \\log_2 N$。这也是熵的最大值定理：等概率分布使熵最大。<br><br><strong>干扰项分析</strong>：A 错在没有取对数；C 多乘了 $N$；D 是每个概率值本身而非熵。<br><br><strong>复盘建议</strong>：均匀分布的熵 $= \\log_2(\\text{可能取值数})$，这是最常用的熵计算结果。", "pitfall": "区分\"字母表大小 N\"和\"熵 = log N\"，后者是前者取对数。"}, {"type": "choice", "points": 2, "question": "以下哪个表达式是信息熵 $H(X)$ 的正确期望形式定义？", "options": ["$\\mathbb{E}_X[p(X)]$", "$\\mathbb{E}_X[-p(X)]$", "$\\mathbb{E}_X\\!\\left[\\log_2 \\frac{1}{p(X)}\\right]$", "$\\mathbb{E}_X\\!\\left[\\log_2 p(X)\\right]$"], "answer": 2, "knowledge_point": "信息熵定义", "diagnosis_hint": "混淆 log(1/p) 与 log(p) 的符号，或误用期望的对象", "explanation": "<strong>正确答案</strong>：C<br><br><strong>推理过程</strong>：$H(X) = -\\sum_x p(x) \\log_2 p(x) = \\sum_x p(x) \\log_2 \\frac{1}{p(x)} = \\mathbb{E}_X\\!\\left[\\log_2 \\frac{1}{p(X)}\\right]$。自信息量 $I(x) = \\log_2(1/p(x))$，熵是自信息量的期望。<br><br><strong>干扰项分析</strong>：A 是 $\\mathbb{E}[p(X)]$，对均匀分布等于 $1/N$，与熵无关；B 符号错误且对象错误；D 缺少负号（$\\log_2 p(X) \\le 0$，其期望是 $-H(X)$）。<br><br><strong>复盘建议</strong>：熵 = 平均自信息量 = $\\mathbb{E}[-\\log p] = \\mathbb{E}[\\log(1/p)]$，两种写法等价。", "pitfall": "D 差了一个负号，$\\mathbb{E}[\\log p(X)] = -H(X)$，是负熵，不是熵。"}, {"type": "choice", "points": 2, "question": "条件熵 $H(X|Y)$ 的含义是？", "options": ["给定某个特定观测值 $Y=y$ 时，$X$ 的熵", "在充分观测 $Y$ 之后，$X$ 的平均剩余不确定性", "$X$ 和 $Y$ 之间的互信息", "观测 $Y$ 后 $X$ 的不确定性增加量"], "answer": 1, "knowledge_point": "条件熵的含义", "diagnosis_hint": "混淆条件熵（期望）与特定条件下的熵", "explanation": "<strong>正确答案</strong>：B<br><br><strong>推理过程</strong>：$H(X|Y) = \\sum_y p(y) H(X|Y=y)$，是对所有可能的 $y$ 取加权平均，因此是\"观测 $Y$（但不固定为某个值）后 $X$ 的平均剩余不确定性\"。关键词是\"平均\"。<br><br><strong>干扰项分析</strong>：A 描述的是 $H(X|Y=y)$（特定值，不是期望）；C 是互信息的定义；D 错误，观测 $Y$ 平均上不会增加 $X$ 的不确定性（conditioning reduces entropy）。<br><br><strong>复盘建议</strong>：$H(X|Y)$ 中大写 $Y$ 表示整个随机变量（期望），小写 $y$ 才是特定观测值。", "pitfall": "A 中的\"特定 Y=y\"对应 H(X|Y=y)，有小写 y；条件熵 H(X|Y) 是对所有 y 的期望。"}, {"type": "choice", "points": 2, "question": "互信息 $I(X;Y) = 0$ 说明 $X$ 和 $Y$ 之间什么关系？", "options": ["$X$ 和 $Y$ 完全相同", "$X$ 和 $Y$ 相互独立", "$H(X) = H(Y)$", "$X$ 和 $Y$ 线性无关"], "answer": 1, "knowledge_point": "互信息的零值条件", "diagnosis_hint": "混淆独立（概率论）和线性无关（线性代数）", "explanation": "<strong>正确答案</strong>：B<br><br><strong>推理过程</strong>：$I(X;Y) = D_{\\mathrm{KL}}(p(x,y) \\| p(x)p(y))$，KL 散度为零当且仅当 $p(x,y) = p(x)p(y)$，即 $X$ 与 $Y$ 相互独立。<br><br><strong>干扰项分析</strong>：A 描述的是 $I(X;Y) = H(X) = H(Y)$（完全相同）；C 两变量熵相等不代表互信息为零；D 线性无关是线性代数概念，独立是概率论概念（线性无关不意味独立）。<br><br><strong>复盘建议</strong>：$I(X;Y) = 0 \\Leftrightarrow X \\perp Y$（相互独立），这是互信息的核心语义。", "pitfall": "独立（probabilistic independence）比线性无关更强；两变量可以线性无关但有非线性依赖（即 I(X;Y)>0）。"}, {"type": "choice", "points": 2, "question": "关于 KL 散度 $D_{\\mathrm{KL}}(p\\|q)$，以下哪项描述是<strong>错误的</strong>？", "options": ["$D_{\\mathrm{KL}}(p\\|q) \\ge 0$，等号当且仅当 $p=q$", "$D_{\\mathrm{KL}}(p\\|q)$ 满足对称性：$D_{\\mathrm{KL}}(p\\|q) = D_{\\mathrm{KL}}(q\\|p)$", "$D_{\\mathrm{KL}}(p\\|q)$ 不满足三角不等式", "$D_{\\mathrm{KL}}(p\\|q)$ 与互信息有关系 $I(X;Y) = D_{\\mathrm{KL}}(p(x,y)\\|p(x)p(y))$"], "answer": 1, "knowledge_point": "KL散度性质", "diagnosis_hint": "误认为 KL 散度对称", "explanation": "<strong>正确答案</strong>：B（B 是错误的描述）<br><br><strong>推理过程</strong>：KL 散度不满足对称性，即一般 $D_{\\mathrm{KL}}(p\\|q) \\ne D_{\\mathrm{KL}}(q\\|p)$。举例：令 $p=(0.9, 0.1)$，$q=(0.5, 0.5)$，则 $D_{\\mathrm{KL}}(p\\|q) = 0.9\\log(1.8) + 0.1\\log(0.2) \\approx 0.531$，而 $D_{\\mathrm{KL}}(q\\|p) = 0.5\\log(1/1.8)+0.5\\log(5) \\approx 0.657$，两者不等。<br><br><strong>干扰项分析</strong>：A、C、D 均为正确描述。A 是 Gibbs 不等式；C KL散度确实无三角不等式；D 是互信息与 KL 散度的标准关系。<br><br><strong>复盘建议</strong>：KL 散度\"三不满足\"：不对称、无三角不等式、（虽非负但）无上界。这是它\"不是距离\"的原因。", "pitfall": "此题问\"错误的\"描述，要先找出 B 是唯一错误的，即 KL 散度不对称。"}, {"type": "choice", "points": 2, "question": "联合熵 $H(X,Y)$ 与边缘熵 $H(X)$、$H(Y)$ 的正确大小关系是？", "options": ["$H(X,Y) = H(X) + H(Y)$（恒成立）", "$H(X,Y) \\ge H(X) + H(Y)$", "$H(X,Y) \\le H(X) + H(Y)$，等号当且仅当 $X$ 与 $Y$ 独立", "$H(X,Y) \\le \\min(H(X), H(Y))$"], "answer": 2, "knowledge_point": "联合熵上界", "diagnosis_hint": "误认为联合熵恒等于边缘熵之和", "explanation": "<strong>正确答案</strong>：C<br><br><strong>推理过程</strong>：由链式法则 $H(X,Y) = H(X) + H(Y|X)$，而 $H(Y|X) \\le H(Y)$（conditioning reduces entropy），故 $H(X,Y) \\le H(X)+H(Y)$。等号 $H(Y|X)=H(Y)$ 当且仅当 $X \\perp Y$。<br><br><strong>干扰项分析</strong>：A 仅在独立时成立；B 方向相反；D 联合熵至少不小于任何边缘熵（$H(X,Y) \\ge \\max(H(X), H(Y))$，而非 min）。<br><br><strong>复盘建议</strong>：联合熵的上界是边缘熵之和，下界是最大边缘熵。$\\max(H(X),H(Y)) \\le H(X,Y) \\le H(X)+H(Y)$。", "pitfall": "等号 H(X,Y)=H(X)+H(Y) 仅在独立时成立，不是恒等式。"}, {"type": "choice", "points": 2, "question": "在机器学习分类任务中，固定真实标签分布 $p$ 不变，最小化交叉熵 $CE(p\\|q)$ 对模型参数 $q$ 等价于最小化什么？", "options": ["$H(p)$（真实分布的熵）", "$D_{\\mathrm{KL}}(q\\|p)$", "$D_{\\mathrm{KL}}(p\\|q)$", "$H(q)$（模型分布的熵）"], "answer": 2, "knowledge_point": "交叉熵与KL散度的关系", "diagnosis_hint": "混淆 KL 散度的方向，或认为等价于最小化 H(p)", "explanation": "<strong>正确答案</strong>：C<br><br><strong>推理过程</strong>：$CE(p\\|q) = H(p) + D_{\\mathrm{KL}}(p\\|q)$。当 $p$ 固定时，$H(p)$ 是常数，最小化 $CE(p\\|q)$ 就是最小化 $D_{\\mathrm{KL}}(p\\|q)$（注意方向：从 $p$ 到 $q$）。<br><br><strong>干扰项分析</strong>：A $H(p)$ 与模型参数无关，无法优化；B 方向反了（$D_{\\mathrm{KL}}(q\\|p)$ 不等于 $CE(p\\|q)$ 减 $H(p)$）；D 最小化模型熵与交叉熵无关。<br><br><strong>复盘建议</strong>：$CE = H(p) + D_{\\mathrm{KL}}(p\\|q)$，$p$ 固定则 $CE$ 和 $D_{\\mathrm{KL}}(p\\|q)$ 同步变化，方向不能反。", "pitfall": "KL散度有方向：D_KL(p||q) 中 p 是参考分布（真实），q 是近似分布（模型）。"}, {"type": "choice", "points": 2, "question": "自信息量 $I(x) = -\\log_2 p(x)$，当事件概率 $p(x) \\to 0^+$ 时，$I(x)$ 趋向何值？", "options": ["$0$", "$-\\infty$", "$1$", "$+\\infty$"], "answer": 3, "knowledge_point": "自信息量的极端情形", "diagnosis_hint": "混淆 log(0) 的符号，或混淆 p→0 和 p→1 的情况", "explanation": "<strong>正确答案</strong>：D<br><br><strong>推理过程</strong>：$I(x) = -\\log_2 p(x)$。当 $p(x) \\to 0^+$ 时，$\\log_2 p(x) \\to -\\infty$，故 $I(x) = -\\log_2 p(x) \\to +\\infty$。直觉：极稀有事件一旦发生，带来无穷大的信息量。<br><br><strong>干扰项分析</strong>：A 是 $p(x)=1$ 时（确定事件，无信息）；B 符号错误；C 无依据。<br><br><strong>复盘建议</strong>：$p \\to 0 \\Rightarrow I \\to +\\infty$（无限惊喜）；$p = 1 \\Rightarrow I = 0$（毫无惊喜）。这两个端点是最常考的。", "pitfall": "log(0) = -∞，加上负号后 = +∞，不要忘记负号导致符号翻转。"}, {"type": "tf", "points": 1, "question": "信息熵 $H(X)$ 由随机变量 $X$ 的概率分布 $p$ 完全确定，与 $X$ 的具体取值（字母表元素）无关。", "options": [], "answer": true, "knowledge_point": "信息熵的定义", "diagnosis_hint": "误认为熵依赖于 X 取的具体数值（如1,2,3 vs a,b,c）", "explanation": "<strong>正确答案</strong>：正确（√）<br><br><strong>判断边界</strong>：$H(X) = -\\sum_x p(x) \\log p(x)$，只用到概率值 $p(x)$，不用到 $x$ 本身是什么。例如 $X\\in\\{\\text{猫},\\text{狗}\\}$ 与 $X\\in\\{0,1\\}$ 若概率相同，则熵相同。换言之，熵是概率分布的泛函，是对称函数（Schur凹）。<br><br><strong>复盘建议</strong>：$H(X) = H(p)$ 的写法更准确地反映了这一点——熵只依赖分布 $p$，不依赖变量具体取什么值。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "对任意随机变量 $X$ 和 $Y$，均有 $H(X|Y) \\le H(X)$（即条件不增加不确定性）。", "options": [], "answer": true, "knowledge_point": "条件熵性质", "diagnosis_hint": "误以为特定条件可能增加不确定性", "explanation": "<strong>正确答案</strong>：正确（√）<br><br><strong>判断边界</strong>：这是\"conditioning reduces entropy\"定理。证明：$H(X|Y) \\le H(X) \\Leftrightarrow I(X;Y) = H(X)-H(X|Y) \\ge 0$，而互信息非负性由 KL 散度非负性保证。注意：对于特定的 $y$，$H(X|Y=y)$ 可以大于 $H(X)$；但对所有 $y$ 的期望（即 $H(X|Y)$）一定不超过 $H(X)$。<br><br><strong>复盘建议</strong>：期望层面成立，单次观测层面不一定成立——这是常见陷阱。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "KL 散度满足对称性：$D_{\\mathrm{KL}}(p\\|q) = D_{\\mathrm{KL}}(q\\|p)$。", "options": [], "answer": false, "knowledge_point": "KL散度不对称性", "diagnosis_hint": "直觉上认为\"距离\"应该对称", "explanation": "<strong>正确答案</strong>：错误（×）<br><br><strong>判断边界</strong>：KL 散度一般不对称。反例：设 $p=(0.9,0.1)$，$q=(0.5,0.5)$，计算可得 $D_{\\mathrm{KL}}(p\\|q) \\ne D_{\\mathrm{KL}}(q\\|p)$。对称化版本称为 Jensen-Shannon 散度：$JSD(p\\|q) = \\frac{1}{2}D_{\\mathrm{KL}}(p\\|m) + \\frac{1}{2}D_{\\mathrm{KL}}(q\\|m)$，其中 $m=(p+q)/2$。<br><br><strong>复盘建议</strong>：KL 散度不对称是其\"不是距离\"的核心原因之一，必须记住。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "互信息满足对称性：$I(X;Y) = I(Y;X)$。", "options": [], "answer": true, "knowledge_point": "互信息对称性", "diagnosis_hint": "混淆互信息（对称）和条件熵（不对称）", "explanation": "<strong>正确答案</strong>：正确（√）<br><br><strong>判断边界</strong>：由定义 $I(X;Y) = H(X) + H(Y) - H(X,Y)$，由于 $H(X,Y)=H(Y,X)$（联合熵对称），故 $I(X;Y) = I(Y;X)$。直觉：X 关于 Y 共享的信息 = Y 关于 X 共享的信息，\"共享\"是互相的。<br><br><strong>复盘建议</strong>：互信息对称，但条件熵 $H(X|Y) \\ne H(Y|X)$（一般不对称）——注意区分。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "若 $X$ 与 $Y$ 相互独立，则 $H(X,Y) = H(X) + H(Y)$。", "options": [], "answer": true, "knowledge_point": "独立时的联合熵", "diagnosis_hint": "无", "explanation": "<strong>正确答案</strong>：正确（√）<br><br><strong>判断边界</strong>：独立时 $p(x,y)=p(x)p(y)$，故 $H(X,Y) = H(X) + H(Y|X) = H(X)+H(Y)$（因为独立时 $H(Y|X)=H(Y)$）。等价地，独立时 $I(X;Y)=0$，而 $I(X;Y) = H(X)+H(Y)-H(X,Y)=0$ 即给出 $H(X,Y)=H(X)+H(Y)$。<br><br><strong>复盘建议</strong>：这是独立性在信息论中的核心体现，等号仅在独立时成立。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "对任意分布 $q$，均有 $CE(p\\|q) \\ge H(p)$。", "options": [], "answer": true, "knowledge_point": "交叉熵下界", "diagnosis_hint": "忘记 KL 散度非负性", "explanation": "<strong>正确答案</strong>：正确（√）<br><br><strong>判断边界</strong>：$CE(p\\|q) = H(p) + D_{\\mathrm{KL}}(p\\|q) \\ge H(p)$，因为 $D_{\\mathrm{KL}} \\ge 0$。等号当且仅当 $q=p$，即用真实分布编码时交叉熵等于自身的熵（最优编码）。<br><br><strong>复盘建议</strong>：交叉熵下界是信息论编码定理的基础——任何编码方案的平均码长不低于信源熵。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "对于任意两个具体事件 $x$ 和 $y$，点互信息（点互信息量）$\\log\\frac{p(x|y)}{p(x)}$ 一定非负。", "options": [], "answer": false, "knowledge_point": "点互信息的符号", "diagnosis_hint": "将互信息（期望，非负）和点互信息（单次，可正可负）混淆", "explanation": "<strong>正确答案</strong>：错误（×）<br><br><strong>判断边界</strong>：点互信息 $i(x;y) = \\log\\frac{p(x|y)}{p(x)} = \\log\\frac{p(x,y)}{p(x)p(y)}$。当观测到 $Y=y$ 使得 $x$ 概率降低时（即 $p(x|y) < p(x)$），$i(x;y) < 0$。例如：$X$=下雨，$Y$=晴天预报。观测到晴天预报后，下雨概率降低，点互信息为负。<br><br><strong>复盘建议</strong>：只有期望意义上的互信息 $I(X;Y) = \\mathbb{E}[i(X;Y)] \\ge 0$，单次实现的点互信息无此保证。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "$I(X;X) = H(X)$（X 关于自身的互信息等于 X 的熵）。", "options": [], "answer": true, "knowledge_point": "自互信息", "diagnosis_hint": "不熟悉自互信息的特殊情况", "explanation": "<strong>正确答案</strong>：正确（√）<br><br><strong>判断边界</strong>：$I(X;X) = H(X) - H(X|X) = H(X) - 0 = H(X)$，因为已知 $X$ 后对 $X$ 完全确定，$H(X|X)=0$。等价地，$I(X;X) = H(X)+H(X)-H(X,X) = 2H(X)-H(X) = H(X)$（因为 $H(X,X)=H(X)$）。<br><br><strong>复盘建议</strong>：这揭示了\"熵 = X 关于自身携带的信息量\"的深刻含义。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "条件熵 $H(X|Y) \\ge 0$ 对任意随机变量 $X$、$Y$ 成立。", "options": [], "answer": true, "knowledge_point": "条件熵非负性", "diagnosis_hint": "误认为条件可能使熵为负", "explanation": "<strong>正确答案</strong>：正确（√）<br><br><strong>判断边界</strong>：$H(X|Y) = \\sum_y p(y) H(X|Y=y)$，每个 $H(X|Y=y) \\ge 0$（熵的非负性），加权平均后仍然 $\\ge 0$。这与\"点互信息可以为负\"不矛盾——条件熵是期望，点互信息是单次实现。<br><br><strong>复盘建议</strong>：所有\"熵\"类量（$H(X)$、$H(X|Y)$、$H(X,Y)$）均非负。可以为负的是\"互信息\"和\"KL散度\"的负数形式，但互信息本身也非负。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "若 $X$ 取有限个值，则信息熵 $H(X)$ 是概率向量 $p$ 的凹函数（concave function）。", "options": [], "answer": true, "knowledge_point": "熵的凹性", "diagnosis_hint": "混淆凹函数和凸函数", "explanation": "<strong>正确答案</strong>：正确（√）<br><br><strong>判断边界</strong>：$H(p) = -\\sum_i p_i \\log p_i$，其 Hessian 矩阵是负定的（$\\partial^2 H / \\partial p_i^2 = -1/(p_i \\ln 2) < 0$），故 $H$ 是凹函数。凹性的含义：两个分布的混合分布的熵不低于各自熵的混合，即 $H(\\lambda p + (1-\\lambda)q) \\ge \\lambda H(p) + (1-\\lambda) H(q)$。<br><br><strong>复盘建议</strong>：熵的凹性是许多不等式（最大熵、数据处理不等式等）的基础，记住\"熵是概率向量的凹函数\"。", "pitfall": ""}, {"type": "short", "points": 6, "question": "写出自信息量 $I(x)$ 公理化推导的三个条件，并说明为什么这三个条件唯一确定了对数形式 $I(x) = -\\log_2 p(x)$。", "options": [], "answer": null, "knowledge_point": "自信息量公理化推导", "diagnosis_hint": "遗漏连续性条件，或无法解释三条件如何锁定对数", "explanation": "<strong>参考答案</strong>（6分）：<br><br><strong>三条公理</strong>（各1分，共3分）：<ol><li><strong>单调递减性</strong>：$I(x)$ 是 $p(x)$ 的严格单调递减函数——概率越小，信息量越大。</li><li><strong>连续性</strong>：$I(x)$ 是 $p(x)$ 的连续函数——概率连续变化，信息量也连续变化。</li><li><strong>独立可加性</strong>：若 $X \\perp Y$，则 $I(x,y) = I(x) + I(y)$，即 $f(p_1 p_2) = f(p_1) + f(p_2)$，其中 $f = I \\circ p^{-1}$。</li></ol><strong>唯一性推导</strong>（3分）：满足 $f(ab) = f(a) + f(b)$（Cauchy函数方程）且连续的实值函数，唯一解为 $f(t) = c \\log t$（$c$ 为常数）。因此 $I(x) = f(p(x)) = c \\log p(x)$。由单调递减性知 $c < 0$，取 $c = -1$（底数为2时单位为bit），得 $I(x) = -\\log_2 p(x)$。", "pitfall": "Cauchy 函数方程仅在连续性假设下才有唯一对数解；若不加连续性，存在病态解（Hamel基构造）。"}, {"type": "short", "points": 6, "question": "证明联合熵的链式法则：$H(X,Y) = H(X) + H(Y|X)$。给出详细推导过程。", "options": [], "answer": null, "knowledge_point": "联合熵链式法则", "diagnosis_hint": "推导步骤不清晰，或不知道如何利用乘法公式", "explanation": "<strong>参考答案</strong>（6分）：<br><br>$$H(X,Y) = -\\sum_{x,y} p(x,y) \\log p(x,y) \\quad (1分)$$<br>利用乘法公式 $p(x,y) = p(x) p(y|x)$（1分）：<br>$$= -\\sum_{x,y} p(x,y) \\log[p(x)p(y|x)]$$<br>$$= -\\sum_{x,y} p(x,y) \\log p(x) - \\sum_{x,y} p(x,y) \\log p(y|x) \\quad (1分)$$<br>第一项：$\\sum_{x,y} p(x,y) \\log p(x) = \\sum_x \\log p(x) \\sum_y p(x,y) = \\sum_x p(x) \\log p(x)$（边缘化，1分）；<br>第二项：$-\\sum_{x,y} p(x,y) \\log p(y|x) = H(Y|X)$（条件熵定义，1分）；<br>故 $H(X,Y) = -\\sum_x p(x)\\log p(x) + H(Y|X) = H(X) + H(Y|X)$（1分）。$\\blacksquare$", "pitfall": "边缘化步骤容易遗漏：$\\sum_y p(x,y) = p(x)$，需要明确写出。"}, {"type": "short", "points": 6, "question": "互信息 $I(X;Y)$ 有三种等价表达形式，写出这三种形式并分别解释其含义。", "options": [], "answer": null, "knowledge_point": "互信息的等价表达", "diagnosis_hint": "只记得一种形式，或无法说明各自含义", "explanation": "<strong>参考答案</strong>（6分，每种2分）：<br><br><strong>形式一</strong>（2分）：$I(X;Y) = H(X) - H(X|Y)$<br>含义：Y 给 X 带来的信息量 = X 原有不确定性 - 已知 Y 后 X 的剩余不确定性，体现信息是\"不确定性的消除\"。<br><br><strong>形式二</strong>（2分）：$I(X;Y) = H(X) + H(Y) - H(X,Y)$<br>含义：两变量各自不确定性之和减去联合不确定性，多出来的部分（减掉的部分）正是两者共享的信息（Venn图中的交集）。<br><br><strong>形式三</strong>（2分）：$I(X;Y) = D_{\\mathrm{KL}}(p(x,y)\\|p(x)p(y))$<br>含义：联合分布与独立乘积分布之间的 KL 散度，衡量两变量\"偏离独立\"的程度；独立时 KL 散度为零即互信息为零。", "pitfall": "三种形式都可以互相推导，关键是理解各自的语义角度：不确定性减少 / Venn图交集 / 偏离独立性。"}, {"type": "short", "points": 6, "question": "解释交叉熵 $CE(p\\|q)$ 和 KL 散度 $D_{\\mathrm{KL}}(p\\|q)$ 的关系，并说明在机器学习训练中为什么最小化交叉熵等价于最小化 KL 散度。", "options": [], "answer": null, "knowledge_point": "交叉熵与KL散度的关系", "diagnosis_hint": "不知道 CE = H(p) + D_KL 的关系式，或无法解释为何等价", "explanation": "<strong>参考答案</strong>（6分）：<br><br><strong>定义</strong>（1分）：$CE(p\\|q) = -\\sum_x p(x) \\log q(x)$，$D_{\\mathrm{KL}}(p\\|q) = \\sum_x p(x) \\log \\frac{p(x)}{q(x)}$。<br><br><strong>关系式推导</strong>（2分）：<br>$$D_{\\mathrm{KL}}(p\\|q) = \\sum_x p(x)\\log p(x) - \\sum_x p(x)\\log q(x) = -H(p) + CE(p\\|q)$$<br>故 $CE(p\\|q) = H(p) + D_{\\mathrm{KL}}(p\\|q)$。<br><br><strong>等价性说明</strong>（3分）：在机器学习中，$p$ 是训练数据给定的真实标签分布（固定，不依赖模型参数 $\\theta$），$q = q_\\theta$ 是模型的预测分布（依赖参数）。优化目标：<br>$$\\min_\\theta CE(p\\|q_\\theta) = \\min_\\theta [H(p) + D_{\\mathrm{KL}}(p\\|q_\\theta)]$$<br>由于 $H(p)$ 与 $\\theta$ 无关，最小化 $CE$ 等价于最小化 $D_{\\mathrm{KL}}(p\\|q_\\theta)$，即让模型分布尽量贴近真实分布。", "pitfall": "必须强调\"p 固定\"这个前提，否则等价关系不成立。"}, {"type": "essay", "points": 8, "question": "用 Venn 图解释信息论中六个度量（$H(X)$、$H(Y)$、$H(X|Y)$、$H(Y|X)$、$I(X;Y)$、$H(X,Y)$）之间的关系，写出所有核心等式，并解释每个等式的直觉含义。", "options": [], "answer": null, "knowledge_point": "Venn图——各度量的几何关系", "diagnosis_hint": "遗漏某些等式，或不能说清楚每个等式的直觉含义", "explanation": "<strong>参考答案</strong>（8分）：<br><br><strong>Venn 图描述</strong>（2分）：画两个相交的圆，左圆面积代表 $H(X)$，右圆面积代表 $H(Y)$，两圆总覆盖面积代表 $H(X,Y)$。<ul><li>左圆独占区域 = $H(X|Y)$</li><li>右圆独占区域 = $H(Y|X)$</li><li>交集区域 = $I(X;Y)$</li></ul><strong>核心等式与直觉</strong>（各1分，共6分）：<ol><li>$H(X,Y) = H(X) + H(Y|X)$：联合不确定性 = X 的不确定性 + 已知 X 后 Y 的额外不确定性。</li><li>$H(X,Y) = H(Y) + H(X|Y)$：对称地，联合 = Y + 已知 Y 后 X 的额外不确定性。</li><li>$H(X,Y) = H(X) + H(Y) - I(X;Y)$：联合 = 两个圆面积 - 重叠（否则重叠计两次）。</li><li>$I(X;Y) = H(X) - H(X|Y) = H(Y) - H(Y|X)$：互信息 = 任一变量通过对方减少的不确定性。</li><li>$H(X|Y) = H(X,Y) - H(Y)$：条件熵 = 联合熵 - 已知部分的熵（从总面积中减去 Y 的圆）。</li><li>$I(X;Y) = H(X) + H(Y) - H(X,Y) \\ge 0$：互信息非负 <==> 两圆面积之和 >= 联合面积。</li></ol>", "pitfall": "Venn图中\"交集\"是互信息I(X;Y)，不是任何单独的熵；条件熵是\"一个圆中不被另一个圆覆盖的部分\"。"}, {"type": "essay", "points": 8, "question": "证明互信息 $I(X;Y) \\ge 0$，并解释 $I(X;Y) = 0$ 的充要条件及其物理含义。", "options": [], "answer": null, "knowledge_point": "互信息非负性证明", "diagnosis_hint": "不知道用 KL 散度路线证明，或无法给出简洁的充要条件", "explanation": "<strong>参考答案</strong>（8分）：<br><br><strong>证明 $I(X;Y) \\ge 0$</strong>（5分）：<br>利用 $I(X;Y) = D_{\\mathrm{KL}}(p(x,y) \\| p(x)p(y))$（1分），只需证 KL 散度非负。<br>KL 散度非负性（Gibbs 不等式，3分）：<br>$$D_{\\mathrm{KL}}(p\\|q) = \\sum_x p(x)\\log\\frac{p(x)}{q(x)} = -\\sum_x p(x)\\log\\frac{q(x)}{p(x)}$$<br>由 Jensen 不等式（$\\log$ 是凹函数）：<br>$$-\\sum_x p(x)\\log\\frac{q(x)}{p(x)} \\ge -\\log\\sum_x p(x)\\cdot\\frac{q(x)}{p(x)} = -\\log\\sum_x q(x) = -\\log 1 = 0$$<br>故 $D_{\\mathrm{KL}}(p\\|q) \\ge 0$，从而 $I(X;Y) \\ge 0$（1分）。<br><br><strong>$I(X;Y) = 0$ 充要条件</strong>（2分）：<br>$I(X;Y) = 0 \\Leftrightarrow D_{\\mathrm{KL}}(p(x,y)\\|p(x)p(y)) = 0 \\Leftrightarrow p(x,y) = p(x)p(y) \\Leftrightarrow X \\perp Y$（相互独立）。<br><br><strong>物理含义</strong>（1分）：$I(X;Y)=0$ 意味着 $X$ 和 $Y$ 不共享任何信息，观测 $Y$ 完全不能帮助推断 $X$（反之亦然）。", "pitfall": "Jensen 不等式用于凹函数时方向是 f(E[X]) >= E[f(X)]；这里对 log（凹函数）：log(E[q/p]) >= E[log(q/p)]，注意方向。"}, {"type": "essay", "points": 10, "question": "详细解释 KL 散度 $D_{\\mathrm{KL}}(p\\|q)$ 的定义、性质（非负性、不对称性、无三角不等式）和与互信息的联系，并讨论：为什么说 KL 散度不是真正意义上的\"距离\"？", "options": [], "answer": null, "knowledge_point": "KL散度性质与局限", "diagnosis_hint": "遗漏某条性质，或无法举例说明不对称性", "explanation": "<strong>参考答案</strong>（10分）：<br><br><strong>定义</strong>（2分）：$$D_{\\mathrm{KL}}(p\\|q) = \\sum_x p(x)\\log\\frac{p(x)}{q(x)} = \\mathbb{E}_p\\!\\left[\\log\\frac{p(X)}{q(X)}\\right]$$约定：若 $q(x)=0$ 而 $p(x)>0$，则该项为 $+\\infty$；$0\\log(0/0)=0$。<br><br><strong>非负性</strong>（2分）：由 Gibbs 不等式（Jensen 不等式），$D_{\\mathrm{KL}}(p\\|q) \\ge 0$，等号当且仅当 $p=q$。<br><br><strong>不对称性</strong>（2分）：$D_{\\mathrm{KL}}(p\\|q) \\ne D_{\\mathrm{KL}}(q\\|p)$（一般）。举例：$p=(0.9,0.1)$，$q=(0.5,0.5)$：<br>$D_{\\mathrm{KL}}(p\\|q) = 0.9\\log_2 1.8 + 0.1\\log_2 0.2 \\approx 0.531$ bit；<br>$D_{\\mathrm{KL}}(q\\|p) = 0.5\\log_2(0.5/0.9)+0.5\\log_2(0.5/0.1) \\approx 0.657$ bit；两者不等。<br><br><strong>无三角不等式</strong>（1分）：可构造 $p,q,r$ 使得 $D_{\\mathrm{KL}}(p\\|r) > D_{\\mathrm{KL}}(p\\|q)+D_{\\mathrm{KL}}(q\\|r)$，故不满足三角不等式。<br><br><strong>与互信息联系</strong>（1分）：$I(X;Y) = D_{\\mathrm{KL}}(p(x,y)\\|p(x)p(y))$，互信息是衡量联合分布偏离独立乘积的 KL 散度。<br><br><strong>为何不是\"距离\"</strong>（2分）：度量空间的距离需满足：（1）非负性 $d(p,q)\\ge 0$；（2）同一性 $d(p,q)=0 \\Leftrightarrow p=q$；（3）对称性 $d(p,q)=d(q,p)$；（4）三角不等式。KL 散度满足（1）（2）但不满足（3）（4），故称\"散度\"而非\"距离\"。对称化版本有 JS 散度（满足（1）（2）（3）且有上界）。", "pitfall": "讨论为何不是距离时，必须明确列出距离的四条公理，再逐条验证 KL 散度是否满足。"}, {"type": "comprehensive", "points": 20, "question": "设 $X$ 为二元信道输入，$p(X=0)=0.6$，$p(X=1)=0.4$；信道为二元对称信道（BSC），翻转概率 $\\varepsilon=0.1$，即 $p(Y=0|X=0)=p(Y=1|X=1)=0.9$，$p(Y=1|X=0)=p(Y=0|X=1)=0.1$。\n\n请计算：\n(1) 信源熵 $H(X)$（4分）\n(2) 条件熵 $H(Y|X)$（4分）\n(3) 输出熵 $H(Y)$（4分）\n(4) 互信息 $I(X;Y)$（4分）\n(5) 说明 $H(X,Y)$ 的计算思路并写出结果（2分）\n(6) 若将输入改为均匀分布 $p(X=0)=p(X=1)=0.5$，$I(X;Y)$ 如何变化？给出直觉解释（2分）", "options": [], "answer": null, "knowledge_point": "信息度量综合计算——BSC信道", "diagnosis_hint": "计算 H(Y) 时未正确使用全概率公式，或混淆 H(Y|X) 与 H(Y)", "explanation": "<strong>完整参考答案</strong>（20分）：<br><br>\n\n<strong>(1) 信源熵 $H(X)$</strong>（4分）：<br>\n$$H(X) = -p(0)\\log_2 p(0) - p(1)\\log_2 p(1)$$\n$$= -0.6\\log_2 0.6 - 0.4\\log_2 0.4$$\n$$\\approx -0.6 \\times (-0.7370) - 0.4 \\times (-1.3219)$$\n$$\\approx 0.4422 + 0.5288 \\approx \\boxed{0.971 \\text{ bit}}$$<br>\n\n<strong>(2) 条件熵 $H(Y|X)$</strong>（4分）：<br>\nBSC 信道中，对每个 $x$，$p(Y|X=x)$ 均为 $(0.9, 0.1)$（或 $(0.1, 0.9)$），其熵相同：\n$$H(Y|X=0) = H(Y|X=1) = -0.9\\log_2 0.9 - 0.1\\log_2 0.1$$\n$$\\approx 0.9 \\times 0.152 + 0.1 \\times 3.322 \\approx 0.469 \\text{ bit}$$\n$$H(Y|X) = \\sum_x p(x) H(Y|X=x) = 0.6 \\times 0.469 + 0.4 \\times 0.469 = \\boxed{0.469 \\text{ bit}}$$<br>\n\n<strong>(3) 输出熵 $H(Y)$</strong>（4分）：<br>\n全概率公式：\n$$p(Y=0) = p(Y=0|X=0)p(X=0) + p(Y=0|X=1)p(X=1)$$\n$$= 0.9 \\times 0.6 + 0.1 \\times 0.4 = 0.54 + 0.04 = 0.58$$\n$$p(Y=1) = 1 - 0.58 = 0.42$$\n$$H(Y) = -0.58\\log_2 0.58 - 0.42\\log_2 0.42$$\n$$\\approx 0.58 \\times 0.7865 + 0.42 \\times 1.2519 \\approx 0.456 + 0.526 \\approx \\boxed{0.979 \\text{ bit}}$$<br>\n\n<strong>(4) 互信息 $I(X;Y)$</strong>（4分）：<br>\n$$I(X;Y) = H(Y) - H(Y|X) \\approx 0.979 - 0.469 = \\boxed{0.510 \\text{ bit}}$$<br>\n\n<strong>(5) 联合熵 $H(X,Y)$</strong>（2分）：<br>\n由链式法则：$H(X,Y) = H(X) + H(Y|X) \\approx 0.971 + 0.469 = \\boxed{1.440 \\text{ bit}}$。<br>\n也可验证：$H(X,Y) = H(Y) + H(X|Y)$，其中 $H(X|Y) = H(X,Y) - H(Y) \\approx 1.440 - 0.979 = 0.461$ bit。<br>\n\n<strong>(6) 均匀输入时 $I(X;Y)$ 的变化</strong>（2分）：<br>\n均匀输入时 $H(X)=1$ bit（最大），此时 $p(Y=0)=0.9\\times0.5+0.1\\times0.5=0.5$，$H(Y)=1$ bit（最大）。<br>\n$$I(X;Y) = H(Y) - H(Y|X) = 1 - 0.469 = 0.531 \\text{ bit} > 0.510 \\text{ bit}$$\n<strong>直觉</strong>：均匀输入使输出熵 $H(Y)$ 最大化（信道利用率最高），在 $H(Y|X)$ 固定的情况下，$I(X;Y)$ 增大。均匀分布是 BSC 信道容量最大化的最优输入分布。", "pitfall": "计算 H(Y) 必须先用全概率公式求 p(Y=0) 和 p(Y=1)，不能直接用 H(Y|X) 替代 H(Y)；H(Y|X) 是条件熵（已知 X），H(Y) 是无条件熵（不知 X）。"}];
+var LABELS = {"page_title": "章节测试", "section": {"choice": "一、选择题", "tf": "二、判断题", "short": "三、简答题", "essay": "四、问答题", "comprehensive": "五、综合题"}, "section_order": ["choice", "tf", "short", "essay", "comprehensive"], "points_suffix": "分", "true_label": "正确", "false_label": "错误", "placeholder": "在此作答...", "pitfall_prefix": "易错提醒：", "correct_label": "正确", "wrong_label": "错误", "answer_prefix": "正确答案：", "reference_label": "参考答案", "graded_label": "已批改", "grade_button": "提交批改", "unanswered_label": "未作答", "wrong_review_title": "错题分析文档", "wrong_review_intro": "本次收录 __COUNT__ 道客观题错题。可以下载 Markdown 文档，或复制整段内容交给模型做错因分析和二次学习规划。", "no_wrong_questions": "本次客观题没有错题。主观题请对照参考答案自行复盘。", "download_wrong_review": "下载错题文档", "copy_wrong_review_prompt": "复制错题分析 Prompt", "score_label": "总分", "duration_prefix": "满分 100 分 | 建议 ", "duration_suffix": " 分钟 | 选择答案后点击提交批改"};
+var WRONG_REVIEW_PROMPT = "";
+var LAST_WRONG_REVIEW = '';
+
+function pointsOf(q) {
+  return q.points || q.score || 0;
+}
+
+function stripHtml(html) {
+  var div = document.createElement('div');
+  div.innerHTML = html || '';
+  return (div.textContent || div.innerText || '').replace(/\s+/g, ' ').trim();
+}
+
+// Convert Markdown fenced code blocks (```lang\n...\n```) and inline `code`
+// to <pre><code> / <code> HTML, then convert \n to <br> for plain text lines.
+function formatQuestion(text) {
+  if (!text) return '';
+  // 1. Replace fenced code blocks: ```lang\ncode\n```
+  text = text.replace(/```(\w*)\n([\s\S]*?)```/g, function(_, lang, code) {
+    var escaped = code
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+    var cls = lang ? ' class="language-' + lang + '"' : '';
+    return '<pre><code' + cls + '>' + escaped + '</code></pre>';
+  });
+  // 2. Replace inline backtick `code`
+  text = text.replace(/`([^`\n]+)`/g, function(_, code) {
+    var escaped = code.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    return '<code>' + escaped + '</code>';
+  });
+  // 3. Convert remaining \n to <br> (outside pre blocks already handled above)
+  // Split on <pre>...</pre> so we don't double-process code blocks
+  var parts = text.split(/(<pre>[\s\S]*?<\/pre>)/);
+  for (var i = 0; i < parts.length; i++) {
+    if (i % 2 === 0) {
+      parts[i] = parts[i].replace(/\n/g, '<br>');
+    }
+  }
+  return parts.join('');
+}
+
+function answerText(q, value) {
+  if (value === null || value === undefined || value === '') return LABELS.unanswered_label;
+  var idx = parseInt(value);
+  if (q.type === 'choice') {
+    return String.fromCharCode(65 + idx) + '. ' + ((q.options && q.options[idx]) ? stripHtml(q.options[idx]) : '');
+  }
+  if (q.type === 'tf') {
+    return idx === 0 ? LABELS.true_label : LABELS.false_label;
+  }
+  return String(value);
+}
+
+function normalizedAnswer(q) {
+  if (q.type === 'tf') {
+    if (q.answer === LABELS.true_label || q.answer === true || q.answer === 'true') return 0;
+    if (q.answer === LABELS.false_label || q.answer === false || q.answer === 'false') return 1;
+  }
+  return parseInt(q.answer);
+}
+
+function questionTypeLabel(type) {
+  return LABELS.section[type] || type;
+}
+
+function build(){
+  var container = document.getElementById('questions-container');
+  if (!container) { console.error('ExamPass: questions-container not found'); return; }
+  var h = '';
+  var sec = '';
+  var titles = LABELS.section;
+
+  for (var i = 0; i < Q.length; i++) {
+    var q = Q[i];
+    var s = q.type;
+    if (s !== sec) {
+      sec = s;
+      if (titles[s]) {
+        h += '<h3>' + titles[s] + '</h3>';
+      }
+    }
+
+    var qid = 'q' + i;
+    h += '<div class="q-card" id="card-' + qid + '">';
+    h += '<div class="q-num">' + (i+1) + '. (' + pointsOf(q) + ' ' + LABELS.points_suffix + ')</div>';
+    h += '<div class="q-text">' + formatQuestion(q.question) + '</div>';
+
+    if (q.type === 'choice') {
+      var opts = q.options || [];
+      for (var j = 0; j < opts.length; j++) {
+        h += '<label class="option" id="opt-' + qid + '-' + j + '" onclick="sel(\'' + qid + '\',' + j + ')">';
+        h += '<input type="radio" name="' + qid + '" value="' + j + '">' + String.fromCharCode(65+j) + '. ' + opts[j] + '</label>';
+      }
+    } else if (q.type === 'tf') {
+      h += '<label class="option" id="opt-' + qid + '-0" onclick="sel(\'' + qid + '\',0)">';
+      h += '<input type="radio" name="' + qid + '" value="0">' + LABELS.true_label + '</label>';
+      h += '<label class="option" id="opt-' + qid + '-1" onclick="sel(\'' + qid + '\',1)">';
+      h += '<input type="radio" name="' + qid + '" value="1">' + LABELS.false_label + '</label>';
+    } else {
+      h += '<textarea class="q-textarea" id="text-' + qid + '" placeholder="' + LABELS.placeholder + '" rows="3"></textarea>';
+    }
+
+    h += '<div class="result" id="result-' + qid + '">';
+    h += '<span class="badge" id="badge-' + qid + '"></span><span id="correct-' + qid + '"></span>';
+    h += '<div class="explanation">' + q.explanation + '</div>';
+    if (q.pitfall) {
+      h += '<div class="pitfall">' + LABELS.pitfall_prefix + q.pitfall + '</div>';
+    }
+    h += '</div></div>';
+  }
+
+  container.innerHTML = h;
+
+  // Re-render MathJax for dynamically inserted formulas
+  if (window.MathJax && MathJax.typesetPromise) {
+    MathJax.typesetPromise([container]).catch(function(err) {
+      console.error('MathJax typeset error:', err);
+    });
+  }
+}
+
+document.addEventListener('DOMContentLoaded', build);
+if (document.readyState === 'interactive' || document.readyState === 'complete') {
+  build();
+}
+
+function sel(qid, idx) {
+  var prefix = 'opt-' + qid + '-';
+  var all = document.querySelectorAll('[id^="' + prefix + '"]');
+  for (var i = 0; i < all.length; i++) {
+    all[i].classList.remove('selected');
+  }
+  var target = document.getElementById('opt-' + qid + '-' + idx);
+  if (target) {
+    target.classList.add('selected');
+  }
+  var radio = document.querySelector('input[name="' + qid + '"][value="' + idx + '"]');
+  if (radio) {
+    radio.checked = true;
+  }
+}
+
+function gradeAll() {
+  var score = 0;
+  var wrongItems = [];
+  for (var i = 0; i < Q.length; i++) {
+    var q = Q[i];
+    var qid = 'q' + i;
+    var card = document.getElementById('card-' + qid);
+    var result = document.getElementById('result-' + qid);
+    var badge = document.getElementById('badge-' + qid);
+    var correctEl = document.getElementById('correct-' + qid);
+    if (!card || !result) continue;
+
+    result.style.display = 'block';
+
+    if (q.type === 'choice' || q.type === 'tf') {
+      var radio = document.querySelector('input[name="' + qid + '"]:checked');
+      var correctIndex = normalizedAnswer(q);
+      if (radio && parseInt(radio.value) === correctIndex) {
+        score += pointsOf(q);
+        card.classList.add('correct');
+        badge.className = 'badge badge-ok';
+        badge.textContent = LABELS.correct_label;
+        correctEl.innerHTML = '';
+        var correctOpt = document.getElementById('opt-' + qid + '-' + correctIndex);
+        if (correctOpt) correctOpt.classList.add('correct-answer');
+      } else {
+        card.classList.add('wrong');
+        badge.className = 'badge badge-no';
+        badge.textContent = LABELS.wrong_label;
+        var ansText = answerText(q, correctIndex);
+        correctEl.innerHTML = LABELS.answer_prefix + ansText;
+        if (radio) {
+          var wrongOpt = document.getElementById('opt-' + qid + '-' + radio.value);
+          if (wrongOpt) wrongOpt.classList.add('wrong-answer');
+        }
+        var correctOpt = document.getElementById('opt-' + qid + '-' + correctIndex);
+        if (correctOpt) correctOpt.classList.add('correct-answer');
+        wrongItems.push({
+          number: i + 1,
+          type: questionTypeLabel(q.type),
+          points: pointsOf(q),
+          question: stripHtml(q.question),
+          options: (q.options || []).map(stripHtml),
+          userAnswer: answerText(q, radio ? radio.value : null),
+          correctAnswer: ansText,
+          explanation: stripHtml(q.explanation),
+          pitfall: stripHtml(q.pitfall || ''),
+          knowledgePoint: stripHtml(q.knowledge_point || q.knowledgePoint || '')
+        });
+      }
+    } else {
+      card.classList.add('correct');
+      badge.className = 'badge badge-ref';
+      badge.textContent = LABELS.reference_label;
+    }
+  }
+
+  var sb = document.getElementById('score-box');
+  if (sb) {
+    sb.style.display = 'block';
+    document.getElementById('score-num').textContent = score;
+    sb.scrollIntoView({behavior:'smooth'});
+  }
+
+  var opts = document.querySelectorAll('.option');
+  for (var i = 0; i < opts.length; i++) opts[i].style.pointerEvents = 'none';
+  var tas = document.querySelectorAll('.q-textarea');
+  for (var i = 0; i < tas.length; i++) tas[i].disabled = true;
+
+  var btn = document.getElementById('grade-btn');
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = LABELS.graded_label;
+  }
+
+  buildWrongReview(wrongItems);
+
+  // Re-render MathJax for revealed explanations
+  if (window.MathJax && MathJax.typesetPromise) {
+    MathJax.typesetPromise().catch(function(err) {
+      console.error('MathJax typeset error:', err);
+    });
+  }
+}
+
+function buildWrongReview(wrongItems) {
+  var box = document.getElementById('wrong-review-box');
+  if (!box) return;
+
+  LAST_WRONG_REVIEW = renderWrongReviewMarkdown(wrongItems);
+
+  if (!wrongItems.length) {
+    box.style.display = 'block';
+    box.innerHTML = '<h3>' + LABELS.wrong_review_title + '</h3><p>' + LABELS.no_wrong_questions + '</p>';
+    return;
+  }
+
+  box.style.display = 'block';
+  box.innerHTML = [
+    '<h3>' + LABELS.wrong_review_title + '</h3>',
+    '<p>' + LABELS.wrong_review_intro.replace('__COUNT__', wrongItems.length) + '</p>',
+    '<div class="wrong-review-actions">',
+    '<button type="button" onclick="downloadWrongReview()">' + LABELS.download_wrong_review + '</button>',
+    '<button type="button" onclick="copyWrongReviewPrompt()">' + LABELS.copy_wrong_review_prompt + '</button>',
+    '</div>',
+    '<textarea id="wrong-review-text" readonly rows="12">' + LAST_WRONG_REVIEW.replace(/&/g, '&amp;').replace(/</g, '&lt;') + '</textarea>'
+  ].join('');
+}
+
+function renderWrongReviewMarkdown(wrongItems) {
+  var now = new Date().toLocaleString();
+  var lines = [];
+
+  lines.push('# ExamPass 错题分析文档');
+  lines.push('');
+  lines.push('- 生成时间：' + now);
+  lines.push('- 错题数量：' + wrongItems.length);
+  lines.push('');
+  lines.push('## 给模型的错题分析 Prompt');
+  lines.push('');
+  if (WRONG_REVIEW_PROMPT) {
+    lines.push(WRONG_REVIEW_PROMPT);
+  } else {
+    lines.push('请根据下面的错题记录，分析我的错因，并给出继续学习方案。要求：');
+    lines.push('1. 按知识模块归类错题，不要只逐题复述答案；');
+    lines.push('2. 判断每道题错在概念定义、公式推导、图表理解、条件适用、计算步骤、概念混淆还是审题；');
+    lines.push('3. 对涉及公式或推导的错题，补全从前提到结论的推导链条，不能跳步；');
+    lines.push('4. 对选择题，解释我选错选项为什么有迷惑性，以及正确选项和错误选项的关键边界；');
+    lines.push('5. 给出需要回看课件的具体知识点、图表、公式和页/章节线索；');
+    lines.push('6. 最后生成一份二次学习清单和 5 道针对这些薄弱点的进阶训练题。');
+  }
+  lines.push('');
+  lines.push('## 错题记录');
+  lines.push('');
+
+  if (!wrongItems.length) {
+    lines.push('本次没有客观题错题。');
+    return lines.join('\n');
+  }
+
+  for (var i = 0; i < wrongItems.length; i++) {
+    var item = wrongItems[i];
+    lines.push('### 错题 ' + (i + 1) + '：第 ' + item.number + ' 题');
+    lines.push('');
+    lines.push('- 题型：' + item.type);
+    lines.push('- 分值：' + item.points);
+    lines.push('- 题干：' + item.question);
+    if (item.options.length) {
+      lines.push('- 选项：');
+      for (var j = 0; j < item.options.length; j++) {
+        lines.push('  - ' + String.fromCharCode(65 + j) + '. ' + item.options[j]);
+      }
+    }
+    lines.push('- 我的答案：' + item.userAnswer);
+    lines.push('- 正确答案：' + item.correctAnswer);
+    lines.push('- 解析：' + item.explanation);
+    if (item.pitfall) lines.push('- 易错点：' + item.pitfall);
+    if (item.knowledgePoint) lines.push('- 对应知识点：' + item.knowledgePoint);
+    lines.push('');
+  }
+
+  return lines.join('\n');
+}
+
+function downloadWrongReview() {
+  if (!LAST_WRONG_REVIEW) return;
+  var blob = new Blob([LAST_WRONG_REVIEW], {type: 'text/markdown;charset=utf-8'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = '错题分析文档.md';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function copyWrongReviewPrompt() {
+  var text = LAST_WRONG_REVIEW || '';
+  if (!text) return;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text);
+  } else {
+    var ta = document.getElementById('wrong-review-text');
+    if (ta) {
+      ta.focus();
+      ta.select();
+      document.execCommand('copy');
+    }
+  }
+}
+
+</script>
+</body>
+</html>

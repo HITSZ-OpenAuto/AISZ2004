@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Lecture 11：噪声信道编码定理证明</title>
+<script>
+MathJax = {
+  tex: {
+    inlineMath: [['$', '$']],
+    displayMath: [['$$', '$$']]
+  }
+};
+</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js"></script>
+<style>
+/* === ExamPass Shared Styles === */
+/* Paper-like warm background, clean typography, responsive */
+
+:root {
+  --paper: #fdf6e3;
+  --paper-dark: #f5ecd7;
+  --ink: #2c2c2c;
+  --ink-light: #555;
+  --accent: #2563eb;
+  --accent-hover: #1d4ed8;
+  --divider: #d6c8a8;
+  --card-bg: #fef9ef;
+  --card-border: #e8dcc8;
+  --correct: #22c55e;
+  --correct-bg: #f0fdf4;
+  --wrong: #ef4444;
+  --wrong-bg: #fef2f2;
+  --tag-bg: #fef3c7;
+  --tag-text: #92400e;
+  --radius: 6px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: "Microsoft YaHei", "Noto Sans SC", "SimSun", sans-serif;
+  font-size: 12pt; line-height: 1.75; color: var(--ink);
+  max-width: 860px; margin: auto; padding: 24px 20px 60px;
+  background: var(--paper);
+}
+
+@media print {
+  body { font-size: 10.5pt; background: #fff; }
+  .no-print { display: none !important; }
+  h1, h2, h3 { page-break-after: avoid; }
+}
+
+/* ── Header ── */
+#exampass-header {
+  display: flex; justify-content: space-between; align-items: baseline;
+  padding: 6px 0; margin-bottom: 0;
+}
+.header-brand { font-size: 1.2em; font-weight: 700; color: #1a1a2e; letter-spacing: 0.3px; }
+.header-url  { font-size: 0.78em; color: #999; }
+.header-divider { border: none; border-top: 2px solid var(--divider); margin: 4px 0 20px 0; }
+
+/* ── Typography ── */
+h1 { font-size: 1.55em; text-align: center; border-bottom: 2px solid var(--divider); padding-bottom: 8px; margin-top: 0; }
+h2 { font-size: 1.25em; border-bottom: 1px solid var(--divider); padding-bottom: 4px; margin-top: 28px; }
+h3 { font-size: 1.08em; margin-top: 20px; color: var(--ink); }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ── Tables ── */
+table { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 0.95em; }
+td, th { border: 1px solid var(--card-border); padding: 5px 9px; text-align: left; }
+th { background: var(--paper-dark); font-weight: 700; }
+
+/* ── Embedded source images ── */
+.embedded-images {
+  margin: 18px 0 24px;
+}
+.embedded-images-intro {
+  color: var(--ink-light);
+  font-size: 0.95em;
+}
+.embedded-image {
+  margin: 14px 0 18px;
+  padding: 10px;
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  background: var(--card-bg);
+  break-inside: avoid;
+}
+.embedded-image img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+  border: 1px solid var(--divider);
+  background: #fff;
+}
+.embedded-image figcaption {
+  margin-top: 8px;
+  color: var(--ink-light);
+  font-size: 0.92em;
+  line-height: 1.5;
+}
+.embedded-image-note::before {
+  content: " - ";
+}
+
+/* ── Knowledge point vs explanation ── */
+.kp { font-weight: 700; color: var(--ink); }           /* key point: bold dark */
+.exp { font-weight: 400; color: var(--ink-light); }    /* explanation: lighter */
+.exp em, .exp strong { color: var(--ink); }             /* emphasis inside explanation */
+
+/* ── Block elements ── */
+blockquote {
+  border-left: 3px solid #c0392b; background: #fef9ef;
+  padding: 6px 14px; margin: 10px 0; font-size: 0.95em;
+}
+code { background: #f0ede0; padding: 2px 5px; border-radius: 3px; font-size: 0.92em; }
+pre { background: #f0ede0; padding: 10px; border-radius: var(--radius); overflow-x: auto; }
+
+/* ── TOC ── */
+div.toc {
+  background: var(--card-bg); padding: 14px 18px;
+  border: 1px solid var(--card-border); border-radius: var(--radius); margin-bottom: 22px;
+}
+div.toc ul { padding-left: 18px; }
+div.toc li { margin: 3px 0; font-size: 0.95em; }
+
+/* ── Priority tags ── */
+.tag-must   { background: #fee2e2; color: #991b1b; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+.tag-key    { background: #fef3c7; color: #92400e; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+.tag-freq   { background: #dbeafe; color: #1e40af; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+.tag-info   { background: #f0fdf4; color: #166534; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+
+
+</style>
+</head>
+<body>
+
+<header id="exampass-header">
+  <div class="header-left"><span class="header-brand">ExamPass Assistant</span></div>
+  <div class="header-right"><span class="header-url">github.com/MIKUZ12/ExamPass-Assistant</span></div>
+</header>
+<hr class="header-divider">
+
+<h1>Lecture 11：噪声信道编码定理证明</h1>
+<div class="toc">
+<h2>目录</h2>
+<ul>
+<li><a href="#s24643153">一、定理陈述与证明框架</a></li>
+  <li><a href="#s55891138">噪声信道编码定理（Shannon 1948） 必考</a></li>
+  <li><a href="#s58433688">香农的证明思路：期望论证 重点</a></li>
+<li><a href="#s71927909">二、联合典型集回顾</a></li>
+  <li><a href="#s24493577">定义（三条件） 必考</a></li>
+  <li><a href="#s67780645">Joint Typicality Lemma（三个性质） 必考</a></li>
+<li><a href="#s82337385">三、典型集编码方案</a></li>
+  <li><a href="#s22763206">编码方案构造 必考</a></li>
+  <li><a href="#s36138470">译码错误条件 重点</a></li>
+<li><a href="#s77126570">四、正向证明（可达性）</a></li>
+  <li><a href="#s44811100">证明框架与 Union Bound 必考</a></li>
+<li><a href="#s45268669">五、反向证明（逆定理）</a></li>
+  <li><a href="#s74995731">证明思路（DPI + Fano 不等式） 必考</a></li>
+<li><a href="#s53034935">六、几何解释</a></li>
+  <li><a href="#s56705510">噪声球模型 常考</a></li>
+<li><a href="#s69916393">七、平均误差与最大误差</a></li>
+  <li><a href="#s12313562">Expurgation 论证 重点</a></li>
+</ul>
+</div>
+
+<h2 id="s24643153">一、定理陈述与证明框架</h2>
+
+<h3 id="s55891138">噪声信道编码定理（Shannon 1948） <span class="tag-must">必考</span></h3>
+<p><span class="kp">噪声信道编码定理</span>给出信道可靠传输的最大速率：</p>
+<ul>
+  <li><strong>正向（可达性）</strong>：若 $R &lt; C_I = \max_{P_X} I(X;Y)$，则存在编码方案使传输误差趋于零</li>
+  <li><strong>反向（逆定理）</strong>：若 $R &gt; C_I$，则任何编码方案的传输误差均必须大于零</li>
+</ul>
+<p>其中传输速率 $R = \dfrac{\log_2 M}{n}$，$M$ 为信息状态数，$n$ 为码字长度。</p>
+<blockquote>易错：$C_I$ 是理论信道容量（最优化 $I(X;Y)$ 得到），$R$ 是实际操作速率（$\log_2 M / n$），两者含义不同但数值在极限情况下相等。</blockquote>
+
+<h3 id="s58433688">香农的证明思路：期望论证 <span class="tag-key">重点</span></h3>
+<p>核心难点：好的编码方案未知，无法直接计算其误差 $P(\hat{U} \neq U | C_n)$。</p>
+<p><span class="kp">香农思路</span>：对所有编码方案求期望，将不等式化为存在性问题：</p>
+$$\underbrace{\mathbb{E}_{C_n \sim P(C_n)}\left[P(\hat{U} \neq U \mid C_n)\right]}_{\text{容易计算}} = P(\hat{U} \neq U) \to 0 \implies \exists C_n,\; P(\hat{U} \neq U \mid C_n) \to 0$$
+<p><span class="exp">若所有方案的平均错误趋于零，则必存在某个方案误差趋于零（期望下界论证：若期望趋于0，最小值也趋于0）。该方法无需事先知道 $P(C_n)$ 的具体形式。</span></p>
+
+<h2 id="s71927909">二、联合典型集回顾</h2>
+
+<h3 id="s24493577">定义（三条件） <span class="tag-must">必考</span></h3>
+<p>$\epsilon$-联合典型集 $A_\epsilon^n(X,Y)$ 由所有满足以下三条件的序列对 $(x^n, y^n)$ 构成：</p>
+<ol>
+  <li>$\left| -\frac{1}{n}\log p(x^n) - H(X) \right| \le \epsilon$ &emsp;（$x^n$ 是 $X$ 的典型序列）</li>
+  <li>$\left| -\frac{1}{n}\log p(y^n) - H(Y) \right| \le \epsilon$ &emsp;（$y^n$ 是 $Y$ 的典型序列）</li>
+  <li>$\left| -\frac{1}{n}\log p(x^n,y^n) - H(X,Y) \right| \le \epsilon$ &emsp;（$(x^n,y^n)$ 是 $(X,Y)$ 的联合典型序列）</li>
+</ol>
+
+<h3 id="s67780645">Joint Typicality Lemma（三个性质） <span class="tag-must">必考</span></h3>
+<p><strong>性质 1（联合采样概率趋于 1）</strong>：若 $(X_i, Y_i) \overset{i.i.d.}{\sim} P_{XY}$，则：</p>
+$$P\left((x^n, y^n) \in A_\epsilon^n(X,Y)\right) \xrightarrow{n\to\infty} 1$$
+<p><strong>性质 2（典型集大小上界）</strong>：对任意 $n$：</p>
+$$|A_\epsilon^n(X,Y)| \le 2^{n(H(X,Y)+\epsilon)}$$
+<p><strong>性质 3（独立采样概率上界）</strong>：若 $\tilde{X}^n$ 和 $\tilde{Y}^n$ 相互独立，且边缘分布与 $(X,Y)$ 相同，则：</p>
+$$P\left((\tilde{x}^n, \tilde{y}^n) \in A_\epsilon^n(X,Y)\right) \le 2^{-n(I(X;Y)-3\epsilon)}$$
+<p><strong>性质 3 证明</strong>：</p>
+$$P(\tilde{x}^n, \tilde{y}^n \in A_\epsilon^n) = \sum_{A_\epsilon^n} p(x^n)p(y^n) \le |A_\epsilon^n| \cdot 2^{-n(H(X)-\epsilon)} \cdot 2^{-n(H(Y)-\epsilon)}$$
+$$\le 2^{n(H(X,Y)+\epsilon)} \cdot 2^{-n(H(X)-\epsilon)} \cdot 2^{-n(H(Y)-\epsilon)} = 2^{-n(I(X;Y)-3\epsilon)}$$
+<blockquote>易错：性质 1 是联合采样（概率趋于 1），性质 3 是独立采样（概率趋于 0）。两者结论相反，核心区别在于序列对是否来自真实联合分布。</blockquote>
+
+<h2 id="s82337385">三、典型集编码方案</h2>
+
+<h3 id="s22763206">编码方案构造 <span class="tag-must">必考</span></h3>
+<p>给定编码长度 $n$，信息状态数 $M = 2^{nR}$：</p>
+<ol>
+  <li><strong>生成码本</strong>：从 $A_\epsilon^n(X)$ 中随机选 $M = 2^{nR}$ 个序列作为码字，构成码本（编码表）</li>
+  <li><strong>编码</strong>：状态 $u \in \{1,2,\ldots,M\}$ 映射为码字 $x^n(u)$</li>
+  <li><strong>译码</strong>：接收到 $y^n$ 后，寻找唯一的 $u$，使得 $(x^n(u), y^n) \in A_\epsilon^n(X,Y)$；若不唯一或不存在则宣告错误</li>
+</ol>
+<p><span class="exp">思考：无需确定具体的 $P(C_n)$，只需知道码本是从典型集中随机生成的，期望计算中分布会自然消除。</span></p>
+
+<h3 id="s36138470">译码错误条件 <span class="tag-key">重点</span></h3>
+<p>输入状态 $U = u$，<strong>译码成功</strong>要求同时满足：</p>
+<ul>
+  <li>$(x^n(u), y^n) \in A_\epsilon^n(X,Y)$（真实码字与接收序列联合典型）</li>
+  <li>$(x^n(k), y^n) \notin A_\epsilon^n(X,Y)$，$\forall k \neq u$（其他码字与接收序列不联合典型）</li>
+</ul>
+<p>译码错误（OR 条件）：</p>
+$$P(\hat{U} \neq U | U=u) = P\left[(x^n(u), y^n) \notin A_\epsilon^n \text{ OR } \exists k\neq u: (x^n(k), y^n) \in A_\epsilon^n \,\Big|\, U=u\right]$$
+
+<h2 id="s77126570">四、正向证明（可达性）</h2>
+
+<h3 id="s44811100">证明框架与 Union Bound <span class="tag-must">必考</span></h3>
+<p>目标：证明当 $R &lt; C_I$ 时，$\mathbb{E}_{C_n}[P(\hat{U} \neq U | C_n)] \to 0$。</p>
+<p><strong>Step 1：分解期望</strong></p>
+$$\mathbb{E}[P(\hat{U}\neq U|C_n)] = \sum_u P(U=u) \cdot P(\hat{U}\neq U | U=u)$$
+<p><strong>Step 2：Union Bound（利用对称性，只看 $u=1$）</strong></p>
+$$P(\hat{U}\neq U | U=u) \le \underbrace{P\left((x^n(u),y^n)\notin A_\epsilon^n\right)}_{\to 0 \text{（性质1）}} + \sum_{k\neq u} P\left((x^n(k), y^n)\in A_\epsilon^n \,\Big|\, U=u\right)$$
+<p><strong>Step 3：关键步骤</strong>——$x^n(k)$（$k\neq u$）与 $y^n$ 独立，故第二项用性质 3：</p>
+$$P\left((x^n(k), y^n) \in A_\epsilon^n | U=u\right) \le 2^{-n(I(X;Y)-3\epsilon)}$$
+<p><strong>Step 4：Union Bound 求和</strong>（共 $M-1 \le M = 2^{nR}$ 项）</p>
+$$P(\hat{U}\neq U|U=u) \le \underbrace{\epsilon}_{\to 0} + 2^{nR} \cdot 2^{-n(I(X;Y)-3\epsilon)} = \epsilon + 2^{-n(I(X;Y)-R-3\epsilon)}$$
+<p><strong>结论</strong>：当 $R &lt; I(X;Y) - 3\epsilon$（即 $R &lt; C_I - 3\epsilon$，对最优 $P_X$ 取最大值），误差指数趋于 $0$。</p>
+$$\boxed{\text{若 } R < C_I,\; \exists C_n:\; P(\hat{U}\neq U|C_n) \to 0}$$
+<blockquote>易错：Union Bound 只适用于可数个事件的并；独立性条件来源于不同码字是独立选取的，与接收序列 $y^n$ 无关。</blockquote>
+
+<h2 id="s45268669">五、反向证明（逆定理）</h2>
+
+<h3 id="s74995731">证明思路（DPI + Fano 不等式） <span class="tag-must">必考</span></h3>
+<p>目标：证明当 $R &gt; C_I$ 时，任何编码方案均有 $P(\hat{U}\neq U) &gt; 0$。</p>
+<p><strong>Step 1：马尔可夫链 + 数据处理不等式（DPI）</strong></p>
+<p>整个传输系统构成马尔可夫链 $U \to X^n \to Y^n \to \hat{U}$，故：</p>
+$$I(U; Y^n) \le I(X^n; Y^n) \le \sum_{i=1}^n I(X_i; Y_i) \le nC_I$$
+<p>注：$I(X^n; Y^n) \le \sum I(X_i;Y_i)$ 利用 DMC 的无记忆性（$H(Y^n|X^n) = \sum H(Y_i|X_i)$）；$\sum I(X_i;Y_i) \le nC_I$ 因为 $I(X_i;Y_i) \le C_I$。</p>
+<p><strong>Step 2：Fano 不等式</strong></p>
+$$P(\hat{U}\neq U) \ge \frac{H(U|Y^n) - 1}{H(U)} = \frac{H(U) - I(U;Y^n) - 1}{H(U)}$$
+<p><strong>Step 3：代入 $H(U) = \log M = nR$（均匀分布假设）</strong></p>
+$$P(\hat{U}\neq U) \ge \frac{nR - nC_I - 1}{nR} = 1 - \frac{C_I}{R} - \frac{1}{nR}$$
+<p><strong>结论</strong>：若 $R &gt; C_I$，对足够大的 $n$，$P(\hat{U}\neq U) &gt; 0$（误差不可能趋于零）。</p>
+$$\boxed{P(\hat{U}\neq U) \ge 1 - \frac{C_I}{R} - \frac{1}{nR} > 0 \text{ when } R > C_I}$$
+<blockquote>易错：反向证明只假设 DMC（无记忆信道），不能假设 $X^n$ 或 $Y^n$ 满足独立同分布——这是反向与正向证明的关键区别。</blockquote>
+
+<h2 id="s53034935">六、几何解释</h2>
+
+<h3 id="s56705510">噪声球模型 <span class="tag-freq">常考</span></h3>
+<p>类比"球填充"（ball-packing）直觉：</p>
+<ul>
+  <li>每个码字 $x^n(u)$ 经信道传输后，对应约 $2^{nH(Y|X)}$ 个可能的输出（<span class="kp">噪声球</span>）</li>
+  <li>输出空间总大小约为 $2^{nH(Y)}$</li>
+  <li>共有 $2^{nR}$ 个码字，每个对应一个噪声球</li>
+</ul>
+<p>若要在输出端区分所有输入（噪声球不重叠）：</p>
+$$2^{nR} \cdot 2^{nH(Y|X)} \le 2^{nH(Y)} \implies R \le H(Y) - H(Y|X) = I(X;Y) \le C_I$$
+<p><span class="exp">这给出了 $R \le C_I$ 的几何直觉，与反向证明结论一致。当 $n \to \infty$ 时，大数定律使所有信道行为趋近于"噪声打印机"（固定的噪声模式）。</span></p>
+
+<h2 id="s69916393">七、平均误差与最大误差</h2>
+
+<h3 id="s12313562">Expurgation 论证 <span class="tag-key">重点</span></h3>
+<p>问题：正向证明仅保证存在编码方案使<strong>平均误差</strong>趋于零，能否使每个状态的最大误差也趋于零？</p>
+<p><strong>Expurgation（删除最差码字）方法</strong>：</p>
+<ol>
+  <li>对满足 $P(\hat{U}\neq U|C_n) \to 0$ 的编码方案 $C_n$，将 $M = 2^{nR}$ 个状态按误差从大到小排列</li>
+  <li>删除误差最大的一半状态，剩余 $M/2 = 2^{nR-1}$ 个状态</li>
+  <li>对剩余状态，最大误差 $\le 2 P(\hat{U}\neq U|C_n) \to 0$</li>
+</ol>
+<p>代价：传输速率从 $R$ 降为 $R' = \frac{\log(2^{nR}/2)}{n} = R - \frac{1}{n} \to R$（$n$ 大时几乎不损失）。</p>
+<p><strong>结论</strong>：存在编码方案使<strong>最大误差</strong>也趋于零，即对所有 $u$，$P(\hat{U}\neq U|U=u) \to 0$。</p>
+<blockquote>易错：Expurgation 不是无代价的，速率从 $R$ 降到 $R' = R - 1/n$；但当 $n \to \infty$ 时，$R' \to R$，故不影响定理的渐进意义。</blockquote>
+
+
+
+</body>
+</html>

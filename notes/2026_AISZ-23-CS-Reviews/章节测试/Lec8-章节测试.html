@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Lecture 8：Huffman 码</title>
+<script>
+MathJax = {
+  tex: {
+    inlineMath: [['$', '$']],
+    displayMath: [['$$', '$$']]
+  }
+};
+</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js"></script>
+<style>
+/* === ExamPass Shared Styles === */
+/* Paper-like warm background, clean typography, responsive */
+
+:root {
+  --paper: #fdf6e3;
+  --paper-dark: #f5ecd7;
+  --ink: #2c2c2c;
+  --ink-light: #555;
+  --accent: #2563eb;
+  --accent-hover: #1d4ed8;
+  --divider: #d6c8a8;
+  --card-bg: #fef9ef;
+  --card-border: #e8dcc8;
+  --correct: #22c55e;
+  --correct-bg: #f0fdf4;
+  --wrong: #ef4444;
+  --wrong-bg: #fef2f2;
+  --tag-bg: #fef3c7;
+  --tag-text: #92400e;
+  --radius: 6px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: "Microsoft YaHei", "Noto Sans SC", "SimSun", sans-serif;
+  font-size: 12pt; line-height: 1.75; color: var(--ink);
+  max-width: 860px; margin: auto; padding: 24px 20px 60px;
+  background: var(--paper);
+}
+
+@media print {
+  body { font-size: 10.5pt; background: #fff; }
+  .no-print { display: none !important; }
+  h1, h2, h3 { page-break-after: avoid; }
+}
+
+/* ── Header ── */
+#exampass-header {
+  display: flex; justify-content: space-between; align-items: baseline;
+  padding: 6px 0; margin-bottom: 0;
+}
+.header-brand { font-size: 1.2em; font-weight: 700; color: #1a1a2e; letter-spacing: 0.3px; }
+.header-url  { font-size: 0.78em; color: #999; }
+.header-divider { border: none; border-top: 2px solid var(--divider); margin: 4px 0 20px 0; }
+
+/* ── Typography ── */
+h1 { font-size: 1.55em; text-align: center; border-bottom: 2px solid var(--divider); padding-bottom: 8px; margin-top: 0; }
+h2 { font-size: 1.25em; border-bottom: 1px solid var(--divider); padding-bottom: 4px; margin-top: 28px; }
+h3 { font-size: 1.08em; margin-top: 20px; color: var(--ink); }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ── Tables ── */
+table { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 0.95em; }
+td, th { border: 1px solid var(--card-border); padding: 5px 9px; text-align: left; }
+th { background: var(--paper-dark); font-weight: 700; }
+
+/* ── Embedded source images ── */
+.embedded-images {
+  margin: 18px 0 24px;
+}
+.embedded-images-intro {
+  color: var(--ink-light);
+  font-size: 0.95em;
+}
+.embedded-image {
+  margin: 14px 0 18px;
+  padding: 10px;
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  background: var(--card-bg);
+  break-inside: avoid;
+}
+.embedded-image img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+  border: 1px solid var(--divider);
+  background: #fff;
+}
+.embedded-image figcaption {
+  margin-top: 8px;
+  color: var(--ink-light);
+  font-size: 0.92em;
+  line-height: 1.5;
+}
+.embedded-image-note::before {
+  content: " - ";
+}
+
+/* ── Knowledge point vs explanation ── */
+.kp { font-weight: 700; color: var(--ink); }           /* key point: bold dark */
+.exp { font-weight: 400; color: var(--ink-light); }    /* explanation: lighter */
+.exp em, .exp strong { color: var(--ink); }             /* emphasis inside explanation */
+
+/* ── Block elements ── */
+blockquote {
+  border-left: 3px solid #c0392b; background: #fef9ef;
+  padding: 6px 14px; margin: 10px 0; font-size: 0.95em;
+}
+code { background: #f0ede0; padding: 2px 5px; border-radius: 3px; font-size: 0.92em; }
+pre { background: #f0ede0; padding: 10px; border-radius: var(--radius); overflow-x: auto; }
+
+/* ── TOC ── */
+div.toc {
+  background: var(--card-bg); padding: 14px 18px;
+  border: 1px solid var(--card-border); border-radius: var(--radius); margin-bottom: 22px;
+}
+div.toc ul { padding-left: 18px; }
+div.toc li { margin: 3px 0; font-size: 0.95em; }
+
+/* ── Priority tags ── */
+.tag-must   { background: #fee2e2; color: #991b1b; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+.tag-key    { background: #fef3c7; color: #92400e; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+.tag-freq   { background: #dbeafe; color: #1e40af; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+.tag-info   { background: #f0fdf4; color: #166534; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+
+/* === Interactive Test Styles === */
+
+/* ── Score box ── */
+#score-box {
+  display: none; background: var(--paper-dark); color: var(--ink);
+  padding: 16px 20px; border-radius: var(--radius); margin: 14px 0;
+  text-align: center; border: 1px solid var(--card-border);
+}
+#score-box .score-num { font-size: 2.2em; font-weight: 700; }
+#score-box .score-label { font-size: 0.85em; color: var(--ink-light); }
+
+/* ── Question card ── */
+.q-card {
+  background: var(--card-bg); border: 1px solid var(--card-border);
+  border-radius: var(--radius); padding: 12px 14px; margin: 10px 0;
+  transition: all 0.15s;
+}
+.q-card.correct { border-left: 3px solid var(--correct); background: #f7fdf4; }
+.q-card.wrong   { border-left: 3px solid var(--wrong); background: #fef9f9; }
+
+.q-num  { font-weight: 700; font-size: 0.98em; margin-bottom: 4px; }
+.q-text { margin-bottom: 8px; font-size: 0.98em; }
+.q-text pre {
+  background: #f5f5f5; border: 1px solid #ddd; border-radius: 4px;
+  padding: 10px 14px; margin: 8px 0; overflow-x: auto;
+  font-family: 'Consolas', 'Courier New', monospace; font-size: 0.9em;
+  line-height: 1.5; white-space: pre;
+}
+.q-text code {
+  font-family: 'Consolas', 'Courier New', monospace; font-size: 0.9em;
+  background: #f0f0f0; padding: 1px 4px; border-radius: 3px;
+}
+
+/* ── Options (compact) ── */
+.option {
+  display: block; padding: 4px 10px; margin: 3px 0;
+  border: 1px solid var(--card-border); border-radius: 4px;
+  cursor: pointer; transition: all 0.12s; font-size: 0.93em;
+  background: #fefcf5;
+}
+.option:hover            { background: #f0ede0; }
+.option input            { margin-right: 6px; }
+.option.selected         { border-color: var(--accent); background: #eff6ff; }
+.option.correct-answer   { border-color: var(--correct); background: var(--correct-bg); }
+.option.wrong-answer     { border-color: var(--wrong); background: var(--wrong-bg); }
+
+/* ── Textareas (compact) ── */
+.q-textarea {
+  width: 100%; min-height: 56px; border: 1px solid var(--card-border);
+  border-radius: 4px; padding: 6px 10px; font-family: inherit;
+  font-size: 0.93em; background: #fefcf5; resize: vertical;
+}
+.q-textarea:focus { outline: none; border-color: var(--accent); }
+
+/* ── Result after grading ── */
+.result {
+  display: none; margin-top: 8px; padding: 8px 12px;
+  background: #fefcf5; border: 1px solid var(--card-border);
+  border-radius: 4px; font-size: 0.9em; line-height: 1.6;
+}
+.result .badge {
+  display: inline-block; padding: 1px 9px; border-radius: 3px;
+  font-weight: 700; font-size: 0.82em; margin-right: 6px;
+}
+.badge-ok  { background: var(--correct-bg); color: #166534; }
+.badge-no  { background: var(--wrong-bg); color: #991b1b; }
+.badge-ref { background: #dbeafe; color: #1e40af; }
+
+.result .explanation { margin-top: 4px; color: var(--ink); }
+.result .pitfall { color: #b45309; margin-top: 3px; font-size: 0.9em; }
+
+/* ── Grading button ── */
+.grading-bar { text-align: center; margin: 20px 0; }
+.grading-bar button {
+  font-size: 1em; padding: 8px 32px; background: var(--accent);
+  color: #fff; border: none; border-radius: var(--radius);
+  cursor: pointer; font-weight: 600; letter-spacing: 0.3px;
+}
+.grading-bar button:hover     { background: var(--accent-hover); }
+.grading-bar button:disabled  { background: #bbb; cursor: not-allowed; }
+
+/* ── Wrong-question review document ── */
+.wrong-review-box {
+  display: none;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  margin: 18px 0;
+}
+.wrong-review-box h3 {
+  margin-top: 0;
+}
+.wrong-review-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px 0;
+}
+.wrong-review-actions button {
+  font-size: 0.92em;
+  padding: 6px 12px;
+  background: var(--ink);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+.wrong-review-actions button:hover {
+  background: #000;
+}
+#wrong-review-text {
+  width: 100%;
+  min-height: 220px;
+  border: 1px solid var(--card-border);
+  border-radius: 4px;
+  padding: 8px 10px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.84em;
+  line-height: 1.5;
+  background: #fff;
+  resize: vertical;
+}
+
+</style>
+</head>
+<body>
+
+<header id="exampass-header">
+  <div class="header-left"><span class="header-brand">ExamPass Assistant</span></div>
+  <div class="header-right"><span class="header-url">github.com/MIKUZ12/ExamPass-Assistant</span></div>
+</header>
+<hr class="header-divider">
+
+<h1>Lecture 8：Huffman 码</h1>
+<h2 style="text-align:center">章节测试</h2>
+<p style="text-align:center;color:var(--ink-light);font-size:0.95em">满分100分</p>
+
+<div id="score-box"><div class="score-num" id="score-num">0</div><div class="score-label">总分</div></div>
+<div id="questions-container"></div>
+<div class="grading-bar no-print"><button onclick="gradeAll()" id="grade-btn">提交批改</button></div>
+<div id="wrong-review-box" class="wrong-review-box no-print"></div>
+
+<script>
+var Q = [{"type": "choice", "points": 2, "question": "Huffman 码是以下哪个优化问题的精确最优解？", "options": ["$\\min\\sum p(x)l(x)$，$l(x)\\ge 0$（实数，连续松弛）", "$\\min\\sum p(x)l(x)$，$l(x)\\in\\mathbb{Z}^+$，满足 Kraft 不等式", "$\\max H(X)$", "$\\min\\max_x l(x)$"], "answer": 1, "knowledge_point": "Huffman码定义", "diagnosis_hint": "混淆连续松弛与整数约束", "explanation": "<strong>正确答案</strong>：B<br><br><strong>推理过程</strong>：Huffman 是整数码长约束下最小平均编码长度的精确最优解。Shannon 码是近似解，连续松弛最优为 $-\\log p(x)$（可能非整数）。", "pitfall": ""}, {"type": "choice", "points": 2, "question": "Huffman 算法每步合并哪两个符号？", "options": ["概率最大的两个", "概率最小的两个", "任意两个", "码长最短的两个"], "answer": 1, "knowledge_point": "Huffman算法", "diagnosis_hint": "", "explanation": "<strong>正确答案</strong>：B<br><br><strong>推理过程</strong>：贪婪策略：每次选概率最小的两个合并，使低概率符号获得最长码字。", "pitfall": ""}, {"type": "choice", "points": 2, "question": "在最优前缀码中，概率最小的两符号 $s_{r-1},s_r$ 的码长关系是？", "options": ["$l_{r-1}=l_r=l_{\\max}$", "$l_{r-1}<l_r$", "$l_{r-1}=1$", "无特定关系"], "answer": 0, "knowledge_point": "最优前缀码性质", "diagnosis_hint": "", "explanation": "<strong>正确答案</strong>：A<br><br><strong>推理过程</strong>：最优前缀码中，概率最小的两符号拥有最长且相等的码长，存在最优树使它们是姊妹节点。", "pitfall": ""}, {"type": "choice", "points": 2, "question": "Huffman 证明中，融合 $s_{r-1},s_r$ 后 $L_U$ 与 $L_V$ 的关系是？", "options": ["$L_U=L_V$", "$L_U=L_V+p_{r-1}+p_r$", "$L_U=L_V-p_{r-1}-p_r$", "$L_U=L_V\\cdot(p_{r-1}+p_r)$"], "answer": 1, "knowledge_point": "Huffman最优性证明", "diagnosis_hint": "", "explanation": "<strong>正确答案</strong>：B<br><br><strong>推理过程</strong>：扩展时两个符号各多 1 位，$L_U=L_V+p_{r-1}+p_r$，原问题最优与子问题最优等价。", "pitfall": ""}, {"type": "choice", "points": 2, "question": "Huffman 码平均编码长度 $L_H$ 与 $H(X)$ 的关系？", "options": ["$L_H=H(X)$", "$H(X)\\le L_H<H(X)+1$", "$L_H>H(X)+1$", "$L_H<H(X)$"], "answer": 1, "knowledge_point": "Huffman性能界", "diagnosis_hint": "", "explanation": "<strong>正确答案</strong>：B<br><br><strong>推理过程</strong>：Huffman 是整数约束最优，下界 $H(X)$，上界严格小于 $H(X)+1$。", "pitfall": ""}, {"type": "choice", "points": 2, "question": "Gallager（1978）的冗余界表明 $L_H$ 不超过？", "options": ["$H(X)+p_{\\max}+1$", "$H(X)+p_{\\max}+0.086$", "$H(X)+1/p_{\\max}$", "$H(X)+\\log(1/p_{\\max})$"], "answer": 1, "knowledge_point": "Gallager冗余界", "diagnosis_hint": "", "explanation": "<strong>正确答案</strong>：B<br><br><strong>推理过程</strong>：$L_H\\le H(X)+p_{\\max}+0.086$，常数 $0.086=1-\\log_2 e+\\log_2(\\log_2 e)$。", "pitfall": ""}, {"type": "choice", "points": 2, "question": "$N$ 阶扩展信源 Huffman 编码，每符号平均码长满足？", "options": ["$H(X)\\le L/N<H(X)+1$", "$H(X)\\le L/N<H(X)+1/N$", "$L/N=H(X)$", "$L/N<H(X)$"], "answer": 1, "knowledge_point": "块编码", "diagnosis_hint": "", "explanation": "<strong>正确答案</strong>：B<br><br><strong>推理过程</strong>：整体最多多 1 bit，分摊到 $N$ 个符号为 $1/N$。", "pitfall": ""}, {"type": "choice", "points": 2, "question": "Huffman 编码树与哪个概念等价？", "options": ["最优 YES/NO 二叉决策树", "最大似然估计", "最小最大码", "均匀分布编码"], "answer": 0, "knowledge_point": "Huffman与决策树", "diagnosis_hint": "", "explanation": "<strong>正确答案</strong>：A<br><br><strong>推理过程</strong>：Huffman 树的每个内部节点对应一个 YES/NO 集合问题，平均深度=平均编码长度。", "pitfall": ""}, {"type": "choice", "points": 2, "question": "固定 $p(Y|X)$，互信息 $I(X;Y)$ 关于 $p(X)$ 是？", "options": ["凸函数", "凹函数", "线性函数", "与 $p(X)$ 无关"], "answer": 1, "knowledge_point": "互信息凹凸性", "diagnosis_hint": "记混方向", "explanation": "<strong>正确答案</strong>：B<br><br><strong>推理过程</strong>：$I=H(Y)-H(Y|X)$，$H(Y|X)$ 线性，$H(Y)$ 是 $p(Y)=\\sum p(x)p(y|x)$ 的凹函数，故 $I$ 是凹函数。", "pitfall": "固定 p(X) 时 I 是 p(Y|X) 的凸函数"}, {"type": "choice", "points": 2, "question": "固定 $p(X)$，互信息 $I(X;Y)$ 关于 $p(Y|X)$ 是？", "options": ["凸函数", "凹函数", "线性函数", "常数"], "answer": 0, "knowledge_point": "互信息凹凸性", "diagnosis_hint": "记混方向", "explanation": "<strong>正确答案</strong>：A<br><br><strong>推理过程</strong>：固定 $p(X)$，$I=D_{KL}(p(x,y)\\|p(x)p(y))$，利用 KL 散度对联合分布的凸性证明。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "给定概率分布，Huffman 码是唯一的。", "options": [], "answer": false, "knowledge_point": "Huffman算法", "diagnosis_hint": "", "explanation": "<strong>正确答案</strong>：错误（×）<br><br><strong>推理过程</strong>：当多个符号概率相等时，合并顺序可不同，导致不同 Huffman 码，但平均编码长度相同。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "Huffman 码的平均编码长度严格大于 $H(X)$（不含等号）。", "options": [], "answer": false, "knowledge_point": "Huffman性能界", "diagnosis_hint": "", "explanation": "<strong>正确答案</strong>：错误（×）<br><br><strong>推理过程</strong>：信源为二分分布时，$L_H=H(X)$，等号成立。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "Huffman 码的平均编码长度不超过 Shannon 码。", "options": [], "answer": true, "knowledge_point": "Huffman vs Shannon", "diagnosis_hint": "", "explanation": "<strong>正确答案</strong>：正确（√）<br><br><strong>推理过程</strong>：Huffman 是整数约束最优解，Shannon 是可行解，故 $L_H\\le L_S$。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "块编码可使每符号平均码长趋近 $H(X)$，但需放弃即时可译性。", "options": [], "answer": true, "knowledge_point": "块编码", "diagnosis_hint": "", "explanation": "<strong>正确答案</strong>：正确（√）<br><br><strong>推理过程</strong>：$L/N<H(X)+1/N$，$N$ 越大越接近 $H(X)$，但需等 $N$ 个符号到达，牺牲即时性。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "一定存在一棵最优前缀码树，使最小概率的两个符号是姊妹节点。", "options": [], "answer": true, "knowledge_point": "最优前缀码性质", "diagnosis_hint": "", "explanation": "<strong>正确答案</strong>：正确（√）<br><br><strong>推理过程</strong>：若不是姊妹节点，可交换等长码字使其成为姊妹节点，总长度不变。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "每个符号的 Huffman 码长一定不超过 Shannon 码长。", "options": [], "answer": false, "knowledge_point": "Huffman vs Shannon", "diagnosis_hint": "", "explanation": "<strong>正确答案</strong>：错误（×）<br><br><strong>推理过程</strong>：$L_H\\le L_S$ 是平均意义的，单个符号可能 $l_H(x)>l_S(x)$。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "固定 $p(Y|X)$，$H(Y)$ 是 $p(X)$ 的凹函数。", "options": [], "answer": true, "knowledge_point": "互信息凹凸性", "diagnosis_hint": "", "explanation": "<strong>正确答案</strong>：正确（√）<br><br><strong>推理过程</strong>：$p(y)=\\sum_x p(x)p(y|x)$ 是 $p(X)$ 的线性函数，$H(Y)$ 是 $p(Y)$ 的凹函数，复合仍凹。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "Huffman 编码等价于最优二叉 YES/NO 决策树。", "options": [], "answer": true, "knowledge_point": "Huffman与决策树", "diagnosis_hint": "", "explanation": "<strong>正确答案</strong>：正确（√）<br><br><strong>推理过程</strong>：Huffman 树的内部节点对应集合 YES/NO 问题，平均问题数=平均编码长度。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "Gallager 冗余界中 $0.086$ 是固定常数，与 $p_{\\max}$ 无关。", "options": [], "answer": true, "knowledge_point": "Gallager冗余界", "diagnosis_hint": "", "explanation": "<strong>正确答案</strong>：正确（√）<br><br><strong>推理过程</strong>：$0.086=1-\\log_2 e+\\log_2(\\log_2 e)$ 是固定值，$p_{\\max}$ 是另一个加项。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "Huffman 递归证明的基础情形是 $r=1$（一个符号）。", "options": [], "answer": false, "knowledge_point": "Huffman最优性证明", "diagnosis_hint": "", "explanation": "<strong>正确答案</strong>：错误（×）<br><br><strong>推理过程</strong>：基础情形是 $r=2$（两个符号，唯一前缀码 $\\{0,1\\}$），不是 $r=1$。", "pitfall": ""}, {"type": "short", "points": 6, "question": "简述 Huffman 编码算法步骤，并说明为何合并概率最小的两个符号是合理的。", "options": [], "answer": "", "knowledge_point": "Huffman算法", "diagnosis_hint": "", "explanation": "<strong>参考答案</strong>：步骤：(1)按概率排序；(2)合并最小概率两符号为新符号（概率相加）；(3)重复到只剩一个符号；(4)按合并树反向分配码字。合理性：最优前缀码中最小概率两符号码长最长且相等，成为姊妹节点；Huffman 满足此性质，通过递归-融合论证全局最优。", "pitfall": ""}, {"type": "short", "points": 6, "question": "证明：若子问题 $V$（$r-1$ 符号）的 Huffman 码最优，则原问题 $U$（$r$ 符号）对应码也最优。", "options": [], "answer": "", "knowledge_point": "Huffman最优性证明", "diagnosis_hint": "", "explanation": "<strong>参考答案</strong>：$L_U=L_V+p_{r-1}+p_r$（常数偏移）。若 $L_V$ 最优，假设 $U$ 存在更优码 $L_U^*<L_U$，则融合 $s_{r-1},s_r$ 得 $V$ 的码长 $L_U^*-p_{r-1}-p_r<L_V$，与 $L_V$ 最优矛盾。□", "pitfall": ""}, {"type": "short", "points": 6, "question": "说明块编码的思路和优缺点，给出 $N=2$ 时每符号平均码长界。", "options": [], "answer": "", "knowledge_point": "块编码", "diagnosis_hint": "", "explanation": "<strong>参考答案</strong>：思路：将 $N$ 个符号视为超级符号做 Huffman。$H(X)\\le L_N/N<H(X)+1/N$。$N=2$ 时：$H(X)\\le L_2/2<H(X)+0.5$。优点：冗余降至 $1/N$。缺点：牺牲即时性（延时 $N$），编码树规模 $|\\mathcal{X}|^N$ 爆炸，未处理符号间相关性。", "pitfall": ""}, {"type": "short", "points": 6, "question": "证明固定 $p(Y|X)$ 时 $I(X;Y)$ 是 $p(X)$ 的凹函数。", "options": [], "answer": "", "knowledge_point": "互信息凹凸性", "diagnosis_hint": "", "explanation": "<strong>参考答案</strong>：$I(X;Y)=H(Y)-H(Y|X)$。$H(Y|X)=\\sum_x p(x)H(Y|X=x)$ 是 $p(X)$ 的线性函数。$p(y)=\\sum_x p(x)p(y|x)$ 是 $p(X)$ 的线性映射，$H(Y)$ 是 $p(Y)$ 的凹函数，复合仍凹。故 $I=$ 凹 $-$ 线性 $=$ 凹函数。", "pitfall": ""}, {"type": "essay", "points": 8, "question": "论述 Huffman 最优性的完整证明框架（三性质 + 融合-扩展 + 递归）。", "options": [], "answer": "", "knowledge_point": "Huffman最优性证明", "diagnosis_hint": "", "explanation": "<strong>参考答案</strong>：(1) 三性质：$p_i\\ge p_j\\Rightarrow l_i\\le l_j$；最小两符号 $l_{r-1}=l_r=l_{\\max}$；存在最优树使之成姊妹节点。(2) 融合关系：$L_U=L_V+p_{r-1}+p_r$，$U$ 最优 $\\Leftrightarrow$ $V$ 最优。(3) 归纳：$r=2$ 显然；设 $r-1$ 符号时 Huffman 最优（归纳假设），$r$ 符号 Huffman 融合得 $V$，由假设 $V$ 最优，扩展 $U$ 亦最优。", "pitfall": ""}, {"type": "essay", "points": 8, "question": "比较 Huffman 码与 Shannon 码（问题设置、码长选取、性能界、优缺点）。", "options": [], "answer": "", "knowledge_point": "Huffman vs Shannon", "diagnosis_hint": "", "explanation": "<strong>参考答案</strong>：相同：均为前缀码，满足 $H(X)\\le L<H(X)+1$，均解整数约束优化。不同：Shannon 直接取 $\\lceil-\\log p(x)\\rceil$（可行解，近似），Huffman 贪婪（精确最优），$L_H\\le L_S$。Huffman 更优，Gallager 界 $L_H\\le H(X)+p_{\\max}+0.086$ 更紧，但构造需先知道全部概率；Shannon 构造更简单。", "pitfall": ""}, {"type": "essay", "points": 10, "question": "论述互信息关于 $p(Y|X)$ 是凸函数的证明，并解释固定 $p(X)$ 与固定 $p(Y|X)$ 时凹凸性相反的原因。", "options": [], "answer": "", "knowledge_point": "互信息凹凸性", "diagnosis_hint": "", "explanation": "<strong>参考答案</strong>：凸性证明：设 $p^{(\\lambda)}=\\lambda p^{(1)}_{Y|X}+(1-\\lambda)p^{(2)}_{Y|X}$，则联合分布 $p_X p^{(\\lambda)}=\\lambda p^{(1)}_{XY}+(1-\\lambda)p^{(2)}_{XY}$。$I(p_X;p^{(\\lambda)}_{Y|X})=D_{KL}(\\lambda p^{(1)}_{XY}+(1-\\lambda)p^{(2)}_{XY}\\|p_X(\\lambda q^{(1)}_Y+(1-\\lambda)q^{(2)}_Y))$，由 KL 散度联合凸性 $\\le\\lambda I(p_X;p^{(1)}_{Y|X})+(1-\\lambda)I(p_X;p^{(2)}_{Y|X})$，故凸。<br>凹凸相反：固定 $p(Y|X)$ 时，$I=H(Y)-H(Y|X)$，$H(Y)$ 是 $p(X)$ 的凹函数（主导），故 $I$ 凹；固定 $p(X)$ 时，$I=D_{KL}(p_{XY}\\|p_X p_Y)$，KL 散度是凸的（主导），故 $I$ 凸。", "pitfall": ""}, {"type": "comprehensive", "points": 20, "question": "设信源 $\\mathcal{X}=\\{a,b,c,d,e\\}$，概率 $(0.4, 0.2, 0.2, 0.1, 0.1)$。\n(1)构造 Huffman 码（给出过程）。(8分)\n(2)计算 $L_H$。(4分)\n(3)计算 Shannon 码 $L_S$。(4分)\n(4)计算 $H(X)$，验证 $H(X)\\le L_H\\le L_S<H(X)+1$。(4分)", "options": [], "answer": "", "knowledge_point": "Huffman综合", "diagnosis_hint": "", "explanation": "<strong>参考答案</strong>：<br>(1)合并过程：{d=0.1,e=0.1}-->de=0.2；{b=0.2,c=0.2}-->bc=0.4（或先合并de与b）；{de=0.2,a=0.4,bc=0.4}再合并 de+bc=0.6，与 a=0.4 合为 1.0。一种结果：a=1(1位), bc=01x(3位), de=00x(3位) --> a=1,b=010,c=011,d=000,e=001<br>(2) $L_H=0.4\\times 1+0.2\\times 3+0.2\\times 3+0.1\\times 3+0.1\\times 3=0.4+1.8=2.2$ bit<br>(3) Shannon：$l(a)=\\lceil 1.32\\rceil=2,\\ l(b)=l(c)=\\lceil 2.32\\rceil=3,\\ l(d)=l(e)=\\lceil 3.32\\rceil=4$；$L_S=0.4\\times 2+0.4\\times 3+0.2\\times 4=0.8+1.2+0.8=2.8$ bit<br>(4) $H(X)=0.4\\times 1.322+0.4\\times 2.322+0.2\\times 3.322\\approx 0.529+0.929+0.664=2.122$ bit；$2.122\\le 2.2\\le 2.8<3.122$。✓", "pitfall": ""}];
+var LABELS = {"page_title": "章节测试", "section": {"choice": "一、选择题", "tf": "二、判断题", "short": "三、简答题", "essay": "四、问答题", "comprehensive": "五、综合题"}, "section_order": ["choice", "tf", "short", "essay", "comprehensive"], "points_suffix": "分", "true_label": "正确", "false_label": "错误", "placeholder": "在此作答...", "pitfall_prefix": "易错提醒：", "correct_label": "正确", "wrong_label": "错误", "answer_prefix": "正确答案：", "reference_label": "参考答案", "graded_label": "已批改", "grade_button": "提交批改", "unanswered_label": "未作答", "wrong_review_title": "错题分析文档", "wrong_review_intro": "本次收录 __COUNT__ 道客观题错题。可以下载 Markdown 文档，或复制整段内容交给模型做错因分析和二次学习规划。", "no_wrong_questions": "本次客观题没有错题。主观题请对照参考答案自行复盘。", "download_wrong_review": "下载错题文档", "copy_wrong_review_prompt": "复制错题分析 Prompt", "score_label": "总分", "duration_prefix": "满分 100 分 | 建议 ", "duration_suffix": " 分钟 | 选择答案后点击提交批改"};
+var WRONG_REVIEW_PROMPT = "";
+var LAST_WRONG_REVIEW = '';
+
+function pointsOf(q) {
+  return q.points || q.score || 0;
+}
+
+function stripHtml(html) {
+  var div = document.createElement('div');
+  div.innerHTML = html || '';
+  return (div.textContent || div.innerText || '').replace(/\s+/g, ' ').trim();
+}
+
+// Convert Markdown fenced code blocks (```lang\n...\n```) and inline `code`
+// to <pre><code> / <code> HTML, then convert \n to <br> for plain text lines.
+function formatQuestion(text) {
+  if (!text) return '';
+  // 1. Replace fenced code blocks: ```lang\ncode\n```
+  text = text.replace(/```(\w*)\n([\s\S]*?)```/g, function(_, lang, code) {
+    var escaped = code
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+    var cls = lang ? ' class="language-' + lang + '"' : '';
+    return '<pre><code' + cls + '>' + escaped + '</code></pre>';
+  });
+  // 2. Replace inline backtick `code`
+  text = text.replace(/`([^`\n]+)`/g, function(_, code) {
+    var escaped = code.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    return '<code>' + escaped + '</code>';
+  });
+  // 3. Convert remaining \n to <br> (outside pre blocks already handled above)
+  // Split on <pre>...</pre> so we don't double-process code blocks
+  var parts = text.split(/(<pre>[\s\S]*?<\/pre>)/);
+  for (var i = 0; i < parts.length; i++) {
+    if (i % 2 === 0) {
+      parts[i] = parts[i].replace(/\n/g, '<br>');
+    }
+  }
+  return parts.join('');
+}
+
+function answerText(q, value) {
+  if (value === null || value === undefined || value === '') return LABELS.unanswered_label;
+  var idx = parseInt(value);
+  if (q.type === 'choice') {
+    return String.fromCharCode(65 + idx) + '. ' + ((q.options && q.options[idx]) ? stripHtml(q.options[idx]) : '');
+  }
+  if (q.type === 'tf') {
+    return idx === 0 ? LABELS.true_label : LABELS.false_label;
+  }
+  return String(value);
+}
+
+function normalizedAnswer(q) {
+  if (q.type === 'tf') {
+    if (q.answer === LABELS.true_label || q.answer === true || q.answer === 'true') return 0;
+    if (q.answer === LABELS.false_label || q.answer === false || q.answer === 'false') return 1;
+  }
+  return parseInt(q.answer);
+}
+
+function questionTypeLabel(type) {
+  return LABELS.section[type] || type;
+}
+
+function build(){
+  var container = document.getElementById('questions-container');
+  if (!container) { console.error('ExamPass: questions-container not found'); return; }
+  var h = '';
+  var sec = '';
+  var titles = LABELS.section;
+
+  for (var i = 0; i < Q.length; i++) {
+    var q = Q[i];
+    var s = q.type;
+    if (s !== sec) {
+      sec = s;
+      if (titles[s]) {
+        h += '<h3>' + titles[s] + '</h3>';
+      }
+    }
+
+    var qid = 'q' + i;
+    h += '<div class="q-card" id="card-' + qid + '">';
+    h += '<div class="q-num">' + (i+1) + '. (' + pointsOf(q) + ' ' + LABELS.points_suffix + ')</div>';
+    h += '<div class="q-text">' + formatQuestion(q.question) + '</div>';
+
+    if (q.type === 'choice') {
+      var opts = q.options || [];
+      for (var j = 0; j < opts.length; j++) {
+        h += '<label class="option" id="opt-' + qid + '-' + j + '" onclick="sel(\'' + qid + '\',' + j + ')">';
+        h += '<input type="radio" name="' + qid + '" value="' + j + '">' + String.fromCharCode(65+j) + '. ' + opts[j] + '</label>';
+      }
+    } else if (q.type === 'tf') {
+      h += '<label class="option" id="opt-' + qid + '-0" onclick="sel(\'' + qid + '\',0)">';
+      h += '<input type="radio" name="' + qid + '" value="0">' + LABELS.true_label + '</label>';
+      h += '<label class="option" id="opt-' + qid + '-1" onclick="sel(\'' + qid + '\',1)">';
+      h += '<input type="radio" name="' + qid + '" value="1">' + LABELS.false_label + '</label>';
+    } else {
+      h += '<textarea class="q-textarea" id="text-' + qid + '" placeholder="' + LABELS.placeholder + '" rows="3"></textarea>';
+    }
+
+    h += '<div class="result" id="result-' + qid + '">';
+    h += '<span class="badge" id="badge-' + qid + '"></span><span id="correct-' + qid + '"></span>';
+    h += '<div class="explanation">' + q.explanation + '</div>';
+    if (q.pitfall) {
+      h += '<div class="pitfall">' + LABELS.pitfall_prefix + q.pitfall + '</div>';
+    }
+    h += '</div></div>';
+  }
+
+  container.innerHTML = h;
+
+  // Re-render MathJax for dynamically inserted formulas
+  if (window.MathJax && MathJax.typesetPromise) {
+    MathJax.typesetPromise([container]).catch(function(err) {
+      console.error('MathJax typeset error:', err);
+    });
+  }
+}
+
+document.addEventListener('DOMContentLoaded', build);
+if (document.readyState === 'interactive' || document.readyState === 'complete') {
+  build();
+}
+
+function sel(qid, idx) {
+  var prefix = 'opt-' + qid + '-';
+  var all = document.querySelectorAll('[id^="' + prefix + '"]');
+  for (var i = 0; i < all.length; i++) {
+    all[i].classList.remove('selected');
+  }
+  var target = document.getElementById('opt-' + qid + '-' + idx);
+  if (target) {
+    target.classList.add('selected');
+  }
+  var radio = document.querySelector('input[name="' + qid + '"][value="' + idx + '"]');
+  if (radio) {
+    radio.checked = true;
+  }
+}
+
+function gradeAll() {
+  var score = 0;
+  var wrongItems = [];
+  for (var i = 0; i < Q.length; i++) {
+    var q = Q[i];
+    var qid = 'q' + i;
+    var card = document.getElementById('card-' + qid);
+    var result = document.getElementById('result-' + qid);
+    var badge = document.getElementById('badge-' + qid);
+    var correctEl = document.getElementById('correct-' + qid);
+    if (!card || !result) continue;
+
+    result.style.display = 'block';
+
+    if (q.type === 'choice' || q.type === 'tf') {
+      var radio = document.querySelector('input[name="' + qid + '"]:checked');
+      var correctIndex = normalizedAnswer(q);
+      if (radio && parseInt(radio.value) === correctIndex) {
+        score += pointsOf(q);
+        card.classList.add('correct');
+        badge.className = 'badge badge-ok';
+        badge.textContent = LABELS.correct_label;
+        correctEl.innerHTML = '';
+        var correctOpt = document.getElementById('opt-' + qid + '-' + correctIndex);
+        if (correctOpt) correctOpt.classList.add('correct-answer');
+      } else {
+        card.classList.add('wrong');
+        badge.className = 'badge badge-no';
+        badge.textContent = LABELS.wrong_label;
+        var ansText = answerText(q, correctIndex);
+        correctEl.innerHTML = LABELS.answer_prefix + ansText;
+        if (radio) {
+          var wrongOpt = document.getElementById('opt-' + qid + '-' + radio.value);
+          if (wrongOpt) wrongOpt.classList.add('wrong-answer');
+        }
+        var correctOpt = document.getElementById('opt-' + qid + '-' + correctIndex);
+        if (correctOpt) correctOpt.classList.add('correct-answer');
+        wrongItems.push({
+          number: i + 1,
+          type: questionTypeLabel(q.type),
+          points: pointsOf(q),
+          question: stripHtml(q.question),
+          options: (q.options || []).map(stripHtml),
+          userAnswer: answerText(q, radio ? radio.value : null),
+          correctAnswer: ansText,
+          explanation: stripHtml(q.explanation),
+          pitfall: stripHtml(q.pitfall || ''),
+          knowledgePoint: stripHtml(q.knowledge_point || q.knowledgePoint || '')
+        });
+      }
+    } else {
+      card.classList.add('correct');
+      badge.className = 'badge badge-ref';
+      badge.textContent = LABELS.reference_label;
+    }
+  }
+
+  var sb = document.getElementById('score-box');
+  if (sb) {
+    sb.style.display = 'block';
+    document.getElementById('score-num').textContent = score;
+    sb.scrollIntoView({behavior:'smooth'});
+  }
+
+  var opts = document.querySelectorAll('.option');
+  for (var i = 0; i < opts.length; i++) opts[i].style.pointerEvents = 'none';
+  var tas = document.querySelectorAll('.q-textarea');
+  for (var i = 0; i < tas.length; i++) tas[i].disabled = true;
+
+  var btn = document.getElementById('grade-btn');
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = LABELS.graded_label;
+  }
+
+  buildWrongReview(wrongItems);
+
+  // Re-render MathJax for revealed explanations
+  if (window.MathJax && MathJax.typesetPromise) {
+    MathJax.typesetPromise().catch(function(err) {
+      console.error('MathJax typeset error:', err);
+    });
+  }
+}
+
+function buildWrongReview(wrongItems) {
+  var box = document.getElementById('wrong-review-box');
+  if (!box) return;
+
+  LAST_WRONG_REVIEW = renderWrongReviewMarkdown(wrongItems);
+
+  if (!wrongItems.length) {
+    box.style.display = 'block';
+    box.innerHTML = '<h3>' + LABELS.wrong_review_title + '</h3><p>' + LABELS.no_wrong_questions + '</p>';
+    return;
+  }
+
+  box.style.display = 'block';
+  box.innerHTML = [
+    '<h3>' + LABELS.wrong_review_title + '</h3>',
+    '<p>' + LABELS.wrong_review_intro.replace('__COUNT__', wrongItems.length) + '</p>',
+    '<div class="wrong-review-actions">',
+    '<button type="button" onclick="downloadWrongReview()">' + LABELS.download_wrong_review + '</button>',
+    '<button type="button" onclick="copyWrongReviewPrompt()">' + LABELS.copy_wrong_review_prompt + '</button>',
+    '</div>',
+    '<textarea id="wrong-review-text" readonly rows="12">' + LAST_WRONG_REVIEW.replace(/&/g, '&amp;').replace(/</g, '&lt;') + '</textarea>'
+  ].join('');
+}
+
+function renderWrongReviewMarkdown(wrongItems) {
+  var now = new Date().toLocaleString();
+  var lines = [];
+
+  lines.push('# ExamPass 错题分析文档');
+  lines.push('');
+  lines.push('- 生成时间：' + now);
+  lines.push('- 错题数量：' + wrongItems.length);
+  lines.push('');
+  lines.push('## 给模型的错题分析 Prompt');
+  lines.push('');
+  if (WRONG_REVIEW_PROMPT) {
+    lines.push(WRONG_REVIEW_PROMPT);
+  } else {
+    lines.push('请根据下面的错题记录，分析我的错因，并给出继续学习方案。要求：');
+    lines.push('1. 按知识模块归类错题，不要只逐题复述答案；');
+    lines.push('2. 判断每道题错在概念定义、公式推导、图表理解、条件适用、计算步骤、概念混淆还是审题；');
+    lines.push('3. 对涉及公式或推导的错题，补全从前提到结论的推导链条，不能跳步；');
+    lines.push('4. 对选择题，解释我选错选项为什么有迷惑性，以及正确选项和错误选项的关键边界；');
+    lines.push('5. 给出需要回看课件的具体知识点、图表、公式和页/章节线索；');
+    lines.push('6. 最后生成一份二次学习清单和 5 道针对这些薄弱点的进阶训练题。');
+  }
+  lines.push('');
+  lines.push('## 错题记录');
+  lines.push('');
+
+  if (!wrongItems.length) {
+    lines.push('本次没有客观题错题。');
+    return lines.join('\n');
+  }
+
+  for (var i = 0; i < wrongItems.length; i++) {
+    var item = wrongItems[i];
+    lines.push('### 错题 ' + (i + 1) + '：第 ' + item.number + ' 题');
+    lines.push('');
+    lines.push('- 题型：' + item.type);
+    lines.push('- 分值：' + item.points);
+    lines.push('- 题干：' + item.question);
+    if (item.options.length) {
+      lines.push('- 选项：');
+      for (var j = 0; j < item.options.length; j++) {
+        lines.push('  - ' + String.fromCharCode(65 + j) + '. ' + item.options[j]);
+      }
+    }
+    lines.push('- 我的答案：' + item.userAnswer);
+    lines.push('- 正确答案：' + item.correctAnswer);
+    lines.push('- 解析：' + item.explanation);
+    if (item.pitfall) lines.push('- 易错点：' + item.pitfall);
+    if (item.knowledgePoint) lines.push('- 对应知识点：' + item.knowledgePoint);
+    lines.push('');
+  }
+
+  return lines.join('\n');
+}
+
+function downloadWrongReview() {
+  if (!LAST_WRONG_REVIEW) return;
+  var blob = new Blob([LAST_WRONG_REVIEW], {type: 'text/markdown;charset=utf-8'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = '错题分析文档.md';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function copyWrongReviewPrompt() {
+  var text = LAST_WRONG_REVIEW || '';
+  if (!text) return;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text);
+  } else {
+    var ta = document.getElementById('wrong-review-text');
+    if (ta) {
+      ta.focus();
+      ta.select();
+      document.execCommand('copy');
+    }
+  }
+}
+
+</script>
+</body>
+</html>
