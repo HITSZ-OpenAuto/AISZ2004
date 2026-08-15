@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Lecture 8：Huffman 码</title>
+<script>
+MathJax = {
+  tex: {
+    inlineMath: [['$', '$']],
+    displayMath: [['$$', '$$']]
+  }
+};
+</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js"></script>
+<style>
+/* === ExamPass Shared Styles === */
+/* Paper-like warm background, clean typography, responsive */
+
+:root {
+  --paper: #fdf6e3;
+  --paper-dark: #f5ecd7;
+  --ink: #2c2c2c;
+  --ink-light: #555;
+  --accent: #2563eb;
+  --accent-hover: #1d4ed8;
+  --divider: #d6c8a8;
+  --card-bg: #fef9ef;
+  --card-border: #e8dcc8;
+  --correct: #22c55e;
+  --correct-bg: #f0fdf4;
+  --wrong: #ef4444;
+  --wrong-bg: #fef2f2;
+  --tag-bg: #fef3c7;
+  --tag-text: #92400e;
+  --radius: 6px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: "Microsoft YaHei", "Noto Sans SC", "SimSun", sans-serif;
+  font-size: 12pt; line-height: 1.75; color: var(--ink);
+  max-width: 860px; margin: auto; padding: 24px 20px 60px;
+  background: var(--paper);
+}
+
+@media print {
+  body { font-size: 10.5pt; background: #fff; }
+  .no-print { display: none !important; }
+  h1, h2, h3 { page-break-after: avoid; }
+}
+
+/* ── Header ── */
+#exampass-header {
+  display: flex; justify-content: space-between; align-items: baseline;
+  padding: 6px 0; margin-bottom: 0;
+}
+.header-brand { font-size: 1.2em; font-weight: 700; color: #1a1a2e; letter-spacing: 0.3px; }
+.header-url  { font-size: 0.78em; color: #999; }
+.header-divider { border: none; border-top: 2px solid var(--divider); margin: 4px 0 20px 0; }
+
+/* ── Typography ── */
+h1 { font-size: 1.55em; text-align: center; border-bottom: 2px solid var(--divider); padding-bottom: 8px; margin-top: 0; }
+h2 { font-size: 1.25em; border-bottom: 1px solid var(--divider); padding-bottom: 4px; margin-top: 28px; }
+h3 { font-size: 1.08em; margin-top: 20px; color: var(--ink); }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ── Tables ── */
+table { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 0.95em; }
+td, th { border: 1px solid var(--card-border); padding: 5px 9px; text-align: left; }
+th { background: var(--paper-dark); font-weight: 700; }
+
+/* ── Embedded source images ── */
+.embedded-images {
+  margin: 18px 0 24px;
+}
+.embedded-images-intro {
+  color: var(--ink-light);
+  font-size: 0.95em;
+}
+.embedded-image {
+  margin: 14px 0 18px;
+  padding: 10px;
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  background: var(--card-bg);
+  break-inside: avoid;
+}
+.embedded-image img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+  border: 1px solid var(--divider);
+  background: #fff;
+}
+.embedded-image figcaption {
+  margin-top: 8px;
+  color: var(--ink-light);
+  font-size: 0.92em;
+  line-height: 1.5;
+}
+.embedded-image-note::before {
+  content: " - ";
+}
+
+/* ── Knowledge point vs explanation ── */
+.kp { font-weight: 700; color: var(--ink); }           /* key point: bold dark */
+.exp { font-weight: 400; color: var(--ink-light); }    /* explanation: lighter */
+.exp em, .exp strong { color: var(--ink); }             /* emphasis inside explanation */
+
+/* ── Block elements ── */
+blockquote {
+  border-left: 3px solid #c0392b; background: #fef9ef;
+  padding: 6px 14px; margin: 10px 0; font-size: 0.95em;
+}
+code { background: #f0ede0; padding: 2px 5px; border-radius: 3px; font-size: 0.92em; }
+pre { background: #f0ede0; padding: 10px; border-radius: var(--radius); overflow-x: auto; }
+
+/* ── TOC ── */
+div.toc {
+  background: var(--card-bg); padding: 14px 18px;
+  border: 1px solid var(--card-border); border-radius: var(--radius); margin-bottom: 22px;
+}
+div.toc ul { padding-left: 18px; }
+div.toc li { margin: 3px 0; font-size: 0.95em; }
+
+/* ── Priority tags ── */
+.tag-must   { background: #fee2e2; color: #991b1b; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+.tag-key    { background: #fef3c7; color: #92400e; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+.tag-freq   { background: #dbeafe; color: #1e40af; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+.tag-info   { background: #f0fdf4; color: #166534; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+
+
+</style>
+</head>
+<body>
+
+<header id="exampass-header">
+  <div class="header-left"><span class="header-brand">ExamPass Assistant</span></div>
+  <div class="header-right"><span class="header-url">github.com/MIKUZ12/ExamPass-Assistant</span></div>
+</header>
+<hr class="header-divider">
+
+<h1>Lecture 8：Huffman 码</h1>
+<div class="toc">
+<h2>目录</h2>
+<ul>
+<li><a href="#s66428499">一、Huffman 算法构造</a></li>
+  <li><a href="#s63901706">算法描述 必考</a></li>
+<li><a href="#s35290660">二、Huffman 最优性证明</a></li>
+  <li><a href="#s74625771">最优前缀码的三个性质 必考</a></li>
+  <li><a href="#s17662932">融合-扩展论证（Reduction Argument） 必考</a></li>
+  <li><a href="#s71821516">递归完整证明 重点</a></li>
+<li><a href="#s45614784">三、Huffman 码 vs Shannon 码</a></li>
+  <li><a href="#s88469115">整数优化视角 必考</a></li>
+  <li><a href="#s12672524">Huffman 码的性能界 重点</a></li>
+<li><a href="#s48211651">四、块编码与 N 阶扩展信源</a></li>
+  <li><a href="#s62663268">额外 1 bit 的问题与解法 重点</a></li>
+<li><a href="#s39752161">五、Huffman 与 YES/NO 决策树</a></li>
+  <li><a href="#s64867982">等价性 常考</a></li>
+<li><a href="#s81174590">六、互信息的凹凸性（作业内容）</a></li>
+  <li><a href="#s30436510">互信息关于 $p(X)$ 是凹函数 重点</a></li>
+  <li><a href="#s15058098">互信息关于 $p(Y|X)$ 是凸函数 重点</a></li>
+  <li><a href="#s52218746">辅助引理：凸函数与线性函数的复合 了解</a></li>
+</ul>
+</div>
+
+<h2 id="s66428499">一、Huffman 算法构造</h2>
+
+<h3 id="s63901706">算法描述 <span class="tag-must">必考</span></h3>
+<p><span class="kp">Huffman 码</span>是求解整数约束下最优前缀码的贪婪算法（1952，David Huffman）。核心思想：</p>
+<ol>
+  <li>取概率最小的两个符号，赋予相同码长（最长），且码字仅在最后一位不同（一个末位为 0，另一个为 1）</li>
+  <li>将这两个符号合并为一个新符号，新概率 = 两者之和，重复上述步骤直到只剩一个符号</li>
+</ol>
+<p>直观等价：将此过程画成二叉树，树叶即为码字；构造过程从叶到根（bottom-up）。</p>
+<blockquote>易错：每次选择概率「最小的两个」，相同概率时顺序可以任意选——Huffman 码可能不唯一，但平均编码长度相同。</blockquote>
+
+<h2 id="s35290660">二、Huffman 最优性证明</h2>
+
+<h3 id="s74625771">最优前缀码的三个性质 <span class="tag-must">必考</span></h3>
+<p>设符号概率排序 $p_1\ge p_2\ge\cdots\ge p_r$，任意最优前缀码满足：</p>
+<ol>
+  <li><strong>码长单调</strong>：$l_1\le l_2\le\cdots\le l_r$（概率大的符号码长不超过概率小的）</li>
+  <li><strong>最小概率符号有最长、相等码长</strong>：$l_{r-1}=l_r=l_{\max}$</li>
+  <li><strong>姊妹对（sister pair）</strong>：存在一个最优编码树，其中两个最小概率符号 $s_{r-1},s_r$ 是姊妹节点（父节点相同，码字仅末位不同）</li>
+</ol>
+<p>性质3的证明思路：若 $c_{r-1}$ 和 $c_{r-3}$ 不是姊妹对，但码长相同，交换两者位置不改变总编码长度，但可使两个最小概率符号成为姊妹对。</p>
+
+<h3 id="s17662932">融合-扩展论证（Reduction Argument） <span class="tag-must">必考</span></h3>
+<p>设有 $r$ 个符号的原问题 $U$，融合最小概率两符号 $s_{r-1},s_r$ 为 $s_{r-1}^*$（概率 $p_{r-1}+p_r$），得到 $r-1$ 个符号的子问题 $V$。</p>
+<p><strong>关键关系</strong>：$L_U = L_V + p_{r-1} + p_r$</p>
+<p>因此：</p>
+<ul>
+  <li>若 $L_U$ 是 $U$ 的最优编码长度，则 $L_V$ 是 $V$ 的最优编码长度（否则可改进 $V$ 进而改进 $U$）</li>
+  <li>反之，若 $L_V$ 是 $V$ 的最优，则 $L_U=L_V+p_{r-1}+p_r$ 是 $U$ 的最优</li>
+</ul>
+<p><span class="exp">原问题与子问题具有相同的最优性结构，可用递归证明 Huffman 最优。</span></p>
+
+<h3 id="s71821516">递归完整证明 <span class="tag-key">重点</span></h3>
+<ul>
+  <li><strong>基础情形</strong>：$r=2$，编码 $\{0,1\}$ 是唯一前缀码，显然最优</li>
+  <li><strong>递归步骤</strong>：对 $r$ 个符号，Huffman 先融合最小两符号 --> 对 $r-1$ 个符号子问题归纳（子问题最优）--> 扩展回 $r$ 个符号，$L_U=L_V+p_{r-1}+p_r$ 仍最优</li>
+</ul>
+
+<h2 id="s45614784">三、Huffman 码 vs Shannon 码</h2>
+
+<h3 id="s88469115">整数优化视角 <span class="tag-must">必考</span></h3>
+<p>两者都在解：$\min L=\sum p(x)l(x)$，$\text{s.t.}\sum 2^{-l(x)}\le 1$</p>
+<table class="discrepancy-table" style="margin:10px 0;">
+  <tr><th>编码方案</th><th>码长选取</th><th>性质</th></tr>
+  <tr><td>连续松弛最优</td><td>$l^*(x)=-\log p(x)$（可能为分数）</td><td>$L^*=H(X)$，不可实现</td></tr>
+  <tr><td>Shannon 码</td><td>$l(x)=\lceil-\log p(x)\rceil$（整数）</td><td>满足 $H(X)\le L<H(X)+1$，近似解</td></tr>
+  <tr><td>Huffman 码</td><td>贪婪算法给出整数码长</td><td><strong>整数约束下的精确最优解</strong></td></tr>
+</table>
+<blockquote>易错：$L_\text{Huffman}\le L_\text{Shannon}$ 是平均意义上的，不代表每个符号的码长 $l_\text{Huffman}(x)\le l_\text{Shannon}(x)$。</blockquote>
+
+<h3 id="s12672524">Huffman 码的性能界 <span class="tag-key">重点</span></h3>
+<p>平均编码长度满足：</p>
+$$H(X) \le L_\text{Huffman} < H(X)+1$$
+<p><span class="kp">Gallager 冗余界（1978）</span>：</p>
+$$L_\text{Huffman} \le H(X) + p_{\max} + 0.086$$
+<p>其中 $p_{\max}$ 是最大符号概率，常数 $0.086 = 1-\log_2 e + \log_2(\log_2 e) \approx 0.08607$。</p>
+<p><span class="exp">比基础界 $H+1$ 更紧，特别是当 $p_{\max}$ 小时效果显著。</span></p>
+
+<h2 id="s48211651">四、块编码与 N 阶扩展信源</h2>
+
+<h3 id="s62663268">额外 1 bit 的问题与解法 <span class="tag-key">重点</span></h3>
+<p>Huffman 码最坏每符号多 1 bit（上界 $H+1$），解法：<span class="kp">块编码（N 阶扩展信源）</span>。</p>
+<p>将 $N$ 个符号看作一个「超级符号」，对长为 $N$ 的序列整体做 Huffman 编码：</p>
+$$H(X) \le \frac{L_N}{N} < H(X)+\frac{1}{N}$$
+<p>代价：</p>
+<ul>
+  <li>牺牲即时可译性（存在延时 $N$）</li>
+  <li>需计算联合概率 $p(X^N)$，编码树中大量字符串几乎不出现（根据大数定理）</li>
+  <li>未考虑符号间的相关性（非独立同分布时性能变差）</li>
+</ul>
+
+<h2 id="s39752161">五、Huffman 与 YES/NO 决策树</h2>
+
+<h3 id="s64867982">等价性 <span class="tag-freq">常考</span></h3>
+<p>Huffman 码的二叉树对应一种最优的 <span class="kp">YES/NO 问题策略</span>：</p>
+<ul>
+  <li>每问一个集合类问题（$X\in S$？），YES/NO 对应二叉树的左右分支</li>
+  <li>最少平均问题数 = Huffman 码平均编码长度 $L^*$</li>
+  <li>理论下界 = $H(X)$（Shannon 熵）</li>
+</ul>
+<p>例（5个事件，概率 0.25, 0.25, 0.20, 0.15, 0.15）：Huffman 编码 <code>10, 01, 00, 111, 110</code>，平均问题数 $= 2\times(0.25+0.25)+2\times 0.20+3\times(0.15+0.15) = 2.30$。</p>
+
+<h2 id="s81174590">六、互信息的凹凸性（作业内容）</h2>
+
+<h3 id="s30436510">互信息关于 $p(X)$ 是凹函数 <span class="tag-key">重点</span></h3>
+<p>固定 $p(Y|X)$，$I(X;Y)$ 是 $p(X)$ 的凹函数。</p>
+<p>证明思路：</p>
+<ul>
+  <li>$I(X;Y)=H(Y)-H(Y|X)$</li>
+  <li>$H(Y|X)=\sum_x p(x)H(Y|X=x)$ 是 $p(X)$ 的线性函数</li>
+  <li>固定 $p(Y|X)$，$p(y)=\sum_x p(x)p(y|x)$ 是 $p(X)$ 的线性函数</li>
+  <li>$H(Y)$ 是 $p(Y)$ 的凹函数；凹函数与线性函数的复合仍为凹函数</li>
+  <li>故 $H(Y)$ 是 $p(X)$ 的凹函数，而 $H(Y|X)$ 是线性的，因此 $I=H(Y)-H(Y|X)$ 是凹函数</li>
+</ul>
+
+<h3 id="s15058098">互信息关于 $p(Y|X)$ 是凸函数 <span class="tag-key">重点</span></h3>
+<p>固定 $p(X)$，$I(X;Y)$ 是 $p(Y|X)$ 的凸函数。</p>
+<p>证明思路（利用 KL 散度的凸性）：</p>
+<ul>
+  <li>$I(X;Y)=D_{KL}(p(x)p(y|x)\,\|\, p(x)\sum_x p(x)p(y|x))$</li>
+  <li>$p_X\cdot(\lambda p^{(1)}_{Y|X}+(1-\lambda)p^{(2)}_{Y|X})=\lambda p^{(1)}_{XY}+(1-\lambda)p^{(2)}_{XY}$</li>
+  <li>利用 KL 散度对联合分布的凸性：$D_{KL}(\lambda P_1+(1-\lambda)P_2\|Q)\le\lambda D_{KL}(P_1\|Q_1)+(1-\lambda)D_{KL}(P_2\|Q_2)$</li>
+</ul>
+
+<h3 id="s52218746">辅助引理：凸函数与线性函数的复合 <span class="tag-info">了解</span></h3>
+<p>若 $f$ 为凸（凹）函数，$\ell(x)=Ax+b$ 为线性函数，则 $f\circ\ell$ 仍为凸（凹）函数。</p>
+<p>证明：$f\circ\ell(\lambda x_1+(1-\lambda)x_2)=f(\lambda(Ax_1+b)+(1-\lambda)(Ax_2+b))\le\lambda f(Ax_1+b)+(1-\lambda)f(Ax_2+b)$。</p>
+
+
+
+</body>
+</html>

@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Lecture 3 – 不等式与凹凸性</title>
+<script>
+MathJax = {
+  tex: {
+    inlineMath: [['$', '$']],
+    displayMath: [['$$', '$$']]
+  }
+};
+</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js"></script>
+<style>
+/* === ExamPass Shared Styles === */
+/* Paper-like warm background, clean typography, responsive */
+
+:root {
+  --paper: #fdf6e3;
+  --paper-dark: #f5ecd7;
+  --ink: #2c2c2c;
+  --ink-light: #555;
+  --accent: #2563eb;
+  --accent-hover: #1d4ed8;
+  --divider: #d6c8a8;
+  --card-bg: #fef9ef;
+  --card-border: #e8dcc8;
+  --correct: #22c55e;
+  --correct-bg: #f0fdf4;
+  --wrong: #ef4444;
+  --wrong-bg: #fef2f2;
+  --tag-bg: #fef3c7;
+  --tag-text: #92400e;
+  --radius: 6px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: "Microsoft YaHei", "Noto Sans SC", "SimSun", sans-serif;
+  font-size: 12pt; line-height: 1.75; color: var(--ink);
+  max-width: 860px; margin: auto; padding: 24px 20px 60px;
+  background: var(--paper);
+}
+
+@media print {
+  body { font-size: 10.5pt; background: #fff; }
+  .no-print { display: none !important; }
+  h1, h2, h3 { page-break-after: avoid; }
+}
+
+/* ── Header ── */
+#exampass-header {
+  display: flex; justify-content: space-between; align-items: baseline;
+  padding: 6px 0; margin-bottom: 0;
+}
+.header-brand { font-size: 1.2em; font-weight: 700; color: #1a1a2e; letter-spacing: 0.3px; }
+.header-url  { font-size: 0.78em; color: #999; }
+.header-divider { border: none; border-top: 2px solid var(--divider); margin: 4px 0 20px 0; }
+
+/* ── Typography ── */
+h1 { font-size: 1.55em; text-align: center; border-bottom: 2px solid var(--divider); padding-bottom: 8px; margin-top: 0; }
+h2 { font-size: 1.25em; border-bottom: 1px solid var(--divider); padding-bottom: 4px; margin-top: 28px; }
+h3 { font-size: 1.08em; margin-top: 20px; color: var(--ink); }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ── Tables ── */
+table { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 0.95em; }
+td, th { border: 1px solid var(--card-border); padding: 5px 9px; text-align: left; }
+th { background: var(--paper-dark); font-weight: 700; }
+
+/* ── Embedded source images ── */
+.embedded-images {
+  margin: 18px 0 24px;
+}
+.embedded-images-intro {
+  color: var(--ink-light);
+  font-size: 0.95em;
+}
+.embedded-image {
+  margin: 14px 0 18px;
+  padding: 10px;
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  background: var(--card-bg);
+  break-inside: avoid;
+}
+.embedded-image img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+  border: 1px solid var(--divider);
+  background: #fff;
+}
+.embedded-image figcaption {
+  margin-top: 8px;
+  color: var(--ink-light);
+  font-size: 0.92em;
+  line-height: 1.5;
+}
+.embedded-image-note::before {
+  content: " - ";
+}
+
+/* ── Knowledge point vs explanation ── */
+.kp { font-weight: 700; color: var(--ink); }           /* key point: bold dark */
+.exp { font-weight: 400; color: var(--ink-light); }    /* explanation: lighter */
+.exp em, .exp strong { color: var(--ink); }             /* emphasis inside explanation */
+
+/* ── Block elements ── */
+blockquote {
+  border-left: 3px solid #c0392b; background: #fef9ef;
+  padding: 6px 14px; margin: 10px 0; font-size: 0.95em;
+}
+code { background: #f0ede0; padding: 2px 5px; border-radius: 3px; font-size: 0.92em; }
+pre { background: #f0ede0; padding: 10px; border-radius: var(--radius); overflow-x: auto; }
+
+/* ── TOC ── */
+div.toc {
+  background: var(--card-bg); padding: 14px 18px;
+  border: 1px solid var(--card-border); border-radius: var(--radius); margin-bottom: 22px;
+}
+div.toc ul { padding-left: 18px; }
+div.toc li { margin: 3px 0; font-size: 0.95em; }
+
+/* ── Priority tags ── */
+.tag-must   { background: #fee2e2; color: #991b1b; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+.tag-key    { background: #fef3c7; color: #92400e; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+.tag-freq   { background: #dbeafe; color: #1e40af; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+.tag-info   { background: #f0fdf4; color: #166534; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+
+
+</style>
+</head>
+<body>
+
+<header id="exampass-header">
+  <div class="header-left"><span class="header-brand">ExamPass Assistant</span></div>
+  <div class="header-right"><span class="header-url">github.com/MIKUZ12/ExamPass-Assistant</span></div>
+</header>
+<hr class="header-divider">
+
+<h1>Lecture 3 – 不等式与凹凸性</h1>
+<div class="toc">
+<h2>目录</h2>
+<ul>
+<li><a href="#s55770005">本章整体概览</a></li>
+<li><a href="#s32883707">模块一：凸函数与凹函数的定义</a></li>
+  <li><a href="#s24224615">凸函数（Convex Function）的定义 必考</a></li>
+<li><a href="#s24878290">模块二：Jensen 不等式</a></li>
+  <li><a href="#s58510140">Jensen 不等式的表述与推导 必考</a></li>
+  <li><a href="#s43837755">Jensen 不等式的常见推论 重点</a></li>
+<li><a href="#s26777781">模块三：Log-sum 不等式</a></li>
+  <li><a href="#s82835009">Log-sum 不等式的表述 必考</a></li>
+  <li><a href="#s76397275">Log-sum 不等式的两种证明路线 重点</a></li>
+  <li><a href="#s79836209">Log-sum 不等式的核心应用：KL散度非负性 必考</a></li>
+<li><a href="#s66178053">模块四：KL散度非负性及其推论</a></li>
+  <li><a href="#s12951738">Gibbs 不等式（KL散度非负性） 必考</a></li>
+  <li><a href="#s38597684">均匀分布熵最大 重点</a></li>
+<li><a href="#s85797281">模块五：KL散度的凹凸性</a></li>
+  <li><a href="#s25979255">KL散度是 $(p,q)$ 的联合凸函数 重点</a></li>
+<li><a href="#s28183903">模块六：熵的凹凸性</a></li>
+  <li><a href="#s18395470">熵 $H(p)$ 是概率向量 $p$ 的凹函数 必考</a></li>
+  <li><a href="#s81125430">熵凹性的直觉 高频</a></li>
+<li><a href="#s23534792">模块七：互信息的凹凸性</a></li>
+  <li><a href="#s21811873">互信息的凹凸性 重点</a></li>
+<li><a href="#s85310303">模块八：本章不等式体系总览</a></li>
+  <li><a href="#s60906451">Venn 图式不等式关系 必考</a></li>
+<li><a href="#s52148777">常见证明思路总结</a></li>
+</ul>
+</div>
+
+<h2 id="s55770005">本章整体概览</h2>
+<p>
+  本章是 Lecture 2（信息度量）的数学基础补完，核心任务是<strong>严格证明</strong>
+  Lecture 2 中所有"≥ 0"或"≤"结论。
+  证明工具链为：
+</p>
+<pre>
+凸/凹函数定义（支撑超平面）
+        |
+        v
+Jensen 不等式  ←──── 最核心工具
+   /         \
+  v           v
+Log-sum 不等式    直接推论（AM≥GM等）
+   /    \
+  v      v
+KL≥0   H(p) 为凹  I(X;Y) 凹/凸性
+（Gibbs）
+</pre>
+<p>
+  <strong>学习主线</strong>：
+  凸函数定义 --> Jensen 不等式推导 --> Log-sum 不等式推导 --> 用这两把"锤子"证明所有信息论不等式
+</p>
+
+<h2 id="s32883707">模块一：凸函数与凹函数的定义</h2>
+
+<h3 id="s24224615">凸函数（Convex Function）的定义 <span class="tag-must">必考</span></h3>
+<p><strong>是什么</strong>：函数 $f$ 是<span class="kp">凸函数</span>，当且仅当对任意 $x_1, x_2$ 及 $0 \le \lambda \le 1$：
+$$\lambda f(x_1) + (1-\lambda) f(x_2) \ge f(\lambda x_1 + (1-\lambda) x_2)$$
+即：弦在函数图像之上（函数图像"开口向上"）。
+</p>
+<p><strong>等价条件（可微情形）</strong>：$f$ 是凸函数当且仅当 $f$ 始终在其任意切线之上：
+$$f(x) \ge f(x_0) + f'(x_0)(x - x_0), \quad \forall x, x_0$$
+</p>
+<p><strong>凹函数</strong>：$f$ 是凹函数 $\Leftrightarrow$ $-f$ 是凸函数，即：
+$$\lambda f(x_1) + (1-\lambda)f(x_2) \le f(\lambda x_1 + (1-\lambda)x_2)$$
+弦在函数图像之下（函数图像"开口向下"）。
+</p>
+<p><strong>常见函数的凹凸性</strong>（信息论高频使用）：</p>
+<table border="1" cellpadding="6" cellspacing="0" style="border-collapse:collapse;width:100%">
+  <thead><tr style="background:#f0f4ff"><th>函数</th><th>凹/凸</th><th>记忆方法</th></tr></thead>
+  <tbody>
+    <tr><td>$\log x$（$x>0$）</td><td>凹函数</td><td>图像开口向下；$(\log x)'' = -1/x^2 < 0$</td></tr>
+    <tr><td>$-\log x$（$x>0$）</td><td>凸函数</td><td>$(-\log x)'' = 1/x^2 > 0$</td></tr>
+    <tr><td>$x \log x$（$x>0$）</td><td>凸函数</td><td>$(x\log x)'' = 1/(x\ln 2) > 0$</td></tr>
+    <tr><td>$x^2$</td><td>凸函数</td><td>$(x^2)'' = 2 > 0$</td></tr>
+    <tr><td>$e^x$</td><td>凸函数</td><td>$(e^x)'' = e^x > 0$</td></tr>
+    <tr><td>$\sqrt{x}$（$x>0$）</td><td>凹函数</td><td>$(\sqrt{x})'' = -\frac{1}{4}x^{-3/2} < 0$</td></tr>
+  </tbody>
+</table>
+<blockquote>易错：$\log x$ 是凹函数（$\mathbb{E}[\log X] \le \log \mathbb{E}[X]$），$-\log x$ 是凸函数（$\mathbb{E}[-\log X] \ge -\log \mathbb{E}[X]$）。两者符号相反，Jensen 不等式方向也相反，务必先确认凹凸性再写不等号方向。</blockquote>
+
+<h2 id="s24878290">模块二：Jensen 不等式</h2>
+
+<h3 id="s58510140">Jensen 不等式的表述与推导 <span class="tag-must">必考</span></h3>
+<p><strong>是什么</strong>：设 $f$ 是凸函数，$X$ 是随机变量，则：
+$$\boxed{\mathbb{E}[f(X)] \ge f(\mathbb{E}[X])}$$
+等号成立当且仅当 $f$ 严格凸时 $X$ 是常数（即 $X$ 以概率 1 等于某常数）。
+</p>
+<p>对凹函数方向反向：$\mathbb{E}[f(X)] \le f(\mathbb{E}[X])$。</p>
+<p><strong>推导思路</strong>：令 $x_0 = \mathbb{E}[X]$，由支撑超平面性质，存在 $n_0$ 使得：
+$$f(x) \ge f(x_0) + n_0^T(x - x_0), \quad \forall x$$
+两边对 $X$ 取期望：
+$$\mathbb{E}[f(X)] \ge f(x_0) + n_0^T(\mathbb{E}[X] - x_0) = f(\mathbb{E}[X]) + 0 = f(\mathbb{E}[X])$$
+</p>
+<p><strong>使用 Jensen 不等式的四步诀</strong>：</p>
+<ol>
+  <li>确认 $f$ 的凹凸性（凸 --> $\mathbb{E}[f] \ge f(\mathbb{E})$，凹 --> 反向）</li>
+  <li>明确"概率 $p$ 是什么"（谁在加权平均）</li>
+  <li>明确"$X$ 是什么"（期望作用在哪个变量上）</li>
+  <li>写出 $\mathbb{E}[f(X)]$ 和 $f(\mathbb{E}[X])$ 的展开式</li>
+</ol>
+<blockquote>易错：Jensen 不等式的左边是 $\mathbb{E}[f(X)]$（先算 $f$ 再取期望），右边是 $f(\mathbb{E}[X])$（先取期望再算 $f$）。对凸函数，"先算 $f$"更大。记住：凸函数"内大于外"（$f(\mathbb{E}) \le \mathbb{E}[f]$）。</blockquote>
+
+<h3 id="s43837755">Jensen 不等式的常见推论 <span class="tag-key">重点</span></h3>
+<p>以下均为直接套用 Jensen 不等式的结果：</p>
+<table border="1" cellpadding="6" cellspacing="0" style="border-collapse:collapse;width:100%">
+  <thead><tr style="background:#f0f4ff"><th>结论</th><th>使用的 $f$</th><th>凹/凸</th></tr></thead>
+  <tbody>
+    <tr><td>$\mathbb{E}[X^2] \ge (\mathbb{E}[X])^2$（方差非负）</td><td>$f(x)=x^2$</td><td>凸</td></tr>
+    <tr><td>$\mathbb{E}[e^X] \ge e^{\mathbb{E}[X]}$（矩母函数下界）</td><td>$f(x)=e^x$</td><td>凸</td></tr>
+    <tr><td>$\mathbb{E}[\log X] \le \log \mathbb{E}[X]$（对数凹）</td><td>$f(x)=\log x$</td><td>凹</td></tr>
+    <tr><td>$\mathbb{E}[X\log X] \ge \mathbb{E}[X]\log\mathbb{E}[X]$</td><td>$f(x)=x\log x$</td><td>凸</td></tr>
+    <tr><td>$\mathbb{E}[-\log X] \ge -\log \mathbb{E}[X]$（KL非负性的基础）</td><td>$f(x)=-\log x$</td><td>凸</td></tr>
+  </tbody>
+</table>
+<p><strong>算术平均 ≥ 几何平均 ≥ 调和平均（AM-GM-HM 不等式）</strong>：令 $X$ 均匀取 $\{x_1,\ldots,x_n\}$，对严格凸函数 $f(x) = -\log x$ 用 Jensen：
+$$\mathbb{E}[-\log X] \ge -\log \mathbb{E}[X]$$
+$$\Rightarrow \frac{1}{n}\sum_{i=1}^n (-\log x_i) \ge -\log\!\left(\frac{1}{n}\sum x_i\right)$$
+$$\Rightarrow \frac{x_1+\cdots+x_n}{n} \ge \sqrt[n]{x_1 x_2 \cdots x_n}$$
+调和平均类似可得。
+</p>
+<blockquote>易错：AM≥GM 成立需要所有 $x_i > 0$，等号当且仅当所有 $x_i$ 相等（严格凸函数等号条件：$X$ 为常数）。</blockquote>
+
+<h2 id="s26777781">模块三：Log-sum 不等式</h2>
+
+<h3 id="s82835009">Log-sum 不等式的表述 <span class="tag-must">必考</span></h3>
+<p><strong>是什么</strong>：对任意 $a_i \ge 0$，$b_i \ge 0$（$i=1,\ldots,n$），有：
+$$\boxed{\sum_{i=1}^n a_i \log \frac{a_i}{b_i} \ge \left(\sum_{i=1}^n a_i\right) \log \frac{\sum_{i=1}^n a_i}{\sum_{i=1}^n b_i}}$$
+等号当且仅当 $a_i/b_i = \text{const}$（各比值相等）。
+</p>
+<p><strong>为什么重要</strong>：信息论中所有含 $\sum p \log(p/q)$ 结构的不等式（KL散度、熵的凹凸性、互信息凹凸性）都可以直接套用 log-sum 不等式，比 Jensen 路线更简洁。</p>
+
+<h3 id="s76397275">Log-sum 不等式的两种证明路线 <span class="tag-key">重点</span></h3>
+<p><strong>路线一（$f(x) = \log x$ 凹函数 + Jensen）</strong>：</p>
+<p>令 $p_i = b_i / \sum b_j$，$X_i = a_i/b_i$，则 log-sum 不等式等价于：
+$$\mathbb{E}_p[\log X] \le \log \mathbb{E}_p[X]$$
+即对凹函数 $\log x$ 的 Jensen 不等式。</p>
+<p><strong>路线二（$f(x) = x\log x$ 凸函数 + Jensen）</strong>：</p>
+<p>令 $p_i = b_i/\sum b_j$，$X_i = a_i/b_i$，则 log-sum 不等式等价于：
+$$\mathbb{E}[X\log X] \ge \mathbb{E}[X] \log \mathbb{E}[X]$$
+即对凸函数 $x \log x$ 的 Jensen 不等式。</p>
+<blockquote>易错：两种路线本质相同，区别在于如何设置"概率 $p$"和"随机变量 $X$"。考试时选其中一种路线写清楚即可，不要混用。</blockquote>
+
+<h3 id="s79836209">Log-sum 不等式的核心应用：KL散度非负性 <span class="tag-must">必考</span></h3>
+<p>令 $a_i = p(x_i)$，$b_i = q(x_i)$，则：
+$$D_{\mathrm{KL}}(p\|q) = \sum_x p(x)\log\frac{p(x)}{q(x)} \ge \left(\sum_x p(x)\right)\log\frac{\sum_x p(x)}{\sum_x q(x)} = 1 \cdot \log\frac{1}{1} = 0$$
+等号当且仅当 $p(x)/q(x) = \text{const}$，即 $p(x) = q(x)$ 对所有 $x$。</p>
+<p><span class="exp">这是用 log-sum 不等式最简洁地证明 Gibbs 不等式（KL散度非负性）的方法。</span></p>
+
+<h2 id="s66178053">模块四：KL散度非负性及其推论</h2>
+
+<h3 id="s12951738">Gibbs 不等式（KL散度非负性） <span class="tag-must">必考</span></h3>
+<p>$$\boxed{D_{\mathrm{KL}}(p\|q) \ge 0, \quad \text{等号} \Leftrightarrow p = q}$$</p>
+<p><strong>三条重要推论</strong>（均由 $D_{\mathrm{KL}} \ge 0$ 直接推出）：</p>
+<ol>
+  <li><span class="kp">互信息非负性</span>：$I(X;Y) = D_{\mathrm{KL}}(p(x,y)\|p(x)p(y)) \ge 0$，等号 $\Leftrightarrow X \perp Y$</li>
+  <li><span class="kp">条件熵不大于原熵</span>：$H(X|Y) \le H(X)$，等号 $\Leftrightarrow X \perp Y$</li>
+  <li><span class="kp">次可加性</span>：$H(X) + H(Y) \ge H(X,Y)$，等号 $\Leftrightarrow X \perp Y$</li>
+</ol>
+<p><strong>推论2的证明</strong>：$H(X|Y) \le H(X) \Leftrightarrow I(X;Y) = H(X) - H(X|Y) \ge 0$。</p>
+<p><strong>推论3的证明</strong>：$H(X,Y) = H(X) + H(Y|X) \le H(X) + H(Y)$（因为 $H(Y|X) \le H(Y)$）。</p>
+<blockquote>易错：推论2（$H(X|Y) \le H(X)$）是期望层面的结论。对于特定观测值 $y$，$H(X|Y=y)$ 可以大于 $H(X)$；但对所有 $y$ 取期望后一定不超过 $H(X)$。</blockquote>
+
+<h3 id="s38597684">均匀分布熵最大 <span class="tag-key">重点</span></h3>
+<p><strong>结论</strong>：设 $|\mathcal{X}| = N$，则 $H(p) \le \log_2 N$，等号当且仅当 $p$ 是均匀分布 $u(x) = 1/N$。</p>
+<p><strong>关键恒等式</strong>：
+$$H(p) = \log N - D_{\mathrm{KL}}(p\|u)$$
+<span class="exp">推导：$H(p) = -\sum p\log p = -\sum p\log p + \sum p\log(1/N) + \sum p\log N = \log N - D_{\mathrm{KL}}(p\|u)$</span>
+</p>
+<p>由 $D_{\mathrm{KL}}(p\|u) \ge 0$ 立得 $H(p) \le \log N$，等号当 $D_{\mathrm{KL}}=0$，即 $p=u$（均匀分布）。</p>
+<p><strong>直觉</strong>：越接近均匀分布（越"没有规律"），熵越大；信源越随机，所需编码越长。</p>
+
+<h2 id="s85797281">模块五：KL散度的凹凸性</h2>
+
+<h3 id="s25979255">KL散度是 $(p,q)$ 的联合凸函数 <span class="tag-key">重点</span></h3>
+<p><strong>结论</strong>：$D_{\mathrm{KL}}(p\|q)$ 是关于 $(p, q)$ 的凸函数，即对 $0 \le \lambda \le 1$：
+$$\lambda D_{\mathrm{KL}}(p_1\|q_1) + (1-\lambda)D_{\mathrm{KL}}(p_2\|q_2) \ge D_{\mathrm{KL}}(\lambda p_1 + (1-\lambda)p_2 \| \lambda q_1 + (1-\lambda)q_2)$$
+</p>
+<p><strong>证明思路</strong>（用 log-sum 不等式）：令 $a_1 = \lambda p_1(x)$，$b_1 = \lambda q_1(x)$，$a_2 = (1-\lambda)p_2(x)$，$b_2 = (1-\lambda)q_2(x)$，直接套用 log-sum 不等式即得。</p>
+<p><strong>特殊情形</strong>（固定其中一个分布）：</p>
+<ul>
+  <li>固定 $q$：$D_{\mathrm{KL}}(p\|q)$ 是 $p$ 的凸函数</li>
+  <li>固定 $p$：$D_{\mathrm{KL}}(p\|q)$ 是 $q$ 的凸函数</li>
+</ul>
+
+<h2 id="s28183903">模块六：熵的凹凸性</h2>
+
+<h3 id="s18395470">熵 $H(p)$ 是概率向量 $p$ 的凹函数 <span class="tag-must">必考</span></h3>
+<p><strong>结论</strong>：对 $0 \le \lambda \le 1$：
+$$\boxed{\lambda H(p_1) + (1-\lambda)H(p_2) \le H(\lambda p_1 + (1-\lambda)p_2)}$$
+即混合分布的熵 $\ge$ 各分布熵的混合（"混合增加不确定性"）。
+</p>
+<p><strong>三种证明路线</strong>（考试任选其一）：</p>
+<ol>
+  <li><strong>Log-sum 不等式路线</strong>：令 $a_1=\lambda p_1(x)$，$b_1=\lambda$，$a_2=(1-\lambda)p_2(x)$，$b_2=1-\lambda$，套用 log-sum，左边化简为 $-[\lambda H(p_1)+(1-\lambda)H(p_2)]$，右边化简为 $-H(\lambda p_1+(1-\lambda)p_2)$。</li>
+  <li><strong>Jensen 不等式路线</strong>（$f(x) = x\log x$ 凸函数）：同样设置 $p_i$ 和 $x_i$，套用 $\mathbb{E}[X\log X] \ge \mathbb{E}[X]\log\mathbb{E}[X]$。</li>
+  <li><strong>KL散度路线</strong>：利用 $H(p) = \log N - D_{\mathrm{KL}}(p\|u)$，由 KL 散度对 $p$ 的凸性，得 $-D_{\mathrm{KL}}(\cdot\|u)$ 是凹函数，即 $H(\cdot)$ 是凹函数。</li>
+  <li><strong>条件熵路线</strong>（最优雅）：构造混合随机变量 $Y \in \{1,2\}$，$p(Y=1)=\lambda$，$X|Y=1 \sim p_1$，$X|Y=2 \sim p_2$，则 $X \sim \lambda p_1+(1-\lambda)p_2$，由 $H(X|Y) \le H(X)$，得 $\lambda H(p_1)+(1-\lambda)H(p_2) \le H(\lambda p_1+(1-\lambda)p_2)$。</li>
+</ol>
+<blockquote>易错：此处"凹"是相对于概率向量 $p$ 而言的（$p$ 生活在概率单纯形上），不是相对于 $x$ 值。两个概率分布 $p_1, p_2$ 的凸组合 $\lambda p_1 + (1-\lambda)p_2$ 仍是合法的概率分布（各分量求和为1）。</blockquote>
+
+<h3 id="s81125430">熵凹性的直觉 <span class="tag-freq">高频</span></h3>
+<p><strong>"混合分布增加熵"</strong>（Mixing probability distributions increases uncertainty）：</p>
+<p>将两个分布混合后，不确定性不减（至少不小于各分布不确定性的加权平均）。例如：将一枚均匀硬币（$H(p_1)=1$ bit）与一枚全正面的硬币（$H(p_2)=0$ bit）以 $\lambda=0.5$ 混合，得到 $p(正面)=0.75$ 的硬币，$H \approx 0.81$ bit $\ge 0.5 \times 1 + 0.5 \times 0 = 0.5$ bit。</p>
+
+<h2 id="s23534792">模块七：互信息的凹凸性</h2>
+
+<h3 id="s21811873">互信息的凹凸性 <span class="tag-key">重点</span></h3>
+<p><strong>结论</strong>：互信息 $I(X;Y)$ 可以看作 $p(X)$ 和 $p(Y|X)$ 的函数：</p>
+<ul>
+  <li><span class="kp">固定 $p(Y|X)$</span>：$I(X;Y)$ 是关于 $p(X)$ 的<strong>凹函数</strong></li>
+  <li><span class="kp">固定 $p(X)$</span>：$I(X;Y)$ 是关于 $p(Y|X)$ 的<strong>凸函数</strong></li>
+</ul>
+<p><strong>凹性（固定信道 $p(Y|X)$）的意义</strong>：信道容量优化（$\max_{p(X)} I(X;Y)$）的目标函数是凸优化，存在全局最优解，且最优输入分布可以通过 KKT 条件求解（Blahut-Arimoto 算法的基础）。</p>
+<p><strong>展开式</strong>：
+$$I(X;Y) = \sum_{x,y} p(x)p(y|x)\log p(y|x) - \sum_{x,y} p(x)p(y|x)\log\sum_x p(x)p(y|x)$$
+第一项对 $p(X)$ 是线性的（凹），第二项通过 log-sum 不等式可验证对 $p(X)$ 是凸的，总体为凹。
+</p>
+<blockquote>易错：凹在 $p(X)$ 上（固定信道时），凸在 $p(Y|X)$ 上（固定输入时）。方向非对称，与熵的纯凹性不同。</blockquote>
+
+<h2 id="s85310303">模块八：本章不等式体系总览</h2>
+
+<h3 id="s60906451">Venn 图式不等式关系 <span class="tag-must">必考</span></h3>
+<table border="1" cellpadding="6" cellspacing="0" style="border-collapse:collapse;width:100%">
+  <thead><tr style="background:#e8f4fd"><th>结论</th><th>证明工具</th><th>等号条件</th></tr></thead>
+  <tbody>
+    <tr><td>$D_{\mathrm{KL}}(p\|q) \ge 0$</td><td>Log-sum 或 Jensen（$-\log x$ 凸）</td><td>$p = q$</td></tr>
+    <tr><td>$I(X;Y) \ge 0$</td><td>$I = D_{\mathrm{KL}} \ge 0$</td><td>$X \perp Y$</td></tr>
+    <tr><td>$H(X|Y) \le H(X)$</td><td>$I(X;Y) \ge 0$</td><td>$X \perp Y$</td></tr>
+    <tr><td>$H(X,Y) \le H(X)+H(Y)$</td><td>$H(Y|X) \le H(Y)$</td><td>$X \perp Y$</td></tr>
+    <tr><td>$H(p) \le \log|\mathcal{X}|$</td><td>$H(p) = \log N - D_{\mathrm{KL}}(p\|u)$</td><td>$p$ 为均匀分布</td></tr>
+    <tr><td>$H(p)$ 是 $p$ 的凹函数</td><td>Log-sum / Jensen / KL凸性 / 条件熵路线</td><td>（凸组合时等号：$p_1=p_2$）</td></tr>
+    <tr><td>$D_{\mathrm{KL}}(p\|q)$ 是 $(p,q)$ 的凸函数</td><td>Log-sum 不等式</td><td>$p_1/q_1 = p_2/q_2$ 各处</td></tr>
+    <tr><td>$I(X;Y)$ 关于 $p(X)$ 为凹</td><td>熵凹性 + 条件熵凸性</td><td>（见信道容量）</td></tr>
+    <tr><td>$I(X;Y)$ 关于 $p(Y|X)$ 为凸</td><td>KL散度凸性</td><td>（见信道编码）</td></tr>
+  </tbody>
+</table>
+
+<h2 id="s52148777">常见证明思路总结</h2>
+<p><strong>遇到信息论不等式的通用策略</strong>：</p>
+<ol>
+  <li>先尝试<span class="kp">直接套 Log-sum 不等式</span>（最省力，适合含 $\sum a_i \log(a_i/b_i)$ 的结构）</li>
+  <li>若不符合 log-sum 形式，尝试<span class="kp">Jensen 不等式</span>（先判断 $f$ 的凹凸性，再设 $p$ 和 $X$）</li>
+  <li>若结论是关于信息量关系（$H$, $I$, $D_{\mathrm{KL}}$），尝试<span class="kp">转化为 KL 散度非负性</span></li>
+  <li>对凹凸性命题，考虑<span class="kp">条件熵路线</span>（构造辅助随机变量 $Y$）</li>
+</ol>
+<blockquote>易错：套 Jensen 时最常见的错误是写错不等号方向。口诀："凸函数，$\mathbb{E}[f] \ge f(\mathbb{E})$；凹函数，$\mathbb{E}[f] \le f(\mathbb{E})$"。</blockquote>
+
+
+
+</body>
+</html>

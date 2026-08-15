@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Lecture 12：连续情况-高斯信道-水填充</title>
+<script>
+MathJax = {
+  tex: {
+    inlineMath: [['$', '$']],
+    displayMath: [['$$', '$$']]
+  }
+};
+</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js"></script>
+<style>
+/* === ExamPass Shared Styles === */
+/* Paper-like warm background, clean typography, responsive */
+
+:root {
+  --paper: #fdf6e3;
+  --paper-dark: #f5ecd7;
+  --ink: #2c2c2c;
+  --ink-light: #555;
+  --accent: #2563eb;
+  --accent-hover: #1d4ed8;
+  --divider: #d6c8a8;
+  --card-bg: #fef9ef;
+  --card-border: #e8dcc8;
+  --correct: #22c55e;
+  --correct-bg: #f0fdf4;
+  --wrong: #ef4444;
+  --wrong-bg: #fef2f2;
+  --tag-bg: #fef3c7;
+  --tag-text: #92400e;
+  --radius: 6px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: "Microsoft YaHei", "Noto Sans SC", "SimSun", sans-serif;
+  font-size: 12pt; line-height: 1.75; color: var(--ink);
+  max-width: 860px; margin: auto; padding: 24px 20px 60px;
+  background: var(--paper);
+}
+
+@media print {
+  body { font-size: 10.5pt; background: #fff; }
+  .no-print { display: none !important; }
+  h1, h2, h3 { page-break-after: avoid; }
+}
+
+/* ── Header ── */
+#exampass-header {
+  display: flex; justify-content: space-between; align-items: baseline;
+  padding: 6px 0; margin-bottom: 0;
+}
+.header-brand { font-size: 1.2em; font-weight: 700; color: #1a1a2e; letter-spacing: 0.3px; }
+.header-url  { font-size: 0.78em; color: #999; }
+.header-divider { border: none; border-top: 2px solid var(--divider); margin: 4px 0 20px 0; }
+
+/* ── Typography ── */
+h1 { font-size: 1.55em; text-align: center; border-bottom: 2px solid var(--divider); padding-bottom: 8px; margin-top: 0; }
+h2 { font-size: 1.25em; border-bottom: 1px solid var(--divider); padding-bottom: 4px; margin-top: 28px; }
+h3 { font-size: 1.08em; margin-top: 20px; color: var(--ink); }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ── Tables ── */
+table { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 0.95em; }
+td, th { border: 1px solid var(--card-border); padding: 5px 9px; text-align: left; }
+th { background: var(--paper-dark); font-weight: 700; }
+
+/* ── Embedded source images ── */
+.embedded-images {
+  margin: 18px 0 24px;
+}
+.embedded-images-intro {
+  color: var(--ink-light);
+  font-size: 0.95em;
+}
+.embedded-image {
+  margin: 14px 0 18px;
+  padding: 10px;
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  background: var(--card-bg);
+  break-inside: avoid;
+}
+.embedded-image img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+  border: 1px solid var(--divider);
+  background: #fff;
+}
+.embedded-image figcaption {
+  margin-top: 8px;
+  color: var(--ink-light);
+  font-size: 0.92em;
+  line-height: 1.5;
+}
+.embedded-image-note::before {
+  content: " - ";
+}
+
+/* ── Knowledge point vs explanation ── */
+.kp { font-weight: 700; color: var(--ink); }           /* key point: bold dark */
+.exp { font-weight: 400; color: var(--ink-light); }    /* explanation: lighter */
+.exp em, .exp strong { color: var(--ink); }             /* emphasis inside explanation */
+
+/* ── Block elements ── */
+blockquote {
+  border-left: 3px solid #c0392b; background: #fef9ef;
+  padding: 6px 14px; margin: 10px 0; font-size: 0.95em;
+}
+code { background: #f0ede0; padding: 2px 5px; border-radius: 3px; font-size: 0.92em; }
+pre { background: #f0ede0; padding: 10px; border-radius: var(--radius); overflow-x: auto; }
+
+/* ── TOC ── */
+div.toc {
+  background: var(--card-bg); padding: 14px 18px;
+  border: 1px solid var(--card-border); border-radius: var(--radius); margin-bottom: 22px;
+}
+div.toc ul { padding-left: 18px; }
+div.toc li { margin: 3px 0; font-size: 0.95em; }
+
+/* ── Priority tags ── */
+.tag-must   { background: #fee2e2; color: #991b1b; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+.tag-key    { background: #fef3c7; color: #92400e; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+.tag-freq   { background: #dbeafe; color: #1e40af; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+.tag-info   { background: #f0fdf4; color: #166534; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+
+
+</style>
+</head>
+<body>
+
+<header id="exampass-header">
+  <div class="header-left"><span class="header-brand">ExamPass Assistant</span></div>
+  <div class="header-right"><span class="header-url">github.com/MIKUZ12/ExamPass-Assistant</span></div>
+</header>
+<hr class="header-divider">
+
+<h1>Lecture 12：连续情况-高斯信道-水填充</h1>
+<div class="toc">
+<h2>目录</h2>
+<ul>
+<li><a href="#s35468304">一、微分熵</a></li>
+  <li><a href="#s42889013">定义 必考</a></li>
+  <li><a href="#s50948456">与离散熵的关系（量化） 重点</a></li>
+  <li><a href="#s77564636">变量替换性质 重点</a></li>
+<li><a href="#s28476882">二、KL 散度与互信息（连续版）</a></li>
+  <li><a href="#s31089386">连续 KL 散度 必考</a></li>
+  <li><a href="#s63265253">连续互信息 必考</a></li>
+<li><a href="#s24998532">三、高斯分布的统计度量</a></li>
+  <li><a href="#s62919924">高斯分布的微分熵 必考</a></li>
+  <li><a href="#s83958816">高斯分布是最大微分熵分布 必考</a></li>
+  <li><a href="#s86529543">互信息与线性相关性 重点</a></li>
+  <li><a href="#s81382796">两高斯之间的 KL 散度 重点</a></li>
+<li><a href="#s78085826">四、高斯信道</a></li>
+  <li><a href="#s80081558">信道模型与功率约束 必考</a></li>
+  <li><a href="#s89129807">高斯信道容量推导 必考</a></li>
+  <li><a href="#s39041878">高斯信道的几何解释 常考</a></li>
+<li><a href="#s46220928">五、并行高斯信道与水填充</a></li>
+  <li><a href="#s31159073">问题设置 必考</a></li>
+  <li><a href="#s28617031">水填充最优解（KKT 条件） 必考</a></li>
+</ul>
+</div>
+
+<h2 id="s35468304">一、微分熵</h2>
+
+<h3 id="s42889013">定义 <span class="tag-must">必考</span></h3>
+<p><span class="kp">微分熵（differential entropy）</span>是离散熵在连续分布上的类比，定义为：</p>
+$$h(X) = \mathbb{E}[-\log f_X(x)] = -\int f_X(x)\log f_X(x)\,dx$$
+<p>类比定义还有：</p>
+<ul>
+  <li><strong>条件微分熵</strong>：$h(X|Y) = -\iint f_{X,Y}(x,y)\log f_{X|Y}(x|y)\,dx\,dy$</li>
+  <li><strong>联合微分熵</strong>：$h(X,Y) = -\iint f_{X,Y}(x,y)\log f_{X,Y}(x,y)\,dx\,dy$</li>
+</ul>
+<blockquote>易错：微分熵<strong>可以为负数</strong>！均匀分布 $X\sim U(a,b)$：$h(X)=\log(b-a)$，当 $b-a<1$ 时为负。</blockquote>
+
+<h3 id="s50948456">与离散熵的关系（量化） <span class="tag-key">重点</span></h3>
+<p>对连续分布以精度 $\Delta$ 量化：</p>
+$$H(X^\Delta) \approx h(X) + \log\frac{1}{\Delta}$$
+<p><span class="exp">当 $\Delta\to 0$ 时 $H(X^\Delta)\to\infty$，连续/模拟信号熵无穷大，微分熵本身不代表"实际比特数"。</span></p>
+<p>若 $\Delta=2^{-n}$，则 $H(X^\Delta)\approx h(X)+n$，<span class="kp">解读</span>：将 $X$ 量化到 $n$ bit精度所需的平均比特数约为 $h(X)+n$。</p>
+
+<h3 id="s77564636">变量替换性质 <span class="tag-key">重点</span></h3>
+<p>对可逆线性变换 $Y=AX+c$（$\det A\ne 0$）：</p>
+$$h(AX+c) = h(X) + \log|\det A|$$
+<p>特例：$h(X+c)=h(X)$（平移不变）；$h(aX)=h(X)+n\log|a|$（缩放增加熵）。</p>
+<p>证明关键：利用变量替换公式 $f_Y(y)=\frac{1}{|\det A|}f_X(A^{-1}(y-c))$，$dy=|\det A|\,dx$。</p>
+
+<h2 id="s28476882">二、KL 散度与互信息（连续版）</h2>
+
+<h3 id="s31089386">连续 KL 散度 <span class="tag-must">必考</span></h3>
+$$D_{KL}(f\|g) = \int f(x)\log\frac{f(x)}{g(x)}\,dx \ge 0$$
+<p>非负性用 Jensen 不等式证明：$-\log$ 是凸函数，$\mathbb{E}[-\log\frac{g(x)}{f(x)}]\ge -\log\mathbb{E}\frac{g(x)}{f(x)}=-\log 1=0$。</p>
+
+<h3 id="s63265253">连续互信息 <span class="tag-must">必考</span></h3>
+$$I(X;Y) = D_{KL}(f_{XY}\|f_X f_Y) = \iint f_{X,Y}(x,y)\log\frac{f_{X,Y}(x,y)}{f_X(x)f_Y(y)}\,dx\,dy$$
+<p>与微分熵关系（与离散情况相同）：</p>
+<ul>
+  <li>$I(X;Y)=h(X)-h(X|Y)=h(Y)-h(Y|X)=h(X)+h(Y)-h(X,Y)$</li>
+  <li>$h(X|Y)\le h(X)$（条件不增加熵）</li>
+  <li>互信息仍然<strong>非负</strong>（来自 KL 散度非负性）</li>
+</ul>
+<blockquote>易错：互信息非负，但微分熵可以为负；互信息的表达式中微分熵可相互抵消负号。</blockquote>
+
+<h2 id="s24998532">三、高斯分布的统计度量</h2>
+
+<h3 id="s62919924">高斯分布的微分熵 <span class="tag-must">必考</span></h3>
+<p>$n$ 维高斯 $X^n\sim\mathcal{N}(\boldsymbol{\mu},\boldsymbol{\Sigma})$：</p>
+$$h(X^n) = \frac{n}{2}\log(2\pi e) + \frac{1}{2}\log|\boldsymbol{\Sigma}|$$
+<p>证明思路：令 $Y^n=\Sigma^{-1/2}(X^n-\boldsymbol{\mu})$，则 $Y^n\sim\mathcal{N}(\mathbf{0},I)$；利用变量替换性质 $h(X^n)=h(Y^n)+\log|\det\Sigma^{1/2}|$；再计算标准高斯的微分熵，用 $\operatorname{tr}\mathbb{E}[yy^T]=\operatorname{tr}I=n$。</p>
+<p>特例（一维）：$X\sim\mathcal{N}(\mu,\sigma^2)$，$h(X)=\frac{1}{2}\log(2\pi e\sigma^2)$。</p>
+
+<h3 id="s83958816">高斯分布是最大微分熵分布 <span class="tag-must">必考</span></h3>
+<p>在<strong>固定均值 $\boldsymbol{\mu}$ 和协方差 $\boldsymbol{\Sigma}$ 的约束下</strong>，高斯分布具有最大微分熵：</p>
+$$h(X^n) \le \frac{n}{2}\log(2\pi e) + \frac{1}{2}\log|\boldsymbol{\Sigma}|$$
+<p>等号当且仅当 $X^n\sim\mathcal{N}(\boldsymbol{\mu},\boldsymbol{\Sigma})$。</p>
+<p>证明：设真实分布为 $f$，高斯为 $g$；利用 $D_{KL}(f\|g)\ge 0$，即 $-h(X^n)+\mathbb{E}_f[-\log g(x)]\ge 0$；计算 $\mathbb{E}_f[-\log g(x)]$，用 $\operatorname{tr}(\mathbb{E}_f[(x-\mu)(x-\mu)^T]\Sigma^{-1})=\operatorname{tr}(\Sigma\Sigma^{-1})=n$。</p>
+<blockquote>易错：约束是固定协方差矩阵（非固定方差的情况更弱），此时高斯最优。功率约束信道容量即由此得出。</blockquote>
+
+<h3 id="s86529543">互信息与线性相关性 <span class="tag-key">重点</span></h3>
+<p>对联合高斯 $(X_1,X_2)\sim\mathcal{N}$，相关系数为 $\rho$：</p>
+$$I(X_1;X_2) = -\frac{1}{2}\log(1-\rho^2)$$
+<p>$I(X_1;X_2)=0 \Leftrightarrow \rho=0$（线性不相关 $\Leftrightarrow$ 独立）。</p>
+<p><span class="exp">注意：对一般（非高斯）分布，线性不相关不等于独立；只有高斯分布时两者等价。</span></p>
+
+<h3 id="s81382796">两高斯之间的 KL 散度 <span class="tag-key">重点</span></h3>
+<p>$p=\mathcal{N}(\boldsymbol{\mu}_1,\boldsymbol{\Sigma}_1)$，$q=\mathcal{N}(\boldsymbol{\mu}_2,\boldsymbol{\Sigma}_2)$：</p>
+$$D_{KL}(p\|q) = \frac{1}{2}\left(\ln\frac{|\boldsymbol{\Sigma}_2|}{|\boldsymbol{\Sigma}_1|} - n + \operatorname{tr}(\boldsymbol{\Sigma}_2^{-1}\boldsymbol{\Sigma}_1) + (\boldsymbol{\mu}_1-\boldsymbol{\mu}_2)^T\boldsymbol{\Sigma}_2^{-1}(\boldsymbol{\mu}_1-\boldsymbol{\mu}_2)\right)$$
+<p><span class="exp">记忆要点：包含四项——对数行列式比、维度 $n$、迹项、马氏距离项。</span></p>
+
+<h2 id="s78085826">四、高斯信道</h2>
+
+<h3 id="s80081558">信道模型与功率约束 <span class="tag-must">必考</span></h3>
+<p><span class="kp">高斯信道模型</span>：$Y_i = X_i + W_i$，$W_i\sim\mathcal{N}(0,\sigma^2)$，i.i.d.，与 $X_i$ 独立。</p>
+<p><span class="kp">功率约束</span>：$\frac{1}{n}\sum_{i=1}^n X_i^2 \le P$。</p>
+
+<h3 id="s89129807">高斯信道容量推导 <span class="tag-must">必考</span></h3>
+$$C_I = \max_{p(X):\,\mathbb{E}[X^2]\le P} I(X;Y) = \frac{1}{2}\log\!\left(1+\frac{P}{\sigma^2}\right)$$
+<p>推导步骤：</p>
+<ol>
+  <li>$I(X;Y) = h(Y) - h(Y|X) = h(Y) - h(W)$（因为 $Y|X=x$ 时 $Y=x+W$，$h(Y|X)=h(W)$）</li>
+  <li>$h(W) = \frac{1}{2}\log(2\pi e\sigma^2)$（已知，固定）</li>
+  <li>最大化 $h(Y)$：$\operatorname{Var}(Y)=\operatorname{Var}(X)+\sigma^2\le P+\sigma^2$，由高斯最大熵定理 $h(Y)\le\frac{1}{2}\log(2\pi e(P+\sigma^2))$，等号当 $X\sim\mathcal{N}(0,P)$ 时取到</li>
+  <li>$C_I = \frac{1}{2}\log(2\pi e(P+\sigma^2)) - \frac{1}{2}\log(2\pi e\sigma^2) = \frac{1}{2}\log\!\left(1+\frac{P}{\sigma^2}\right)$</li>
+</ol>
+<p><span class="kp">最优输入分布</span>：$X\sim\mathcal{N}(0,P)$，即满功率的高斯分布。</p>
+
+<h3 id="s39041878">高斯信道的几何解释 <span class="tag-freq">常考</span></h3>
+<p>类比离散情况的噪声球：</p>
+<ul>
+  <li>输出空间半径（$n$ 维球）：$\sqrt{n(P+\sigma^2)}$</li>
+  <li>噪声球半径（每个码字对应的不确定范围）：$\sqrt{n\sigma^2}=\sqrt{n}\,\sigma$</li>
+  <li>输入空间半径：$\sqrt{nP}$</li>
+  <li>可区分球数：$\left(\frac{\sqrt{n(P+\sigma^2)}}{\sqrt{n}\,\sigma}\right)^n = \left(1+\frac{P}{\sigma^2}\right)^{n/2}$</li>
+  <li>$R = \frac{1}{n}\log\#\text{spheres} = \frac{1}{2}\log\!\left(1+\frac{P}{\sigma^2}\right)$</li>
+</ul>
+
+<h2 id="s46220928">五、并行高斯信道与水填充</h2>
+
+<h3 id="s31159073">问题设置 <span class="tag-must">必考</span></h3>
+<p>$n$ 个并行高斯信道，第 $i$ 个：$Y_i=X_i+W_i$，$W_i\sim\mathcal{N}(0,N_i)$，各信道噪声不同。</p>
+<p>总功率约束 $\sum P_i=P$，最大化总信道容量：</p>
+$$\max_{\{P_i\}} \sum_{i=1}^n \frac{1}{2}\log\!\left(1+\frac{P_i}{N_i}\right), \quad \text{s.t.} \sum_{i=1}^n P_i = P,\; P_i\ge 0$$
+
+<h3 id="s28617031">水填充最优解（KKT 条件） <span class="tag-must">必考</span></h3>
+<p>写拉格朗日函数 $L$，对 $P_i$ 求导，加入 KKT 条件 $P_i\ge 0,\nu_i\ge 0,\nu_i P_i=0$：</p>
+$$P_i^* = (\mu - N_i)^+ = \max(\mu - N_i,\; 0)$$
+<p>其中水位线 $\mu = \frac{1}{2\lambda}$ 由约束 $\sum_{i=1}^n P_i^* = P$ 确定。</p>
+<p><span class="kp">水填充直觉</span>：把噪声 $N_i$ 看作第 $i$ 个池子的底部高度，将总功率 $P$ 像水一样从低到高注入，公共水位为 $\mu$；噪声太大（底部超过水位）的信道分配功率为 0。</p>
+<blockquote>易错：不是把功率平均分，也不是全给最好的信道。噪声小的信道分到更多功率，但有下限 0。</blockquote>
+<p>最优总容量：</p>
+$$C = \sum_{i:P_i^*>0} \frac{1}{2}\log\!\left(\frac{\mu}{N_i}\right)$$
+
+
+
+</body>
+</html>

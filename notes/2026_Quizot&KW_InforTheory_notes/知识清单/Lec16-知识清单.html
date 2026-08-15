@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Lecture 16: 信源信道分离定理、VAE 与课程总结</title>
+<script>
+MathJax = {
+  tex: {
+    inlineMath: [['$', '$']],
+    displayMath: [['$$', '$$']]
+  }
+};
+</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js"></script>
+<style>
+/* === ExamPass Shared Styles === */
+/* Paper-like warm background, clean typography, responsive */
+
+:root {
+  --paper: #fdf6e3;
+  --paper-dark: #f5ecd7;
+  --ink: #2c2c2c;
+  --ink-light: #555;
+  --accent: #2563eb;
+  --accent-hover: #1d4ed8;
+  --divider: #d6c8a8;
+  --card-bg: #fef9ef;
+  --card-border: #e8dcc8;
+  --correct: #22c55e;
+  --correct-bg: #f0fdf4;
+  --wrong: #ef4444;
+  --wrong-bg: #fef2f2;
+  --tag-bg: #fef3c7;
+  --tag-text: #92400e;
+  --radius: 6px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: "Microsoft YaHei", "Noto Sans SC", "SimSun", sans-serif;
+  font-size: 12pt; line-height: 1.75; color: var(--ink);
+  max-width: 860px; margin: auto; padding: 24px 20px 60px;
+  background: var(--paper);
+}
+
+@media print {
+  body { font-size: 10.5pt; background: #fff; }
+  .no-print { display: none !important; }
+  h1, h2, h3 { page-break-after: avoid; }
+}
+
+/* ── Header ── */
+#exampass-header {
+  display: flex; justify-content: space-between; align-items: baseline;
+  padding: 6px 0; margin-bottom: 0;
+}
+.header-brand { font-size: 1.2em; font-weight: 700; color: #1a1a2e; letter-spacing: 0.3px; }
+.header-url  { font-size: 0.78em; color: #999; }
+.header-divider { border: none; border-top: 2px solid var(--divider); margin: 4px 0 20px 0; }
+
+/* ── Typography ── */
+h1 { font-size: 1.55em; text-align: center; border-bottom: 2px solid var(--divider); padding-bottom: 8px; margin-top: 0; }
+h2 { font-size: 1.25em; border-bottom: 1px solid var(--divider); padding-bottom: 4px; margin-top: 28px; }
+h3 { font-size: 1.08em; margin-top: 20px; color: var(--ink); }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ── Tables ── */
+table { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 0.95em; }
+td, th { border: 1px solid var(--card-border); padding: 5px 9px; text-align: left; }
+th { background: var(--paper-dark); font-weight: 700; }
+
+/* ── Embedded source images ── */
+.embedded-images {
+  margin: 18px 0 24px;
+}
+.embedded-images-intro {
+  color: var(--ink-light);
+  font-size: 0.95em;
+}
+.embedded-image {
+  margin: 14px 0 18px;
+  padding: 10px;
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  background: var(--card-bg);
+  break-inside: avoid;
+}
+.embedded-image img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+  border: 1px solid var(--divider);
+  background: #fff;
+}
+.embedded-image figcaption {
+  margin-top: 8px;
+  color: var(--ink-light);
+  font-size: 0.92em;
+  line-height: 1.5;
+}
+.embedded-image-note::before {
+  content: " - ";
+}
+
+/* ── Knowledge point vs explanation ── */
+.kp { font-weight: 700; color: var(--ink); }           /* key point: bold dark */
+.exp { font-weight: 400; color: var(--ink-light); }    /* explanation: lighter */
+.exp em, .exp strong { color: var(--ink); }             /* emphasis inside explanation */
+
+/* ── Block elements ── */
+blockquote {
+  border-left: 3px solid #c0392b; background: #fef9ef;
+  padding: 6px 14px; margin: 10px 0; font-size: 0.95em;
+}
+code { background: #f0ede0; padding: 2px 5px; border-radius: 3px; font-size: 0.92em; }
+pre { background: #f0ede0; padding: 10px; border-radius: var(--radius); overflow-x: auto; }
+
+/* ── TOC ── */
+div.toc {
+  background: var(--card-bg); padding: 14px 18px;
+  border: 1px solid var(--card-border); border-radius: var(--radius); margin-bottom: 22px;
+}
+div.toc ul { padding-left: 18px; }
+div.toc li { margin: 3px 0; font-size: 0.95em; }
+
+/* ── Priority tags ── */
+.tag-must   { background: #fee2e2; color: #991b1b; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+.tag-key    { background: #fef3c7; color: #92400e; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+.tag-freq   { background: #dbeafe; color: #1e40af; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+.tag-info   { background: #f0fdf4; color: #166534; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+
+
+</style>
+</head>
+<body>
+
+<header id="exampass-header">
+  <div class="header-left"><span class="header-brand">ExamPass Assistant</span></div>
+  <div class="header-right"><span class="header-url">github.com/MIKUZ12/ExamPass-Assistant</span></div>
+</header>
+<hr class="header-divider">
+
+<h1>Lecture 16: 信源信道分离定理、VAE 与课程总结</h1>
+<div class="toc">
+<h2>目录</h2>
+<ul>
+<li><a href="#s82396841">1. 信源-信道分离编码（Source-Channel Separation）</a></li>
+  <li><a href="#s20668936">1.1 系统架构与分离思想 必考</a></li>
+  <li><a href="#s21727156">1.2 联合编码 vs 分离编码 必考</a></li>
+  <li><a href="#s44411437">1.3 分离定理结论 必考</a></li>
+<li><a href="#s27581018">2. 变分自编码器（VAE）</a></li>
+  <li><a href="#s79004121">2.1 率失真三种视角 重点</a></li>
+  <li><a href="#s50414972">2.2 变分下界（ELBO）推导 重点</a></li>
+  <li><a href="#s34090458">2.3 VAE 结构与参数 重点</a></li>
+  <li><a href="#s48446408">2.4 正则项的信息论含义 常考</a></li>
+  <li><a href="#s72591349">2.5 beta-VAE 常考</a></li>
+<li><a href="#s71975689">3. 课程总结与考核重点</a></li>
+  <li><a href="#s31876242">3.1 必考内容 必考</a></li>
+  <li><a href="#s19135039">3.2 核心公式汇总 重点</a></li>
+</ul>
+</div>
+
+<h2 id="s82396841">1. 信源-信道分离编码（Source-Channel Separation）</h2>
+
+<h3 id="s20668936">1.1 系统架构与分离思想 <span class="tag-must">必考</span></h3>
+<p>
+<span class="kp">信源-信道分离编码</span>将信源压缩与信道传输解耦为两个独立模块：
+</p>
+<ul>
+  <li><strong>信源编码（压缩器）</strong>：将 $N$ 长信源序列 $V^N$ 压缩为 $m = \log_2 M$ bits，要求 $m \geq NR^I(D)$</li>
+  <li><strong>信道编码（传输器）</strong>：将 $m$ bits 经 $n$ 次信道传输，要求 $m \leq nC^I$</li>
+</ul>
+<p>
+<span class="exp">关键条件</span>：若 $NR^I(D) \leq nC^I$，则分离编码方案存在，选取满足
+$$NR^I(D) \leq m \leq nC^I$$
+的状态数 $M$，分别设计最优压缩与最优信道编码即可实现端到端失真 $\leq D$。
+</p>
+<blockquote>易错：分离方案要求 $NR^I(D) \leq nC^I$，即 rate $= N/n \leq C^I/R^I(D)$，而非简单的 $R^I(D) \leq C^I$。</blockquote>
+
+<h3 id="s21727156">1.2 联合编码 vs 分离编码 <span class="tag-must">必考</span></h3>
+<p>
+<span class="kp">信源-信道联合编码</span>使用统一编码器直接将 $V^N$ 映射到 $X^n$，rate $= N/n$。
+</p>
+<p>
+<span class="exp">可行性约束推导</span>（马尔可夫链 $V^N \to X^n \to Y^n \to \hat{V}^N$）：
+</p>
+<ul>
+  <li>噪声信道编码定理（反向）：$I(X^n; Y^n) \leq nC^I$</li>
+  <li>率失真定理（反向）：$I(V^N; \hat{V}^N) \geq NR^I(D)$</li>
+  <li>数据处理不等式：$I(V^N; \hat{V}^N) \leq I(X^n; Y^n)$</li>
+</ul>
+<p>合并：$NR^I(D) \leq I(V^N; \hat{V}^N) \leq I(X^n; Y^n) \leq nC^I$</p>
+<p>
+因此 <span class="kp">分离方案不损失最优性</span>，联合编码无法超越分离编码的理论极限。
+</p>
+<blockquote>易错：联合编码并不比分离编码更好。信源信道分离定理保证分离方案等价于最优联合方案。</blockquote>
+
+<h3 id="s44411437">1.3 分离定理结论 <span class="tag-must">必考</span></h3>
+<p>
+<strong>定理</strong>：对独立同分布信源 $V_i \sim V$ 与离散无记忆信道，以 rate $= N/n$ 传输且失真 $\leq D$ 的方案存在，当且仅当：
+$$\frac{N}{n} \leq \frac{C^I}{R^I(D)}$$
+</p>
+<p>
+<span class="exp">实践意义</span>：可分别独立设计最优压缩编码（达到 $R^I(D)$）与最优信道编码（达到 $C^I$），串联即构成最优端到端系统。
+</p>
+
+<h2 id="s27581018">2. 变分自编码器（VAE）</h2>
+
+<h3 id="s79004121">2.1 率失真三种视角 <span class="tag-key">重点</span></h3>
+<ul>
+  <li><strong>失真-率问题</strong>：最小化失真，约束 rate $\leq R$</li>
+  <li><strong>率-失真问题</strong>（Shannon）：最小化 rate，约束 distortion $\leq D$</li>
+  <li><strong>联合最小化</strong>（VAE）：$\min\ \text{Rate} + \text{Distortion}$</li>
+</ul>
+<p>
+<span class="kp">VAE 的损失函数</span>正是第三种视角：重建项（失真度）+ KL 散度项（压缩率）。
+</p>
+
+<h3 id="s50414972">2.2 变分下界（ELBO）推导 <span class="tag-key">重点</span></h3>
+<p>
+目标：最大化对数似然 $\log p(x)$。引入变分后验 $q(z|x)$：
+$$\log p(x) = \mathbb{E}_{q(z|x)}\!\left[\log \frac{p(z,x)}{q(z|x)}\right] + D_{\mathrm{KL}}(q(z|x)\|p(z|x)) \geq \text{ELBO}$$
+</p>
+<p>
+<span class="kp">ELBO 的等价形式</span>：
+$$\text{ELBO} = \mathbb{E}_{q(z|x)}[\log p(x|z)] - D_{\mathrm{KL}}(q(z|x)\|p(z))$$
+</p>
+<p>最大化 ELBO 等价于最小化 loss $= -\text{ELBO} = \underbrace{\mathbb{E}[-\log p_\theta(\hat{x}|z)]}_{\text{失真/重建}} + \underbrace{D_{\mathrm{KL}}(q_\phi(z|x)\|p(z))}_{\text{压缩率/正则}}$
+</p>
+<blockquote>易错：ELBO 是 $\log p(x)$ 的<strong>下界</strong>（非上界）。因为 $D_{\mathrm{KL}} \geq 0$，所以 $\log p(x) \geq \text{ELBO}$。</blockquote>
+
+<h3 id="s34090458">2.3 VAE 结构与参数 <span class="tag-key">重点</span></h3>
+<p>
+<span class="kp">编码器</span>：$q_\phi(z|x) = \mathcal{N}(\mu, \mathrm{diag}(\sigma^2))$，输出 $(\mu, \log\sigma^2)$
+</p>
+<p>
+<span class="kp">重参数化技巧</span>：$z = \mu + \sigma \odot \epsilon,\quad \epsilon \sim \mathcal{N}(\mathbf{0}, \mathbf{I})$
+（使采样可微，允许梯度反向传播）
+</p>
+<p>
+<span class="kp">正则项闭式解</span>：
+$$D_{\mathrm{KL}}(q_\phi(z|x)\|p(z)) = \frac{1}{2}\sum_i \left(\mu_i^2 + \sigma_i^2 - \ln\sigma_i^2 - 1\right)$$
+</p>
+<p>
+<span class="kp">重建项</span>（$p_\theta(\hat{x}|z) = \mathcal{N}(\hat{x}, \sigma_c^2 I)$）：
+$$\mathbb{E}[-\log p_\theta(\hat{x}|z)] = \frac{\|x - \hat{x}\|^2}{\sigma_c^2} = \text{MSE}$$
+</p>
+<blockquote>易错：重参数化不是为了加速，而是为了使采样操作对 $\phi$ 可微，从而实现端到端反向传播。</blockquote>
+
+<h3 id="s48446408">2.4 正则项的信息论含义 <span class="tag-freq">常考</span></h3>
+<p>
+正则项分解：
+$$\mathbb{E}_{x \sim p_{data}}[D_{\mathrm{KL}}(q_\phi(z|x)\|p(z))] = I(X;Z)_{q_\phi} + D_{\mathrm{KL}}(q_\phi(z)\|p(z)) \geq I(X;Z)$$
+</p>
+<p>
+<span class="exp">含义</span>：正则项是互信息 $I(X;Z)$（压缩率）的上界，同时惩罚聚合后验 $q_\phi(z)$ 偏离先验 $p(z)$ 的额外编码开销。
+</p>
+
+<h3 id="s72591349">2.5 beta-VAE <span class="tag-freq">常考</span></h3>
+<p>
+引入权重 $\beta > 0$ 调控率失真权衡：
+$$\mathcal{L} = \mathbb{E}_{z \sim q_\phi}[-\log p_\theta(\hat{x}|z)] + \beta D_{\mathrm{KL}}(q_\phi(z|x)\|p(z))$$
+</p>
+<ul>
+  <li>$\beta = 1$：标准 VAE</li>
+  <li>$\beta > 1$：更强信息瓶颈，潜变量更解耦，但重建质量下降</li>
+  <li>$\beta < 1$：重建质量优先</li>
+</ul>
+
+<h2 id="s71975689">3. 课程总结与考核重点</h2>
+
+<h3 id="s31876242">3.1 必考内容 <span class="tag-must">必考</span></h3>
+<p>期末闭卷考试（70%），提供公式：Jessen、log-sum、Fano、高斯分布统计度量。</p>
+<p>试卷结构：选择+判断（40分） + 论述+证明+计算（60分）</p>
+<ul>
+  <li><span class="kp">噪声信道编码定理证明</span>：约 15/100 分，必须掌握完整证明</li>
+  <li><span class="kp">编码计算</span>：Kraft 不等式、Huffman 码、Hamming 码，10-15 分</li>
+  <li><span class="kp">马尔可夫性</span>：熵率、稳态分布、不可约性、非周期性，10-15 分</li>
+  <li><span class="kp">计算论述</span>：稳态分布、信道容量（KKT 条件）、高斯信道，10-15 分</li>
+</ul>
+<p><strong>不考内容</strong>：SMB 定理证明、Viterbi 算法、凹凸性证明过程</p>
+<blockquote>易错：率失真定理的几何解释（强典型集覆盖引理、失真球）需掌握；信源信道分离定理结论获取过程需掌握。Viterbi 不考。</blockquote>
+
+<h3 id="s19135039">3.2 核心公式汇总 <span class="tag-key">重点</span></h3>
+<p>
+信息度量关系：
+$$H(p) = \log|\mathcal{X}| - D_{\mathrm{KL}}(p\|u), \quad I(X;Y) = D_{\mathrm{KL}}(p_{XY}\|p_X p_Y)$$
+</p>
+<p>
+信道容量：$C^I = \max_{P_X} I(X;Y)$（对称信道用 KKT 条件求解）
+</p>
+<p>
+率失真函数：$R(D) = R^I(D) = \min_{p(\hat{v}|v): \mathbb{E}[d] \leq D} I(V; \hat{V})$
+</p>
+<p>
+信源信道分离：$N/n \leq C^I / R^I(D)$，等价于 $NR^I(D) \leq \log_2 M \leq nC^I$
+</p>
+
+
+
+</body>
+</html>

@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Lecture 6 – 平稳马尔可夫信源</title>
+<script>
+MathJax = {
+  tex: {
+    inlineMath: [['$', '$']],
+    displayMath: [['$$', '$$']]
+  }
+};
+</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js"></script>
+<style>
+/* === ExamPass Shared Styles === */
+/* Paper-like warm background, clean typography, responsive */
+
+:root {
+  --paper: #fdf6e3;
+  --paper-dark: #f5ecd7;
+  --ink: #2c2c2c;
+  --ink-light: #555;
+  --accent: #2563eb;
+  --accent-hover: #1d4ed8;
+  --divider: #d6c8a8;
+  --card-bg: #fef9ef;
+  --card-border: #e8dcc8;
+  --correct: #22c55e;
+  --correct-bg: #f0fdf4;
+  --wrong: #ef4444;
+  --wrong-bg: #fef2f2;
+  --tag-bg: #fef3c7;
+  --tag-text: #92400e;
+  --radius: 6px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: "Microsoft YaHei", "Noto Sans SC", "SimSun", sans-serif;
+  font-size: 12pt; line-height: 1.75; color: var(--ink);
+  max-width: 860px; margin: auto; padding: 24px 20px 60px;
+  background: var(--paper);
+}
+
+@media print {
+  body { font-size: 10.5pt; background: #fff; }
+  .no-print { display: none !important; }
+  h1, h2, h3 { page-break-after: avoid; }
+}
+
+/* ── Header ── */
+#exampass-header {
+  display: flex; justify-content: space-between; align-items: baseline;
+  padding: 6px 0; margin-bottom: 0;
+}
+.header-brand { font-size: 1.2em; font-weight: 700; color: #1a1a2e; letter-spacing: 0.3px; }
+.header-url  { font-size: 0.78em; color: #999; }
+.header-divider { border: none; border-top: 2px solid var(--divider); margin: 4px 0 20px 0; }
+
+/* ── Typography ── */
+h1 { font-size: 1.55em; text-align: center; border-bottom: 2px solid var(--divider); padding-bottom: 8px; margin-top: 0; }
+h2 { font-size: 1.25em; border-bottom: 1px solid var(--divider); padding-bottom: 4px; margin-top: 28px; }
+h3 { font-size: 1.08em; margin-top: 20px; color: var(--ink); }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ── Tables ── */
+table { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 0.95em; }
+td, th { border: 1px solid var(--card-border); padding: 5px 9px; text-align: left; }
+th { background: var(--paper-dark); font-weight: 700; }
+
+/* ── Embedded source images ── */
+.embedded-images {
+  margin: 18px 0 24px;
+}
+.embedded-images-intro {
+  color: var(--ink-light);
+  font-size: 0.95em;
+}
+.embedded-image {
+  margin: 14px 0 18px;
+  padding: 10px;
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  background: var(--card-bg);
+  break-inside: avoid;
+}
+.embedded-image img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+  border: 1px solid var(--divider);
+  background: #fff;
+}
+.embedded-image figcaption {
+  margin-top: 8px;
+  color: var(--ink-light);
+  font-size: 0.92em;
+  line-height: 1.5;
+}
+.embedded-image-note::before {
+  content: " - ";
+}
+
+/* ── Knowledge point vs explanation ── */
+.kp { font-weight: 700; color: var(--ink); }           /* key point: bold dark */
+.exp { font-weight: 400; color: var(--ink-light); }    /* explanation: lighter */
+.exp em, .exp strong { color: var(--ink); }             /* emphasis inside explanation */
+
+/* ── Block elements ── */
+blockquote {
+  border-left: 3px solid #c0392b; background: #fef9ef;
+  padding: 6px 14px; margin: 10px 0; font-size: 0.95em;
+}
+code { background: #f0ede0; padding: 2px 5px; border-radius: 3px; font-size: 0.92em; }
+pre { background: #f0ede0; padding: 10px; border-radius: var(--radius); overflow-x: auto; }
+
+/* ── TOC ── */
+div.toc {
+  background: var(--card-bg); padding: 14px 18px;
+  border: 1px solid var(--card-border); border-radius: var(--radius); margin-bottom: 22px;
+}
+div.toc ul { padding-left: 18px; }
+div.toc li { margin: 3px 0; font-size: 0.95em; }
+
+/* ── Priority tags ── */
+.tag-must   { background: #fee2e2; color: #991b1b; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+.tag-key    { background: #fef3c7; color: #92400e; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+.tag-freq   { background: #dbeafe; color: #1e40af; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+.tag-info   { background: #f0fdf4; color: #166534; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+
+
+</style>
+</head>
+<body>
+
+<header id="exampass-header">
+  <div class="header-left"><span class="header-brand">ExamPass Assistant</span></div>
+  <div class="header-right"><span class="header-url">github.com/MIKUZ12/ExamPass-Assistant</span></div>
+</header>
+<hr class="header-divider">
+
+<h1>Lecture 6 – 平稳马尔可夫信源</h1>
+<div class="toc">
+<h2>目录</h2>
+<ul>
+<li><a href="#s32542112">一、回顾：AEP 推广路径</a></li>
+  <li><a href="#s86829387">1.1 三类信源与对应定理 重点</a></li>
+<li><a href="#s90821051">二、马尔可夫过程基础</a></li>
+  <li><a href="#s57272279">2.1 马尔可夫性质 必考</a></li>
+  <li><a href="#s19777115">2.2 条件独立性质 重点</a></li>
+  <li><a href="#s59202988">2.3 平稳马尔可夫过程 必考</a></li>
+<li><a href="#s10465228">三、状态转移矩阵</a></li>
+  <li><a href="#s85091681">3.1 定义与构造 必考</a></li>
+  <li><a href="#s91798617">3.2 矩阵性质 重点</a></li>
+  <li><a href="#s70835738">3.3 概率演化：Chapman-Kolmogorov 方程 重点</a></li>
+<li><a href="#s32250433">四、稳态分布</a></li>
+  <li><a href="#s83775023">4.1 定义 必考</a></li>
+  <li><a href="#s68839538">4.2 细致平衡（Detailed Balance）重点</a></li>
+  <li><a href="#s47878098">4.3 例子：4 状态链 常考</a></li>
+<li><a href="#s28082223">五、马尔可夫信源的熵率</a></li>
+  <li><a href="#s33245199">5.1 熵率计算公式 必考</a></li>
+  <li><a href="#s10086997">5.2 例子计算 常考</a></li>
+<li><a href="#s10147357">六、遍历性（Ergodicity）</a></li>
+  <li><a href="#s18505584">6.1 遍历性的定义与意义 必考</a></li>
+  <li><a href="#s27723031">6.2 不可约性（Irreducibility）必考</a></li>
+  <li><a href="#s63405790">6.3 非周期性（Aperiodicity）必考</a></li>
+  <li><a href="#s21962507">6.4 综合：不可约+非周期 → 遍历 必考</a></li>
+</ul>
+</div>
+
+<h2 id="s32542112">一、回顾：AEP 推广路径</h2>
+
+<h3 id="s86829387">1.1 三类信源与对应定理 <span class="tag-key">重点</span></h3>
+<pre>
+i.i.d. 信源          ──大数定律──>  AEP（Lec4）
+平稳信源             ──单调有界+Cesàro──> 熵率存在性（Lec5）
+平稳遍历信源         ──Birkhoff──>  SMB 定理（Lec5）
+      ↑
+平稳马尔可夫信源     ←─ 本讲核心：最简单的非独立信源模型
+</pre>
+<p>本讲用<span class="kp">平稳马尔可夫链</span>作为平稳遍历信源的具体例子，给出
+状态转移矩阵、稳态分布、熵率和遍历性的完整分析框架。</p>
+
+<h2 id="s90821051">二、马尔可夫过程基础</h2>
+
+<h3 id="s57272279">2.1 马尔可夫性质 <span class="tag-must">必考</span></h3>
+<p><span class="kp">马尔可夫过程</span>：当前状态只与前一个状态有关，与更早历史无关：</p>
+<p>$$p(X_n \mid X_{n-1}, X_{n-2}, \ldots, X_1) = p(X_n \mid X_{n-1})$$</p>
+<p>等价地，联合概率可分解为：</p>
+<p>$$p(X_n, X_{n-1}, \ldots, X_1) = p(X_1)\,P(X_2\mid X_1)\cdots P(X_n\mid X_{n-1})$$</p>
+<blockquote>易错：马尔可夫性是对条件分布的约束（条件只保留上一步），不等于独立。相邻两步之间仍有依赖关系。</blockquote>
+
+<h3 id="s19777115">2.2 条件独立性质 <span class="tag-key">重点</span></h3>
+<p>马尔可夫链的核心性质：<span class="kp">给定当前状态，过去与未来条件独立</span>（Past and future are conditionally independent given the present）：</p>
+<p>$$X_{-1} \perp X_1 \mid X_0 \quad\Longleftrightarrow\quad p(X_1, X_{-1} \mid X_0) = p(X_1\mid X_0)\,p(X_{-1}\mid X_0)$$</p>
+<p><strong>推导</strong>（利用马尔可夫性）：</p>
+<p>$$p(X_1, X_{-1}\mid X_0) = \frac{p(X_1,X_0,X_{-1})}{p(X_0)} = \frac{p(X_{-1})\,p(X_0\mid X_{-1})\,p(X_1\mid X_0)}{p(X_0)} = p(X_{-1}\mid X_0)\,p(X_1\mid X_0)$$</p>
+
+<h3 id="s59202988">2.3 平稳马尔可夫过程 <span class="tag-must">必考</span></h3>
+<p>在马尔可夫性之上加<span class="kp">平稳性</span>：条件转移概率与时间步无关：</p>
+<p>$$p(X_n\mid X_{n-1}) = p(X_0\mid X_{-1}) \quad \forall n$$</p>
+<p><span class="exp">即转移概率 $P(X=s_j\mid X_{\text{prev}}=s_i)$ 对所有时刻相同——这是建立有限状态转移矩阵的前提。</span></p>
+<p>平稳马尔可夫过程是最简单的非独立平稳信源模型，是 SMB 定理的典型具体例子。</p>
+
+<h2 id="s10465228">三、状态转移矩阵</h2>
+
+<h3 id="s85091681">3.1 定义与构造 <span class="tag-must">必考</span></h3>
+<p>设状态空间 $\mathcal{S}=\{s_1,s_2,\ldots,s_m\}$（即符号集 $\mathcal{X}$），定义
+<span class="kp">状态转移概率</span>：</p>
+<p>$$P_{ij} \;\triangleq\; p(X_0=s_j \mid X_{-1}=s_i)$$</p>
+<p>将所有 $m^2$ 种转移概率排成 $m\times m$ 矩阵 $P$，称为<span class="kp">状态转移矩阵</span>（transition matrix）。</p>
+
+<h3 id="s91798617">3.2 矩阵性质 <span class="tag-key">重点</span></h3>
+<ul>
+  <li><strong>非负性</strong>：$P_{ij}\geq 0$（概率）</li>
+  <li><strong>行归一</strong>：$\sum_j P_{ij}=1$（从状态 $i$ 出发，必然转移到某个状态）</li>
+</ul>
+<p>注意：<span class="kp">行表示"从哪来"，列表示"到哪去"</span>——$P_{ij}$ 是从 $s_i$ 转移到 $s_j$ 的概率。</p>
+<blockquote>易错：列之和不一定为1，行之和才为1。P 是行随机矩阵（row-stochastic），不是列随机矩阵。</blockquote>
+
+<h3 id="s70835738">3.3 概率演化：Chapman-Kolmogorov 方程 <span class="tag-key">重点</span></h3>
+<p>设 $p_{X_k}$ 为第 $k$ 步的概率行向量（$1\times m$），则：</p>
+<p>$$p_{X_0} = p_{X_{-1}}\,P \qquad \text{（前进一步）}$$</p>
+<p>$$p_{X_k} = p_{X_{-1}}\,P^{k+1} \qquad \text{（前进 $k+1$ 步）}$$</p>
+<p>$P^k$ 称为 <span class="kp">$k$ 步转移矩阵</span>，其 $(i,j)$ 元 $[P^k]_{ij}=p(X_k=s_j\mid X_0=s_i)$。</p>
+
+<h2 id="s32250433">四、稳态分布</h2>
+
+<h3 id="s83775023">4.1 定义 <span class="tag-must">必考</span></h3>
+<p><span class="kp">稳态分布</span>（stationary distribution）$\mu$ 是满足以下方程的概率行向量：</p>
+<p>$$\mu = \mu\,P \quad\text{且}\quad \sum_i \mu_i = 1,\;\mu_i\geq 0$$</p>
+<p><span class="exp">直觉：若初始分布为 $\mu$，则经过任意步转移后分布仍为 $\mu$——系统处于统计稳定状态。</span></p>
+<p>若平稳马尔可夫过程的初始分布就是 $\mu$，则该过程是平稳过程（联合分布时移不变）。</p>
+
+<h3 id="s68839538">4.2 细致平衡（Detailed Balance）<span class="tag-key">重点</span></h3>
+<p>若分布 $\mu$ 满足<span class="kp">细致平衡条件</span>（对所有 $i,j$）：</p>
+<p>$$\mu_i\,P_{ij} = \mu_j\,P_{ji}$$</p>
+<p>则 $\mu$ 是稳态分布。<strong>证明</strong>：</p>
+<p>$$\sum_i \mu_i P_{ij} = \sum_i \mu_j P_{ji} = \mu_j \sum_i P_{ji} = \mu_j\cdot 1 = \mu_j$$</p>
+<p>即 $\mu P = \mu$。$\blacksquare$</p>
+<blockquote>易错：细致平衡是稳态分布的充分条件，不是必要条件。存在不满足细致平衡但仍有稳态分布的马尔可夫链（如有向环）。</blockquote>
+
+<h3 id="s47878098">4.3 例子：4 状态链 <span class="tag-freq">常考</span></h3>
+<p>状态空间 $\{s_1,s_2,s_3,s_4\}$，转移矩阵：</p>
+<pre>
+P = [0.8  0.2  0    0  ]
+    [0    0    0.5  0.5]
+    [0.5  0.5  0    0  ]
+    [0    0    0.2  0.8]
+</pre>
+<p>解 $\mu P=\mu$（联立方程）：</p>
+<p>$$\mu_1=\frac{5}{14},\quad\mu_2=\frac{1}{7},\quad\mu_3=\frac{1}{7},\quad\mu_4=\frac{5}{14}$$</p>
+<p>验证：对称结构（$s_1\leftrightarrow s_4$，$s_2\leftrightarrow s_3$），$\mu_1=\mu_4$，$\mu_2=\mu_3$。</p>
+
+<h2 id="s28082223">五、马尔可夫信源的熵率</h2>
+
+<h3 id="s33245199">5.1 熵率计算公式 <span class="tag-must">必考</span></h3>
+<p>对平稳马尔可夫信源，利用马尔可夫性，$H(X_0\mid X_{-\infty}^{-1})=H(X_0\mid X_{-1})$，故：</p>
+<p>$$H(\mathcal{X}) = H(X_0\mid X_{-1}) = \sum_i \mu_i \,H(X_0\mid X_{-1}=s_i) = -\sum_{i,j}\mu_i P_{ij}\log P_{ij}$$</p>
+<p><strong>推导步骤</strong>：</p>
+<p>$$H(X_0\mid X_{-1}) = \sum_i p(X_{-1}=s_i)\,H(X_0\mid X_{-1}=s_i) = \sum_i\mu_i\sum_j P_{ij}\log\frac{1}{P_{ij}}$$</p>
+<blockquote>易错：这里用了 $p(X_{-1}=s_i)=\mu_i$（稳态分布），而不是任意初始分布；且利用马尔可夫性将无穷条件 $X_{-\infty}^{-1}$ 化简为仅条件于 $X_{-1}$。</blockquote>
+
+<h3 id="s10086997">5.2 例子计算 <span class="tag-freq">常考</span></h3>
+<p>对上述4状态链，$H(0.8,0.2) = -0.8\log 0.8 - 0.2\log 0.2 \approx 0.722$ bit，$H(0.5,0.5)=1$ bit：</p>
+<p>$$H(\mathcal{X}) = \mu_1 H(0.8,0.2)+\mu_2 H(0.5,0.5)+\mu_3 H(0.5,0.5)+\mu_4 H(0.8,0.2)$$</p>
+<p>$$= \frac{5}{14}\times 0.722+\frac{1}{7}\times 1+\frac{1}{7}\times 1+\frac{5}{14}\times 0.722 = \frac{5}{7}\times 0.722+\frac{2}{7}\times 1 \approx 0.80 \text{ bit/符号}$$</p>
+
+<h2 id="s10147357">六、遍历性（Ergodicity）</h2>
+
+<h3 id="s18505584">6.1 遍历性的定义与意义 <span class="tag-must">必考</span></h3>
+<p>平稳马尔可夫信源是<span class="kp">遍历的（ergodic）</span>当且仅当：</p>
+<ol>
+  <li>存在<strong>唯一</strong>稳态分布</li>
+  <li>从<strong>任意</strong>初始分布出发，均收敛到该稳态分布</li>
+</ol>
+<p><span class="exp">遍历性保证了 SMB 定理中"时间均值→系综均值"的结论成立，是应用 Birkhoff 遍历定理的前提。</span></p>
+<p>有限状态马尔可夫链的遍历性等价条件：<span class="kp">不可约性 + 非周期性</span>。</p>
+
+<h3 id="s27723031">6.2 不可约性（Irreducibility）<span class="tag-must">必考</span></h3>
+<p><span class="kp">不可约性</span>：从任意状态出发，可以（经有限步）到达任意其他状态。形式化：</p>
+<p>$$\forall i,j,\;\exists N>0 \;\text{ s.t. }\; [P^N]_{ij}>0$$</p>
+<p>等价地：状态转移图中，对所有 $i,j$ 存在从 $s_i$ 到 $s_j$ 的有向路径。</p>
+<p><strong>Perron-Frobenius 定理的推论</strong>：若 $P$ 不可约，则稳态分布存在且唯一，且 $\mu_i>0$（所有状态概率为正）。</p>
+<blockquote>易错：不可约要求双向可达（从 $i$ 到 $j$ 且从 $j$ 到 $i$），有向环 $s_1\to s_2\to s_3\to s_1$ 是不可约的（各状态互通）。</blockquote>
+
+<h3 id="s63405790">6.3 非周期性（Aperiodicity）<span class="tag-must">必考</span></h3>
+<p>状态 $s_i$ 的<span class="kp">周期</span>（period）定义为：</p>
+<p>$$d(i) = \gcd\{k:\,[P^k]_{ii}>0\}$$</p>
+<p><span class="kp">非周期性</span>：所有状态的周期为 1（$d(i)=1$）。</p>
+<p><strong>关键结论</strong>（在不可约链中成立）：</p>
+<ul>
+  <li>所有状态拥有<strong>相同的周期</strong>，故只需检查一个状态</li>
+  <li>实用判定：若存在 $[P^k]_{ii}>0$（转移矩阵某对角元非零，即图中存在自环），则 $d(i)=1$，链非周期</li>
+</ul>
+<blockquote>易错：不可约不蕴含非周期——有向环 $s_1\to s_2\to s_3\to s_1$ 不可约但周期为3，不是遍历的。</blockquote>
+
+<h3 id="s21962507">6.4 综合：不可约+非周期 → 遍历 <span class="tag-must">必考</span></h3>
+<table>
+  <thead><tr><th>条件</th><th>保证</th><th>反例（缺少时）</th></tr></thead>
+  <tbody>
+    <tr><td>不可约（Irreducible）</td><td>稳态分布唯一且各分量$>0$</td><td>吸收态链：某状态出不去，无法从任意分布收敛</td></tr>
+    <tr><td>非周期（Aperiodic）</td><td>任意初始分布收敛到稳态</td><td>$s_1\to s_2\to s_1$ 振荡，不收敛到稳态</td></tr>
+    <tr><td>两者均满足</td><td>遍历：时间均值 a.s. 等于系综均值</td><td>——</td></tr>
+  </tbody>
+</table>
+<p>对例子中的4状态链：转移图中 $s_1$ 有自环（$P_{11}=0.8>0$），故非周期；所有状态在图中互通，故不可约 → 遍历。</p>
+
+
+</body>
+</html>

@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Lecture 9：数据处理不等式与Fano不等式</title>
+<script>
+MathJax = {
+  tex: {
+    inlineMath: [['$', '$']],
+    displayMath: [['$$', '$$']]
+  }
+};
+</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js"></script>
+<style>
+/* === ExamPass Shared Styles === */
+/* Paper-like warm background, clean typography, responsive */
+
+:root {
+  --paper: #fdf6e3;
+  --paper-dark: #f5ecd7;
+  --ink: #2c2c2c;
+  --ink-light: #555;
+  --accent: #2563eb;
+  --accent-hover: #1d4ed8;
+  --divider: #d6c8a8;
+  --card-bg: #fef9ef;
+  --card-border: #e8dcc8;
+  --correct: #22c55e;
+  --correct-bg: #f0fdf4;
+  --wrong: #ef4444;
+  --wrong-bg: #fef2f2;
+  --tag-bg: #fef3c7;
+  --tag-text: #92400e;
+  --radius: 6px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: "Microsoft YaHei", "Noto Sans SC", "SimSun", sans-serif;
+  font-size: 12pt; line-height: 1.75; color: var(--ink);
+  max-width: 860px; margin: auto; padding: 24px 20px 60px;
+  background: var(--paper);
+}
+
+@media print {
+  body { font-size: 10.5pt; background: #fff; }
+  .no-print { display: none !important; }
+  h1, h2, h3 { page-break-after: avoid; }
+}
+
+/* ── Header ── */
+#exampass-header {
+  display: flex; justify-content: space-between; align-items: baseline;
+  padding: 6px 0; margin-bottom: 0;
+}
+.header-brand { font-size: 1.2em; font-weight: 700; color: #1a1a2e; letter-spacing: 0.3px; }
+.header-url  { font-size: 0.78em; color: #999; }
+.header-divider { border: none; border-top: 2px solid var(--divider); margin: 4px 0 20px 0; }
+
+/* ── Typography ── */
+h1 { font-size: 1.55em; text-align: center; border-bottom: 2px solid var(--divider); padding-bottom: 8px; margin-top: 0; }
+h2 { font-size: 1.25em; border-bottom: 1px solid var(--divider); padding-bottom: 4px; margin-top: 28px; }
+h3 { font-size: 1.08em; margin-top: 20px; color: var(--ink); }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ── Tables ── */
+table { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 0.95em; }
+td, th { border: 1px solid var(--card-border); padding: 5px 9px; text-align: left; }
+th { background: var(--paper-dark); font-weight: 700; }
+
+/* ── Embedded source images ── */
+.embedded-images {
+  margin: 18px 0 24px;
+}
+.embedded-images-intro {
+  color: var(--ink-light);
+  font-size: 0.95em;
+}
+.embedded-image {
+  margin: 14px 0 18px;
+  padding: 10px;
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  background: var(--card-bg);
+  break-inside: avoid;
+}
+.embedded-image img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+  border: 1px solid var(--divider);
+  background: #fff;
+}
+.embedded-image figcaption {
+  margin-top: 8px;
+  color: var(--ink-light);
+  font-size: 0.92em;
+  line-height: 1.5;
+}
+.embedded-image-note::before {
+  content: " - ";
+}
+
+/* ── Knowledge point vs explanation ── */
+.kp { font-weight: 700; color: var(--ink); }           /* key point: bold dark */
+.exp { font-weight: 400; color: var(--ink-light); }    /* explanation: lighter */
+.exp em, .exp strong { color: var(--ink); }             /* emphasis inside explanation */
+
+/* ── Block elements ── */
+blockquote {
+  border-left: 3px solid #c0392b; background: #fef9ef;
+  padding: 6px 14px; margin: 10px 0; font-size: 0.95em;
+}
+code { background: #f0ede0; padding: 2px 5px; border-radius: 3px; font-size: 0.92em; }
+pre { background: #f0ede0; padding: 10px; border-radius: var(--radius); overflow-x: auto; }
+
+/* ── TOC ── */
+div.toc {
+  background: var(--card-bg); padding: 14px 18px;
+  border: 1px solid var(--card-border); border-radius: var(--radius); margin-bottom: 22px;
+}
+div.toc ul { padding-left: 18px; }
+div.toc li { margin: 3px 0; font-size: 0.95em; }
+
+/* ── Priority tags ── */
+.tag-must   { background: #fee2e2; color: #991b1b; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+.tag-key    { background: #fef3c7; color: #92400e; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+.tag-freq   { background: #dbeafe; color: #1e40af; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+.tag-info   { background: #f0fdf4; color: #166534; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+
+
+</style>
+</head>
+<body>
+
+<header id="exampass-header">
+  <div class="header-left"><span class="header-brand">ExamPass Assistant</span></div>
+  <div class="header-right"><span class="header-url">github.com/MIKUZ12/ExamPass-Assistant</span></div>
+</header>
+<hr class="header-divider">
+
+<h1>Lecture 9：数据处理不等式与Fano不等式</h1>
+<div class="toc">
+<h2>目录</h2>
+<ul>
+<li><a href="#s21948311">一、马尔可夫链</a></li>
+  <li><a href="#s36465451">定义与基本性质 必考</a></li>
+  <li><a href="#s33573654">可逆性（时间反转） 重点</a></li>
+<li><a href="#s61540537">二、数据处理不等式（DPI）</a></li>
+  <li><a href="#s66929650">定理陈述 必考</a></li>
+  <li><a href="#s46204318">DPI 证明（链式法则拆解） 必考</a></li>
+  <li><a href="#s39888098">应用场景 常考</a></li>
+<li><a href="#s44795950">三、充分统计量</a></li>
+  <li><a href="#s41482225">定义与信息论视角 重点</a></li>
+  <li><a href="#s14446469">Neyman 分解定理（充要条件） 重点</a></li>
+  <li><a href="#s56814700">典型分布中的充分统计量 常考</a></li>
+<li><a href="#s22152126">四、Fano 不等式</a></li>
+  <li><a href="#s10811988">问题设置与符号定义 必考</a></li>
+  <li><a href="#s25285371">关键引理：$H(\hat{X}|X)$ 的展开 必考</a></li>
+  <li><a href="#s59959084">Fano 不等式证明 必考</a></li>
+  <li><a href="#s23562005">应用：信道编码与可靠性 重点</a></li>
+<li><a href="#s51300859">五、压缩感知与信息论（简介）</a></li>
+  <li><a href="#s12608090">无噪声情况 了解</a></li>
+  <li><a href="#s28762843">有噪声情况 常考</a></li>
+</ul>
+</div>
+
+<h2 id="s21948311">一、马尔可夫链</h2>
+
+<h3 id="s36465451">定义与基本性质 <span class="tag-must">必考</span></h3>
+<p><span class="kp">马尔可夫链</span>：当前状态只与前一个状态有关。形式化：</p>
+$$X_1 \to X_2 \to X_3 \to \cdots \to X_n$$
+<p>当且仅当联合概率可分解为：</p>
+$$p(X_n, X_{n-1}, \ldots, X_1) = p(X_1)\prod_{i=2}^{n} p(X_i | X_{i-1})$$
+<p><strong>核心性质</strong>：<span class="kp">过去与未来在当前状态已知时条件独立</span>。即对 $X_{-1} \to X_0 \to X_1$：</p>
+$$p(X_1, X_{-1} | X_0) = p(X_1 | X_0)\, p(X_{-1} | X_0)$$
+<blockquote>易错：马尔可夫性质说的是"给定当前"而不是"给定所有历史"——二者等价但直觉不同。</blockquote>
+
+<h3 id="s33573654">可逆性（时间反转） <span class="tag-key">重点</span></h3>
+<p>若 $X \to Y \to Z$ 是马尔可夫链，则反向 $Z \to Y \to X$ 也是马尔可夫链。</p>
+<p>证明思路：由 $p(x,y,z)=p(x)p(y|x)p(z|y)$，利用 Bayes 可得 $p(x,y,z)=p(z)p(y|z)p(x|y)$，
+故 $Z \to Y \to X$ 也满足马尔可夫分解。</p>
+<p><span class="exp">直观含义：马尔可夫链的"无记忆性"不依赖时间方向。</span></p>
+
+<h2 id="s61540537">二、数据处理不等式（DPI）</h2>
+
+<h3 id="s66929650">定理陈述 <span class="tag-must">必考</span></h3>
+<p>对马尔可夫链 $X \to Y \to Z$，以下不等式成立：</p>
+<ul>
+  <li><span class="kp">DPI</span>：$I(X;Y) \ge I(X;Z)$，等号当且仅当 $I(X;Y|Z)=0$（即 $X \to Z \to Y$）</li>
+  <li><span class="kp">Reverse DPI</span>：$I(Y;Z) \ge I(X;Z)$，等号当且仅当 $I(Y;Z|X)=0$（即 $Y \to X \to Z$）</li>
+</ul>
+<p><span class="exp">直观：数据处理只会丢失关于原始变量的信息，无法增加。</span></p>
+<blockquote>易错：DPI 针对的是马尔可夫链，若 $X,Y,Z$ 不构成马尔可夫链，不等式不一定成立。</blockquote>
+
+<h3 id="s46204318">DPI 证明（链式法则拆解） <span class="tag-must">必考</span></h3>
+<p>利用互信息链式法则对 $(X;Y,Z)$ 做两种展开：</p>
+$$I(X;Y,Z) = I(X;Z) + I(X;Y|Z)$$
+$$I(X;Y,Z) = I(X;Y) + I(X;Z|Y)$$
+<p>两式右边相等，故 $I(X;Z) + I(X;Y|Z) = I(X;Y) + I(X;Z|Y)$。</p>
+<p>因为 $X \to Y \to Z$ 是马尔可夫链，$I(X;Z|Y)=0$（给定 $Y$，$X$ 与 $Z$ 独立）；
+又 $I(X;Y|Z)\ge 0$，故 $I(X;Z) \le I(X;Y)$。$\square$</p>
+<p>类似地，对 Reverse DPI：展开 $I(X,Y;Z)$，利用 $I(X;Z|Y)=0$ 得 $I(X;Z)\le I(Y;Z)$。</p>
+
+<h3 id="s39888098">应用场景 <span class="tag-freq">常考</span></h3>
+<p>DPI 在编码中的核心应用：</p>
+<table>
+  <tr><th>场景</th><th>马尔可夫链</th><th>结论</th></tr>
+  <tr><td>信源编码</td><td>$W \to X \to \hat{W}$（压缩/解压）</td><td>$I(W;\hat{W}) \le I(W;X)$，编码只能丢失信息</td></tr>
+  <tr><td>信道编码</td><td>$W \to X \to Y \to \hat{W}$</td><td>$I(W;\hat{W}) \le I(X;Y)$，解码性能受信道容量限制</td></tr>
+</table>
+<p><span class="exp">信道容量 $I(X;Y)$ 是通信可靠传输的根本上界，这由 DPI 直接给出。</span></p>
+
+<h2 id="s44795950">三、充分统计量</h2>
+
+<h3 id="s41482225">定义与信息论视角 <span class="tag-key">重点</span></h3>
+<p>设随机样本 $\mathbf{X}=(X_1,\ldots,X_n)$ 服从参数 $\theta$ 的分布，$T(\mathbf{X})$ 为统计量。构成马尔可夫链：</p>
+$$\theta \to \mathbf{X} \to T(\mathbf{X})$$
+<p><span class="kp">充分统计量</span>：若 $T(\mathbf{X})$ 包含样本 $\mathbf{X}$ 中关于参数 $\theta$ 的全部信息：</p>
+$$I(\theta; T(\mathbf{X})) = I(\theta; \mathbf{X})$$
+<p>等价条件：$I(\theta; \mathbf{X}|T(\mathbf{X}))=0$，即 $\theta \to T(\mathbf{X}) \to \mathbf{X}$ 是马尔可夫链。</p>
+<p><span class="exp">直观：对参数 $\theta$ 的估计，充分统计量"压缩数据不丢信息"。</span></p>
+
+<h3 id="s14446469">Neyman 分解定理（充要条件） <span class="tag-key">重点</span></h3>
+<p>$T(\mathbf{X})$ 是 $\theta$ 的充分统计量，当且仅当联合概率密度可分解为：</p>
+$$f(\mathbf{x};\theta) = h(\mathbf{x})\, g(T(\mathbf{x});\theta)$$
+<p>其中 $h$ 与 $\theta$ 无关，$g$ 只依赖 $\mathbf{x}$ 经 $T$ 作用的结果。</p>
+<p>证明思路：必要性——由 $f(\mathbf{x}|T=t,\theta)=h(\mathbf{x})$（与 $\theta$ 无关），令 $g(t;\theta)=f_T(t;\theta)$ 即可。充分性——代入条件概率公式，分子分母中 $g(t;\theta)$ 约分消去，余项仅含 $h(\mathbf{x})$，与 $\theta$ 无关。</p>
+<blockquote>易错：分解 $h(\mathbf{x})g(T;\theta)$ 中，$h$ 可以依赖全部 $\mathbf{x}$，只要 $g$ 将 $\theta$ 的影响"路由"到 $T(\mathbf{x})$ 即可。</blockquote>
+
+<h3 id="s56814700">典型分布中的充分统计量 <span class="tag-freq">常考</span></h3>
+<ul>
+  <li><strong>Bernoulli$(θ)$</strong>：$T(\mathbf{X})=\sum_{i=1}^n X_i$（成功次数）是 $\theta$ 的充分统计量</li>
+  <li><strong>高斯 $N(\mu,\sigma^2)$（$\sigma$ 已知）</strong>：$T(\mathbf{X})=\sum_{i=1}^n X_i$（等价于样本均值）是 $\mu$ 的充分统计量</li>
+  <li><strong>指数族分布</strong>：$p(x;\theta)=h(x)\exp\!\left(\eta(\theta)^T\tau(x)-A(\theta)\right)$，则 $T(\mathbf{X})=\sum_{i=1}^n \tau(X_i)$ 是 $\theta$ 的充分统计量</li>
+</ul>
+<p><span class="exp">指数族统一了 Bernoulli、高斯、Poisson 等分布，自然统计量 $\tau(x)$ 即为充分统计量的构成单元。</span></p>
+
+<h2 id="s22152126">四、Fano 不等式</h2>
+
+<h3 id="s10811988">问题设置与符号定义 <span class="tag-must">必考</span></h3>
+<p>场景：马尔可夫链 $X \to Y \to \hat{X}$（变量 --> 观测 --> 估计）。</p>
+<p>定义误差指示变量：</p>
+$$E = \begin{cases}1 & X \ne \hat{X} \\ 0 & X = \hat{X}\end{cases}$$
+<p>记 $P_e = P(X \ne \hat{X}) = P(E=1)$，则：</p>
+$$H(E) = H(P_e, 1-P_e) \le 1 \text{（等号当 } P_e=0.5\text{）}$$
+<blockquote>易错：$H(E)$ 是关于误差概率 $P_e$ 的二元熵，上界为 1 bit，不要混淆 $H(E)$ 与 $H(X)$。</blockquote>
+
+<h3 id="s25285371">关键引理：$H(\hat{X}|X)$ 的展开 <span class="tag-must">必考</span></h3>
+<p>利用联合熵链式法则：</p>
+$$H(E, \hat{X}|X) = H(\hat{X}|X) + \underbrace{H(E|X,\hat{X})}_{=\,0} = H(E|\hat{X}) + H(\hat{X}|E,X)$$
+<p>故 $H(\hat{X}|X) = H(E|\hat{X}) + H(\hat{X}|E,X)$。展开条件熵 $H(\hat{X}|E,X)$：</p>
+$$H(\hat{X}|E,X) = P(E=0)\underbrace{H(\hat{X}|X,E=0)}_{=\,0} + P(E=1)H(\hat{X}|X,E=1) = P_e\, H(\hat{X}|X,E=1)$$
+<p>（当 $E=0$ 时 $\hat{X}=X$，熵为 0。）综合得：</p>
+$$\boxed{H(\hat{X}|X) = H(E|\hat{X}) + P_e\, H(\hat{X}|X,E=1)}$$
+
+<h3 id="s59959084">Fano 不等式证明 <span class="tag-must">必考</span></h3>
+<p>从引理出发，利用上界：</p>
+<ul>
+  <li>$H(E|\hat{X}) \le H(E) \le 1$（条件熵不超过熵）</li>
+  <li>$H(\hat{X}|X,E=1) \le \log|\mathcal{X}|$（在发生错误的条件下，$\hat{X}\ne X$，$\hat{X}$ 最多 $|\mathcal{X}|-1$ 个取值，但 PPT 用 $H(X)$ 作上界）</li>
+  <li>由 DPI：$H(\hat{X}|X) \ge H(X|Y)$（马尔可夫链 $X\to Y\to\hat{X}$，故 $I(X;\hat{X})\le I(X;Y)$，即 $H(X)-H(X|\hat{X})\le H(X)-H(X|Y)$）</li>
+</ul>
+<p>综合得 <span class="kp">Fano 不等式</span>：</p>
+$$H(X|Y) \le H(\hat{X}|X) \le H(E) + P_e\log|\mathcal{X}| \le 1 + P_e\log|\mathcal{X}|$$
+<p>进而误差下界（<span class="kp">错误概率下界</span>）：</p>
+$$\boxed{P_e \ge \frac{H(X|Y)-1}{\log|\mathcal{X}|}}$$
+
+<div class="ppt-discrepancy">
+  <span class="discrepancy-label">⚠️ PPT 与标准表述存在差异</span>
+  <table class="discrepancy-table">
+    <tr><th>PPT 说法</th><th>标准说法</th></tr>
+    <tr>
+      <td>PPT 使用 $H(\hat{X}|X,E=1)\le H(X)$，得到 $P_e\ge(H(X|Y)-1)/H(X)$</td>
+      <td>Cover &amp; Thomas（2nd ed., Theorem 2.10.1）：$H(\hat{X}|X,E=1)\le\log(|\mathcal{X}|-1)$（给定出错，$\hat{X}\ne X$，至多 $|\mathcal{X}|-1$ 种取值），得 $H(X|Y)\le H(P_e)+P_e\log(|\mathcal{X}|-1)$，更紧</td>
+    </tr>
+  </table>
+  <p class="discrepancy-note">两种形式均正确，PPT 用 $H(X)$ 是合法（但较松）的上界；标准形式用 $\log(|\mathcal{X}|-1)$ 更紧。考试建议用 PPT 形式；查证：<em>Cover &amp; Thomas §2.10</em></p>
+</div>
+
+<h3 id="s23562005">应用：信道编码与可靠性 <span class="tag-key">重点</span></h3>
+<p>若 $H(X|Y)=0$，则 $P_e=0$（无误差）；若 $H(X|Y)>0$，则 $P_e>0$（必有错误）。</p>
+<p>下界还可以用互信息改写（利用 $H(X|Y)=H(X)-I(X;Y)$）：</p>
+$$P_e \ge 1 - \frac{I(X;Y)+1}{\log|\mathcal{X}|}$$
+<p><span class="exp">这是信道编码定理逆定理的直接基础：若信道容量不足，误差概率有正下界。</span></p>
+
+<h2 id="s51300859">五、压缩感知与信息论（简介）</h2>
+
+<h3 id="s12608090">无噪声情况 <span class="tag-info">了解</span></h3>
+<p>观测 $y=Ax$，$x$ 为 $k$-稀疏向量（$n$ 维，非零元素 $k$ 个）。</p>
+<p>信息论视角：无损数据压缩问题。$H(X)\approx \log\binom{n}{k}\approx k\log(n/k)$，最低压缩维数 $m$ 由此给出。</p>
+
+<h3 id="s28762843">有噪声情况 <span class="tag-freq">常考</span></h3>
+<p>观测 $y=Ax+w$（加性噪声），问：能否从 $y$ 重建 $x$？</p>
+<p>利用 Fano 不等式：$P_e\ge(H(X|Y)-1)/\log|\mathcal{X}|\ge 1-\frac{I(X;Y)+1}{\log|\mathcal{X}|}$。</p>
+<ul>
+  <li><strong>不可复原条件</strong>：若 $I(X;Y)<\log\binom{n}{k}$，则 $P_e>0$</li>
+  <li><strong>可复原条件</strong>：若 $I(X;Y)\ge\log\binom{n}{k}$，则存在解码器使 $P_e\to 0$</li>
+  <li><strong>最优投影矩阵设计</strong>：$A^*=\arg\max_A I(X;Ax+w)$</li>
+</ul>
+
+
+
+</body>
+</html>

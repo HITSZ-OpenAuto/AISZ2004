@@ -1,0 +1,536 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>信息论本轮对话整理</title>
+  <style>
+    :root {
+      --text: #172033;
+      --muted: #5d667a;
+      --border: #d8deea;
+      --bg: #f7f9fc;
+      --panel: #ffffff;
+      --accent: #0f5f9f;
+      --accent-soft: #e7f1fa;
+      --warn-soft: #fff4df;
+      --code: #f0f3f8;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC", "Microsoft YaHei", Arial, sans-serif;
+      color: var(--text);
+      background: var(--bg);
+      line-height: 1.68;
+    }
+    header {
+      background: #102033;
+      color: #fff;
+      padding: 36px 24px;
+    }
+    header .wrap, main {
+      max-width: 1080px;
+      margin: 0 auto;
+    }
+    h1 {
+      margin: 0 0 10px;
+      font-size: 32px;
+      letter-spacing: 0;
+    }
+    header p {
+      margin: 0;
+      color: #d6dfec;
+      max-width: 820px;
+    }
+    main {
+      padding: 28px 20px 56px;
+    }
+    nav {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 18px 20px;
+      margin-bottom: 22px;
+    }
+    nav h2 {
+      margin-top: 0;
+    }
+    nav ol {
+      margin: 8px 0 0;
+      padding-left: 22px;
+    }
+    section {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 24px;
+      margin: 18px 0;
+    }
+    h2 {
+      margin: 0 0 14px;
+      font-size: 24px;
+      color: #102033;
+    }
+    h3 {
+      margin: 22px 0 8px;
+      font-size: 18px;
+      color: #173a5e;
+    }
+    p {
+      margin: 8px 0;
+    }
+    ul, ol {
+      margin-top: 8px;
+      padding-left: 24px;
+    }
+    li {
+      margin: 5px 0;
+    }
+    .note {
+      border-left: 4px solid var(--accent);
+      background: var(--accent-soft);
+      padding: 12px 14px;
+      margin: 14px 0;
+    }
+    .warning {
+      border-left: 4px solid #b87900;
+      background: var(--warn-soft);
+      padding: 12px 14px;
+      margin: 14px 0;
+    }
+    .formula {
+      background: var(--code);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 10px 14px;
+      margin: 12px 0;
+      overflow-x: auto;
+    }
+    code {
+      background: var(--code);
+      border-radius: 4px;
+      padding: 1px 5px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 14px 0;
+      font-size: 15px;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 8px 10px;
+      text-align: left;
+      vertical-align: top;
+    }
+    th {
+      background: #edf3fa;
+    }
+    footer {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 0 20px 36px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+  </style>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [["\\(", "\\)"], ["$", "$"]], displayMath: [["\\[", "\\]"]] },
+      svg: { fontCache: "global" }
+    };
+  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <h1>信息论本轮对话整理</h1>
+      <p>按学习主题整理本轮关于信道容量、Hamming 码、微分熵、率失真理论和第 15 章证明的讨论。</p>
+    </div>
+  </header>
+
+  <main>
+    <nav>
+      <h2>目录</h2>
+      <ol>
+        <li><a href="#channel-capacity">信道容量与联合典型集</a></li>
+        <li><a href="#hamming">Hamming 码、零空间与纠错</a></li>
+        <li><a href="#continuous">微分熵、高斯最大熵与多维协方差</a></li>
+        <li><a href="#rate-distortion">率失真函数</a></li>
+        <li><a href="#lecture15">第 15 章：Feedback 与率失真定理证明</a></li>
+        <li><a href="#proofs">四个核心证明框架</a></li>
+      </ol>
+    </nav>
+
+    <section id="channel-capacity">
+      <h2>1. 信道容量与联合典型集</h2>
+      <p>第 10 章的主线是：噪声信道的最大可靠传输率等于最大互信息。</p>
+      <div class="formula">
+        \[
+        C=\max_{P_X} I(X;Y)
+        \]
+      </div>
+      <p>传输率定义为：</p>
+      <div class="formula">
+        \[
+        R=\frac{\log_2 M}{n}
+        \]
+      </div>
+      <p>其中 \(M\) 是消息状态数，\(n\) 是每个码字使用信道的次数。</p>
+
+      <h3>联合典型集的作用</h3>
+      <ul>
+        <li>真实通过信道产生的 \((X^n,Y^n)\) 落入联合典型集的概率趋近 1。</li>
+        <li>错误码字 \( \tilde X^n \) 与接收序列 \(Y^n\) 独立，碰巧联合典型的概率约为 \(2^{-nI(X;Y)}\)。</li>
+      </ul>
+      <div class="formula">
+        \[
+        P\{(\tilde X^n,Y^n)\in A_\epsilon^{(n)}(X,Y)\}\approx 2^{-nI(X;Y)}
+        \]
+      </div>
+      <p>若码字数 \(M=2^{nR}\)，则错误码字碰巧联合典型的总概率可用 union bound 控制：</p>
+      <div class="formula">
+        \[
+        2^{nR}2^{-nI(X;Y)}=2^{-n(I(X;Y)-R)}
+        \]
+      </div>
+      <p>因此只要 \(R<I(X;Y)\)，错误概率指数下降。再对 \(P_X\) 优化，就得到容量。</p>
+
+      <h3>如何判断对称信道</h3>
+      <p>把 \(P_{Y|X}\) 写成矩阵，行对应输入，列对应输出。快速判断：</p>
+      <ul>
+        <li>每一行互为排列。</li>
+        <li>每一列和相等。</li>
+      </ul>
+      <p>若整体不满足，可尝试按输出列分块；每个子矩阵满足上述性质时，也属于 Gallager 意义下的对称信道。对称信道的最优输入分布是均匀分布。</p>
+
+      <h3>互信息关于输入分布的导数</h3>
+      <p>设 \(p_i=P(X=x_i)\)，输出分布 \(q(y)=\sum_i p_iP(y|x_i)\)，则：</p>
+      <div class="formula">
+        \[
+        I(X;Y)=\sum_i p_i\sum_y P(y|x_i)\log \frac{P(y|x_i)}{q(y)}
+        \]
+      </div>
+      <p>对 \(p_i\) 求偏导，核心形式为：</p>
+      <div class="formula">
+        \[
+        \frac{\partial I(X;Y)}{\partial p_i}
+        =
+        D(P_{Y|X=x_i}\|P_Y)-\text{常数}
+        \]
+      </div>
+      <p>常数项可由拉格朗日乘子吸收。最优时，被使用的输入符号通常满足同一 KL 距离水平。</p>
+    </section>
+
+    <section id="hamming">
+      <h2>2. Hamming 码、零空间与纠错</h2>
+      <h3>流形直觉</h3>
+      <p>课件中的“数据流形”可理解为高维空间中满足约束的合法结构。Hamming 码中，合法码字满足：</p>
+      <div class="formula">
+        \[
+        Hx=0
+        \]
+      </div>
+      <p>因此合法码字构成 \(H\) 的零空间。错误检测就是看接收向量是否偏离零空间；纠错就是把错误数据拉回合法码字集合。</p>
+
+      <h3>GF(2) 与奇偶校验</h3>
+      <p>Hamming 码工作在 \(GF(2)\) 上，加法就是 XOR：</p>
+      <div class="formula">
+        \[
+        1+1=0,\quad 1+0=1,\quad 0+1=1,\quad 0+0=0
+        \]
+      </div>
+      <p>奇偶校验不是一个总 checksum，而是一组分组 checksum。它们共同保证 \(Hx=0\)。普通 checksum 主要回答“有没有错”；Hamming syndrome 能回答“哪一位错”。</p>
+
+      <h3>单错定位</h3>
+      <p>若发送合法码字 \(x\)，第 \(k\) 位出错，则：</p>
+      <div class="formula">
+        \[
+        y=x+e_k
+        \]
+        \[
+        Hy=H(x+e_k)=Hx+He_k=He_k
+        \]
+      </div>
+      <p>\(He_k\) 正好是 \(H\) 的第 \(k\) 列。因此 syndrome \(s=Hy\) 可以定位错误位。</p>
+
+      <h3>为什么非零码字重量至少为 3</h3>
+      <p>Hamming 矩阵 \(H=[\eta_1,\eta_2,\dots,\eta_n]\) 的列向量非零且互不相同。若 \(z\in Null(H)\)，则：</p>
+      <div class="formula">
+        \[
+        Hz=z_1\eta_1+\cdots+z_n\eta_n=0
+        \]
+      </div>
+      <ul>
+        <li>若 \(|z|=1\)，则 \(Hz=\eta_i\ne0\)，矛盾。</li>
+        <li>若 \(|z|=2\)，则 \(Hz=\eta_i+\eta_j=0\)，推出 \(\eta_i=\eta_j\)，矛盾。</li>
+      </ul>
+      <p>所以非零码字至少有 3 个 1，即最小汉明距离 \(d_{\min}=3\)。</p>
+
+      <h3>检错和纠错的几何意义</h3>
+      <table>
+        <thead>
+          <tr><th>能力</th><th>公式</th><th>几何解释</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>检错</td>
+            <td>\(d_{\min}-1\)</td>
+            <td>错误步数少于两个码字间最短距离时，不会从一个合法码字跳到另一个合法码字。</td>
+          </tr>
+          <tr>
+            <td>纠错</td>
+            <td>\(\left\lfloor \frac{d_{\min}-1}{2}\right\rfloor\)</td>
+            <td>每个码字周围半径 \(t\) 的汉明球不能重叠；需要 \(2t<d_{\min}\)。</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>纠错公式先减一，是为了处理 \(d_{\min}\) 为偶数时的平局边界。例如 \(d_{\min}=4\) 时不能纠 2 位，因为接收点可能离两个码字都为 2。</p>
+    </section>
+
+    <section id="continuous">
+      <h2>3. 微分熵、高斯最大熵与多维协方差</h2>
+      <h3>为什么微分熵可以为负</h3>
+      <p>连续变量的密度 \(f(x)\) 可以大于 1，所以：</p>
+      <div class="formula">
+        \[
+        h(X)=-\int f(x)\log f(x)\,dx
+        \]
+      </div>
+      <p>可以为负。例如 \(X\sim Unif(0,a)\)，则 \(h(X)=\log a\)。当 \(0<a<1\) 时，微分熵为负。</p>
+
+      <h3>信息统计度量可闭式计算</h3>
+      <p>在高斯等分布下，微分熵、互信息、KL 散度可写出解析公式，不必数值积分。例如：</p>
+      <div class="formula">
+        \[
+        X\sim\mathcal N(0,\sigma^2),\quad h(X)=\frac12\log(2\pi e\sigma^2)
+        \]
+      </div>
+
+      <h3>高斯分布最大微分熵</h3>
+      <p>证明使用 KL 散度非负。令 \(Z\sim\mathcal N(\mu,\sigma^2)\) 与 \(X\) 同均值同方差：</p>
+      <div class="formula">
+        \[
+        D(f_X\|f_Z)=-h(X)-\mathbb E_X[\log f_Z(X)]\ge0
+        \]
+      </div>
+      <p>可推出：</p>
+      <div class="formula">
+        \[
+        h(X)\le \frac12\log(2\pi e\sigma^2)
+        \]
+      </div>
+      <p>等号当且仅当 \(X\) 是高斯分布。</p>
+
+      <h3>多维情况中的协方差</h3>
+      <p>若 \(X\in\mathbb R^d\)，协方差为 \(\Sigma\)，同协方差高斯 \(Z\sim\mathcal N(\mu,\Sigma)\) 的微分熵为：</p>
+      <div class="formula">
+        \[
+        h(Z)=\frac12\log\left((2\pi e)^d|\Sigma|\right)
+        \]
+      </div>
+      <p>关键步骤是二次型期望：</p>
+      <div class="formula">
+        \[
+        \mathbb E[(X-\mu)^T\Sigma^{-1}(X-\mu)]
+        =
+        \mathrm{tr}(\Sigma^{-1}\Sigma)
+        =
+        d
+        \]
+      </div>
+    </section>
+
+    <section id="rate-distortion">
+      <h2>4. 率失真函数</h2>
+      <p>率失真理论研究：如果允许重构 \(\hat V\) 和原始 \(V\) 有平均失真 \(D\)，最低压缩率是多少。</p>
+      <div class="formula">
+        \[
+        R(D)=\min_{p(\hat V|V):\mathbb E[d(V,\hat V)]\le D} I(V;\hat V)
+        \]
+      </div>
+      <p>\(I(V;\hat V)\) 的引入来自典型集覆盖：源典型序列数约为 \(2^{NH(V)}\)，一个重构序列覆盖的条件典型源序列数约为 \(2^{NH(V|\hat V)}\)，所需码字数约为：</p>
+      <div class="formula">
+        \[
+        M\approx \frac{2^{NH(V)}}{2^{NH(V|\hat V)}}=2^{NI(V;\hat V)}
+        \]
+      </div>
+
+      <h3>典型集大小与熵</h3>
+      <table>
+        <thead>
+          <tr><th>集合</th><th>指数阶大小</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>普通典型集</td><td>\(|A_\epsilon^{(N)}(V)|\approx 2^{NH(V)}\)</td></tr>
+          <tr><td>联合典型集</td><td>\(|A_\epsilon^{(N)}(V,\hat V)|\approx 2^{NH(V,\hat V)}\)</td></tr>
+          <tr><td>条件典型集</td><td>\(|A_\epsilon^{(N)}(V|\hat v^N)|\approx 2^{NH(V|\hat V)}\)</td></tr>
+        </tbody>
+      </table>
+
+      <h3>性质</h3>
+      <ul>
+        <li>\(R(D)\) 是凸函数。可由 time sharing 或互信息关于测试信道的凸性证明。</li>
+        <li>\(R(D)\) 单调不增。因为 \(D\) 越大，可行集合越大，最小值不会变大。</li>
+        <li>\(R(0)=H(V)\)。零失真退化为无损压缩。</li>
+        <li>存在 \(D_{\max}\)，当 \(D\ge D_{\max}\) 时 \(R(D)=0\)。</li>
+      </ul>
+
+      <h3>高斯信源率失真</h3>
+      <p>若 \(V\sim\mathcal N(0,\sigma^2)\)，平方误差失真 \(d(v,\hat v)=(v-\hat v)^2\)，则：</p>
+      <div class="formula">
+        \[
+        R(D)=
+        \begin{cases}
+        \frac12\log_2\frac{\sigma^2}{D}, & 0\le D\le\sigma^2 \\
+        0, & D>\sigma^2
+        \end{cases}
+        \]
+      </div>
+      <p>证明下界：令 \(E=V-\hat V\)，则：</p>
+      <div class="formula">
+        \[
+        I(V;\hat V)=h(V)-h(V|\hat V)
+        \ge h(V)-h(V-\hat V)
+        \ge \frac12\log\frac{\sigma^2}{D}
+        \]
+      </div>
+      <p>可达构造：令 \(V=\hat V+G\)，其中 \(G\sim\mathcal N(0,D)\)，\(\hat V\sim\mathcal N(0,\sigma^2-D)\)，且二者独立。</p>
+
+      <h3>数量之比与体积之比</h3>
+      <p>离散空间数典型序列个数；连续高斯空间量典型区域体积。两者是同一个覆盖思想。</p>
+      <table>
+        <thead>
+          <tr><th>情形</th><th>典型集合大小</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>离散变量</td><td>数量 \(\approx 2^{nH(X)}\)</td></tr>
+          <tr><td>连续变量</td><td>体积 \(\approx 2^{nh(X)}\)</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="lecture15">
+      <h2>5. 第 15 章：Feedback 与率失真定理证明</h2>
+      <h3>Feedback 不提高 DMC 容量</h3>
+      <p>反馈信道中，编码器第 \(i\) 次输入可依赖过去输出：</p>
+      <div class="formula">
+        \[
+        X_i=x_i(U,Y^{i-1})
+        \]
+      </div>
+      <p>但 DMC 仍满足马尔可夫性：</p>
+      <div class="formula">
+        \[
+        (Y^{i-1},U)\to X_i\to Y_i
+        \]
+      </div>
+      <p>因此仍有：</p>
+      <div class="formula">
+        \[
+        I(U;Y^n)\le \sum_{i=1}^n I(X_i;Y_i)\le nC
+        \]
+      </div>
+      <p>再配合 Fano 不等式可得，若 \(R>C\)，错误概率不能趋近 0。反馈可能改善实现方式或误差指数，但不提高离散无记忆信道容量。</p>
+
+      <h3>正向与反向条件为什么不同</h3>
+      <div class="note">
+        <p>正向证明是在证明“存在一个好方案”，因此可以主动构造 i.i.d. 随机码本。</p>
+        <p>反向证明是在证明“所有方案都不可能突破边界”，因此不能假设编码输出 i.i.d.，必须覆盖任意编码器和译码器。</p>
+      </div>
+
+      <h3>为什么序列互信息不等号方向相反</h3>
+      <p>信道编码反向使用 DMC：</p>
+      <div class="formula">
+        \[
+        I(X^n;Y^n)\le\sum_i I(X_i;Y_i)
+        \]
+      </div>
+      <p>原因是 \(H(Y^n)\le\sum_iH(Y_i)\)，而 \(H(Y^n|X^n)=\sum_iH(Y_i|X_i)\)。</p>
+      <p>率失真反向使用信源 i.i.d.：</p>
+      <div class="formula">
+        \[
+        I(V^N;\hat V^N)\ge\sum_i I(V_i;\hat V_i)
+        \]
+      </div>
+      <p>原因是 \(H(V^N)=\sum_iH(V_i)\)，而 \(H(V^N|\hat V^N)\le\sum_iH(V_i|\hat V_i)\)。一个是在互信息正项上做上界，一个是在负项上做上界后被减掉，所以方向相反。</p>
+
+      <h3>为什么率失真正向证明使用强典型</h3>
+      <p>弱典型控制的是 \(-\log p(\cdot)\) 的样本平均，不足以控制任意失真函数 \(d(v,\hat v)\)。强典型控制经验分布，所以对任意函数 \(g\) 有：</p>
+      <div class="formula">
+        \[
+        \frac1N\sum_i g(x_i)\approx \mathbb E[g(X)]
+        \]
+      </div>
+      <p>令 \(g=d\)，即可保证联合强典型序列的平均失真接近期望失真。</p>
+
+      <h3>Covering Lemma</h3>
+      <p>随机生成 \(M=2^{NR}\) 个重构码字。若每个码字与固定源序列联合典型的概率约为 \(2^{-NI(V;\hat V)}\)，则至少有一个码字成功的概率约为：</p>
+      <div class="formula">
+        \[
+        1-(1-2^{-NI(V;\hat V)})^{2^{NR}}
+        \]
+      </div>
+      <p>当 \(R>I(V;\hat V)\) 时，该概率趋近 1。因此足够多的失真球可以覆盖源典型集。</p>
+    </section>
+
+    <section id="proofs">
+      <h2>6. 四个核心证明框架</h2>
+      <h3>噪声信道编码定理：正向</h3>
+      <p><strong>条件：</strong>DMC；选择输入分布 \(p_X\) 使 \(R<I(X;Y)\)；随机 i.i.d. 生成码本；联合典型译码。</p>
+      <p><strong>目标：</strong>证明存在编码方案使错误概率趋近 0。</p>
+      <p><strong>核心：</strong>真实码字与输出联合典型概率趋近 1；错误码字碰巧联合典型概率约 \(2^{-nI(X;Y)}\)。若 \(M=2^{nR}\)，则：</p>
+      <div class="formula">
+        \[
+        P_e\lesssim P(E_1)+2^{nR}2^{-n(I(X;Y)-\delta)}\to0
+        \]
+      </div>
+
+      <h3>噪声信道编码定理：反向</h3>
+      <p><strong>条件：</strong>DMC；消息均匀；任意编码器和译码器；不假设 \(X^n,Y^n\) i.i.d.</p>
+      <p><strong>目标：</strong>证明可靠通信必须满足 \(R\le C\)。</p>
+      <p><strong>核心链条：</strong></p>
+      <div class="formula">
+        \[
+        I(U;Y^n)\le I(X^n;Y^n)\le\sum_i I(X_i;Y_i)\le nC
+        \]
+      </div>
+      <p>结合 Fano 不等式：</p>
+      <div class="formula">
+        \[
+        P_e\ge 1-\frac{C}{R}-\frac1{nR}
+        \]
+      </div>
+      <p>若 \(R>C\)，错误概率不能趋近 0。</p>
+
+      <h3>率失真定理：正向</h3>
+      <p><strong>条件：</strong>信源 \(V_i\) i.i.d.；存在测试信道 \(p(\hat V|V)\)，满足 \(\mathbb E[d(V,\hat V)]\le D\) 且 \(I(V;\hat V)<R\)。</p>
+      <p><strong>目标：</strong>证明存在有损压缩方案达到失真 \(D\)。</p>
+      <p><strong>核心：</strong>按 \(p_{\hat V}\) 随机生成 \(2^{NR}\) 个重构码字，编码时寻找联合强典型码字。Covering lemma 保证当 \(R>I(V;\hat V)\) 时能找到，强典型保证平均失真不超过 \(D+\epsilon\)。</p>
+
+      <h3>率失真定理：反向</h3>
+      <p><strong>条件：</strong>信源 \(V_i\) i.i.d.；任意压缩器和解压器；不假设 \(\hat V^N\) i.i.d.；平均失真不超过 \(D\)。</p>
+      <p><strong>目标：</strong>证明任意可达方案必须满足 \(R\ge R(D)\)。</p>
+      <p><strong>核心链条：</strong></p>
+      <div class="formula">
+        \[
+        \log M\ge I(V^N;\hat V^N)\ge\sum_i I(V_i;\hat V_i)
+        \]
+        \[
+        I(V_i;\hat V_i)\ge R(D_i),\quad D_i=\mathbb E[d(V_i,\hat V_i)]
+        \]
+        \[
+        R=\frac{\log M}{N}\ge \frac1N\sum_iR(D_i)\ge R\left(\frac1N\sum_iD_i\right)\ge R(D)
+        \]
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>生成时间：2026-07-05。文件用于本轮信息论学习复习。</p>
+  </footer>
+</body>
+</html>

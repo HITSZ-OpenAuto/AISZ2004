@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Lecture 4 – 渐近等分性（AEP）</title>
+<script>
+MathJax = {
+  tex: {
+    inlineMath: [['$', '$']],
+    displayMath: [['$$', '$$']]
+  }
+};
+</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js"></script>
+<style>
+/* === ExamPass Shared Styles === */
+/* Paper-like warm background, clean typography, responsive */
+
+:root {
+  --paper: #fdf6e3;
+  --paper-dark: #f5ecd7;
+  --ink: #2c2c2c;
+  --ink-light: #555;
+  --accent: #2563eb;
+  --accent-hover: #1d4ed8;
+  --divider: #d6c8a8;
+  --card-bg: #fef9ef;
+  --card-border: #e8dcc8;
+  --correct: #22c55e;
+  --correct-bg: #f0fdf4;
+  --wrong: #ef4444;
+  --wrong-bg: #fef2f2;
+  --tag-bg: #fef3c7;
+  --tag-text: #92400e;
+  --radius: 6px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: "Microsoft YaHei", "Noto Sans SC", "SimSun", sans-serif;
+  font-size: 12pt; line-height: 1.75; color: var(--ink);
+  max-width: 860px; margin: auto; padding: 24px 20px 60px;
+  background: var(--paper);
+}
+
+@media print {
+  body { font-size: 10.5pt; background: #fff; }
+  .no-print { display: none !important; }
+  h1, h2, h3 { page-break-after: avoid; }
+}
+
+/* ── Header ── */
+#exampass-header {
+  display: flex; justify-content: space-between; align-items: baseline;
+  padding: 6px 0; margin-bottom: 0;
+}
+.header-brand { font-size: 1.2em; font-weight: 700; color: #1a1a2e; letter-spacing: 0.3px; }
+.header-url  { font-size: 0.78em; color: #999; }
+.header-divider { border: none; border-top: 2px solid var(--divider); margin: 4px 0 20px 0; }
+
+/* ── Typography ── */
+h1 { font-size: 1.55em; text-align: center; border-bottom: 2px solid var(--divider); padding-bottom: 8px; margin-top: 0; }
+h2 { font-size: 1.25em; border-bottom: 1px solid var(--divider); padding-bottom: 4px; margin-top: 28px; }
+h3 { font-size: 1.08em; margin-top: 20px; color: var(--ink); }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ── Tables ── */
+table { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 0.95em; }
+td, th { border: 1px solid var(--card-border); padding: 5px 9px; text-align: left; }
+th { background: var(--paper-dark); font-weight: 700; }
+
+/* ── Embedded source images ── */
+.embedded-images {
+  margin: 18px 0 24px;
+}
+.embedded-images-intro {
+  color: var(--ink-light);
+  font-size: 0.95em;
+}
+.embedded-image {
+  margin: 14px 0 18px;
+  padding: 10px;
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  background: var(--card-bg);
+  break-inside: avoid;
+}
+.embedded-image img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+  border: 1px solid var(--divider);
+  background: #fff;
+}
+.embedded-image figcaption {
+  margin-top: 8px;
+  color: var(--ink-light);
+  font-size: 0.92em;
+  line-height: 1.5;
+}
+.embedded-image-note::before {
+  content: " - ";
+}
+
+/* ── Knowledge point vs explanation ── */
+.kp { font-weight: 700; color: var(--ink); }           /* key point: bold dark */
+.exp { font-weight: 400; color: var(--ink-light); }    /* explanation: lighter */
+.exp em, .exp strong { color: var(--ink); }             /* emphasis inside explanation */
+
+/* ── Block elements ── */
+blockquote {
+  border-left: 3px solid #c0392b; background: #fef9ef;
+  padding: 6px 14px; margin: 10px 0; font-size: 0.95em;
+}
+code { background: #f0ede0; padding: 2px 5px; border-radius: 3px; font-size: 0.92em; }
+pre { background: #f0ede0; padding: 10px; border-radius: var(--radius); overflow-x: auto; }
+
+/* ── TOC ── */
+div.toc {
+  background: var(--card-bg); padding: 14px 18px;
+  border: 1px solid var(--card-border); border-radius: var(--radius); margin-bottom: 22px;
+}
+div.toc ul { padding-left: 18px; }
+div.toc li { margin: 3px 0; font-size: 0.95em; }
+
+/* ── Priority tags ── */
+.tag-must   { background: #fee2e2; color: #991b1b; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+.tag-key    { background: #fef3c7; color: #92400e; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+.tag-freq   { background: #dbeafe; color: #1e40af; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+.tag-info   { background: #f0fdf4; color: #166534; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+
+
+</style>
+</head>
+<body>
+
+<header id="exampass-header">
+  <div class="header-left"><span class="header-brand">ExamPass Assistant</span></div>
+  <div class="header-right"><span class="header-url">github.com/MIKUZ12/ExamPass-Assistant</span></div>
+</header>
+<hr class="header-divider">
+
+<h1>Lecture 4 – 渐近等分性（AEP）</h1>
+<div class="toc">
+<h2>目录</h2>
+<ul>
+<li><a href="#s27424352">本章整体概览</a></li>
+<li><a href="#s23199311">模块一：信源与数据压缩</a></li>
+  <li><a href="#s39245886">信源编码的基本模型 必考</a></li>
+  <li><a href="#s30817851">离散无记忆信源（i.i.d.）重点</a></li>
+<li><a href="#s64565063">模块二：大数定理——AEP 的数学基础</a></li>
+  <li><a href="#s74663825">弱大数定理（WLLN）必考</a></li>
+  <li><a href="#s72043694">大数定理应用到信息量 必考</a></li>
+<li><a href="#s17832502">模块三：渐近等分性（AEP）</a></li>
+  <li><a href="#s59243270">AEP 定理的精确表述 必考</a></li>
+<li><a href="#s52875434">模块四：典型集的三条核心性质</a></li>
+  <li><a href="#s64417061">性质一：每条典型序列的概率 必考</a></li>
+  <li><a href="#s67128030">性质二：典型集的总概率 重点</a></li>
+  <li><a href="#s47576912">性质三：典型集的大小 必考</a></li>
+<li><a href="#s74322155">模块五：典型集的深层理解</a></li>
+  <li><a href="#s23532369">典型集占全集的比例 重点</a></li>
+  <li><a href="#s35209414">渐近等分真的"等分"吗？ 高频</a></li>
+  <li><a href="#s45177097">典型集是最优的吗？——不可减性定理 重点</a></li>
+<li><a href="#s50199849">模块六：定长信源编码定理</a></li>
+  <li><a href="#s63229250">定长编码方案 必考</a></li>
+  <li><a href="#s88270160">信源定长编码定理 必考</a></li>
+  <li><a href="#s44087646">Shannon 第一定理的意义 重点</a></li>
+<li><a href="#s88507845">模块七：扩展——非 i.i.d. 情形</a></li>
+  <li><a href="#s36245064">熵率与 SMB 定理 了解</a></li>
+<li><a href="#s36874541">本章核心结论速查</a></li>
+</ul>
+</div>
+
+<h2 id="s27424352">本章整体概览</h2>
+<p>
+  本章是信息论从"单符号"走向"长序列"的关键一跳，核心结论是
+  <span class="kp">渐近等分性（AEP，Asymptotic Equipartition Property）</span>。
+</p>
+<pre>
+大数定理（概率工具）
+        |
+        v
+AEP：(1/n)log(1/p(X^n)) → H(X)   （以概率收敛）
+        |
+        v
+ε-典型集  A_ε^(n)
+  /             \
+ v               v
+典型序列性质      典型集大小：约 2^{nH(X)}
+（每条概率≈2^{-nH(X)}）
+        |
+        v
+定长编码定理：最优编码长度 = nH(X) bit
+</pre>
+<p>
+  <strong>学习主线</strong>：
+  i.i.d. 信源 --> 大数定理 --> AEP --> ε-典型集三条性质 --> 定长编码定理
+</p>
+
+<h2 id="s23199311">模块一：信源与数据压缩</h2>
+
+<h3 id="s39245886">信源编码的基本模型 <span class="tag-must">必考</span></h3>
+<p><strong>是什么</strong>：信源编码将信源序列 $X^n$ 映射为 $m$ bit 二进制串，再由译码器还原。</p>
+<ul>
+  <li><span class="kp">无损压缩/编码</span>：$p(\hat{X}^n \ne X^n) = 0$，还原完全正确</li>
+  <li><span class="kp">有损压缩/编码</span>：$p(\hat{X}^n \ne X^n) > 0$，允许一定误差</li>
+</ul>
+<p><strong>核心问题</strong>：对长度为 $n$ 的序列 $X^n$，无损压缩至少需要多少 bit？</p>
+<blockquote>易错：信源编码是"压缩"，信道编码是"加冗余纠错"，两者目的相反，不要混淆。</blockquote>
+
+<h3 id="s30817851">离散无记忆信源（i.i.d.）<span class="tag-key">重点</span></h3>
+<p>
+  符号集 $\mathcal{X} = \{s_1, s_2, \ldots, s_m\}$，每个符号出现概率由 $p(X)$ 描述。
+  <span class="kp">$n$ 次扩展信源</span>：独立重复采样 $n$ 次得到序列
+  $X^n = (X_1, X_2, \ldots, X_n)$，其中 $X_i \sim X \sim p(X)$ 独立同分布。
+</p>
+<p>i.i.d. 的关键性质：
+$$p(X^n) = p(X_1, X_2, \ldots, X_n) = \prod_{i=1}^n p(X_i) \quad \text{（概率相乘）}$$
+$$H(X^n) = \sum_{i=1}^n H(X_i) = nH(X) \quad \text{（熵相加）}$$
+</p>
+
+<h2 id="s64565063">模块二：大数定理——AEP 的数学基础</h2>
+
+<h3 id="s74663825">弱大数定理（WLLN）<span class="tag-must">必考</span></h3>
+<p><strong>表述</strong>：设 $X_1, X_2, \ldots, X_n$ 满足 i.i.d.，$X_i \sim p(x)$，则样本均值依概率收敛：
+$$\frac{1}{n}\sum_{i=1}^n X_i \xrightarrow{P} \mathbb{E}[X], \quad n \to \infty$$
+即对任意 $\epsilon > 0$：
+$$p\!\left(\left|\frac{1}{n}\sum_{i=1}^n X_i - \mathbb{E}[X]\right| \le \epsilon\right) \to 1, \quad n \to \infty$$
+</p>
+<p><strong>证明工具——切比雪夫不等式</strong>（Chebyshev's Inequality）：
+$$p(|X - \mu| \ge \epsilon) \le \frac{\sigma^2}{\epsilon^2}$$
+将 $X$ 替换为样本均值 $\bar{X}_n$（方差为 $\sigma^2/n$）：
+$$p\!\left(|\bar{X}_n - \mathbb{E}[X]| \ge \epsilon\right) \le \frac{\sigma^2}{n\epsilon^2} \to 0, \quad n \to \infty$$
+</p>
+<blockquote>易错：大数定理是"依概率收敛"（convergence in probability），不是"几乎必然收敛"；在考试中除非特别说明，用弱大数定理即可。</blockquote>
+
+<h3 id="s72043694">大数定理应用到信息量 <span class="tag-must">必考</span></h3>
+<p>对 i.i.d. 序列 $X^n$，令 $Y_i = \log\frac{1}{p(X_i)}$（各 $X_i$ 的信息量），则：
+$$\frac{1}{n}\log\frac{1}{p(X^n)} = \frac{1}{n}\log\frac{1}{\prod_{i=1}^n p(X_i)} = \frac{1}{n}\sum_{i=1}^n \log\frac{1}{p(X_i)}$$
+由大数定理（$Y_i$ i.i.d.，期望为 $\mathbb{E}\!\left[\log\frac{1}{p(X)}\right] = H(X)$）：
+$$\frac{1}{n}\log\frac{1}{p(X^n)} \xrightarrow{P} H(X)$$
+</p>
+<p><span class="exp">这就是 AEP 的本质：序列 $X^n$ 的"每符号平均信息量"以概率收敛到单符号熵 $H(X)$。</span></p>
+
+<h2 id="s17832502">模块三：渐近等分性（AEP）</h2>
+
+<h3 id="s59243270">AEP 定理的精确表述 <span class="tag-must">必考</span></h3>
+<p>设 $X_1, X_2, \ldots$ i.i.d. $\sim p(x)$，则对任意 $\epsilon > 0$，当 $n$ 足够大时：
+$$p\!\left(\left|\frac{1}{n}\log\frac{1}{p(X^n)} - H(X)\right| \le \epsilon\right) \to 1$$
+即 $\frac{1}{n}\log\frac{1}{p(X^n)} \xrightarrow{P} H(X)$。
+</p>
+<p><strong>定义</strong>：满足
+$\left|\frac{1}{n}\log\frac{1}{p(x^n)} - H(X)\right| \le \epsilon$
+的序列 $x^n$ 称为 <span class="kp">$\epsilon$-典型序列</span>，所有这样的序列构成 <span class="kp">$\epsilon$-典型集</span>：
+$$A_\epsilon^{(n)} \triangleq \left\{x^n \in \mathcal{X}^n : \left|\frac{1}{n}\log\frac{1}{p(x^n)} - H(X)\right| \le \epsilon\right\}$$
+</p>
+<p>AEP 的直接推论：$p(X^n \in A_\epsilon^{(n)}) \to 1$（典型集的总概率趋向于 1）。</p>
+<blockquote>易错：AEP 中 $\epsilon$ 是误差容限，可以任意小（但固定），"典型"是渐近意义上的，不是精确的。</blockquote>
+
+<h2 id="s52875434">模块四：典型集的三条核心性质</h2>
+
+<h3 id="s64417061">性质一：每条典型序列的概率 <span class="tag-must">必考</span></h3>
+<p>由 $\epsilon$-典型集定义，对任意 $x^n \in A_\epsilon^{(n)}$：
+$$n H(X) - n\epsilon \le -\log p(x^n) \le n H(X) + n\epsilon$$
+取指数得概率范围（指数级变化）：
+$$\boxed{2^{-n(H(X)+\epsilon)} \le p(x^n) \le 2^{-n(H(X)-\epsilon)}}$$
+</p>
+<p><span class="exp">直觉：典型集中每条序列的概率近似为 $2^{-nH(X)}$，即"等分"——这正是"渐近等分性"名称的由来。</span></p>
+
+<h3 id="s67128030">性质二：典型集的总概率 <span class="tag-key">重点</span></h3>
+<p>$$\boxed{p(X^n \in A_\epsilon^{(n)}) = \sum_{x^n \in A_\epsilon^{(n)}} p(x^n) \to 1}$$
+即对任意 $\epsilon > 0$，当 $n$ 足够大时，随机序列 $X^n$ 落入典型集的概率趋向于 1。</p>
+<p>等价表述：对任意 $\epsilon > 0$，存在 $n_0$ 使得 $n > n_0$ 时，$p(X^n \in A_\epsilon^{(n)}) \ge 1 - \epsilon$。</p>
+
+<h3 id="s47576912">性质三：典型集的大小 <span class="tag-must">必考</span></h3>
+<p>$$\boxed{(1-\epsilon) 2^{n(H(X)-\epsilon)} \le |A_\epsilon^{(n)}| \le 2^{n(H(X)+\epsilon)}}$$</p>
+<p><strong>证明上界</strong>：利用概率归一化（$\sum_{x^n \in \mathcal{X}^n} p(x^n) = 1$）：
+$$1 \ge \sum_{x^n \in A_\epsilon^{(n)}} p(x^n) \ge \sum_{x^n \in A_\epsilon^{(n)}} 2^{-n(H(X)+\epsilon)} = |A_\epsilon^{(n)}| \cdot 2^{-n(H(X)+\epsilon)}$$
+故 $|A_\epsilon^{(n)}| \le 2^{n(H(X)+\epsilon)}$。
+</p>
+<p><strong>证明下界</strong>：利用总概率趋向 1（当 $n$ 足够大时 $\sum_{A_\epsilon^{(n)}} p(x^n) \ge 1 - \epsilon$）：
+$$1 - \epsilon \le \sum_{x^n \in A_\epsilon^{(n)}} p(x^n) \le \sum_{x^n \in A_\epsilon^{(n)}} 2^{-n(H(X)-\epsilon)} = |A_\epsilon^{(n)}| \cdot 2^{-n(H(X)-\epsilon)}$$
+故 $|A_\epsilon^{(n)}| \ge (1-\epsilon) 2^{n(H(X)-\epsilon)}$。
+</p>
+<blockquote>易错：大小上界不需要 $1-\epsilon$ 因子（来自总概率 $\le 1$），下界才需要（来自总概率 $\ge 1-\epsilon$）。</blockquote>
+
+<h2 id="s74322155">模块五：典型集的深层理解</h2>
+
+<h3 id="s23532369">典型集占全集的比例 <span class="tag-key">重点</span></h3>
+<p>$\mathcal{X}^n$ 共有 $|\mathcal{X}|^n = 2^{n\log|\mathcal{X}|}$ 条序列，典型集大小约 $2^{nH(X)}$，故：
+$$\frac{|A_\epsilon^{(n)}|}{|\mathcal{X}^n|} \approx \frac{2^{nH(X)}}{2^{n\log|\mathcal{X}|}} = 2^{-n(\log|\mathcal{X}| - H(X))} = 2^{-nD_{\mathrm{KL}}(p(X)\|u(X))}$$
+其中 $u$ 为 $\mathcal{X}$ 上的均匀分布，因为 $\log|\mathcal{X}| - H(X) = D_{\mathrm{KL}}(p\|u)$（由 Lecture 3 结论）。
+</p>
+<table border="1" cellpadding="6" cellspacing="0" style="border-collapse:collapse;width:100%">
+  <thead><tr style="background:#f0f4ff"><th>量</th><th>意义</th></tr></thead>
+  <tbody>
+    <tr><td>$H(X)$</td><td>数据的不可压缩性（熵越大，典型集越大，越难压缩）</td></tr>
+    <tr><td>$D_{\mathrm{KL}}(p\|u)$</td><td>数据的可压缩性（KL 散度越大，典型集占比越小，越可压缩）</td></tr>
+    <tr><td>特别地：$p = u$（均匀分布）</td><td>$H(X) = \log|\mathcal{X}|$，典型集 = 全集，完全不可压缩</td></tr>
+  </tbody>
+</table>
+
+<h3 id="s35209414">渐近等分真的"等分"吗？ <span class="tag-freq">高频</span></h3>
+<p>典型集中，概率最大的序列与概率最小的序列之比：
+$$\frac{2^{-n(H(X)-\epsilon)}}{2^{-n(H(X)+\epsilon)}} = 2^{2n\epsilon}$$
+<span class="exp">概率差距是指数级的！但"信息量"（$-\log p$）的差距是 $2n\epsilon$，即线性的。"等分"是"信息量近似相等"，不是"概率完全相等"。对概率取了 $\log$ 后，指数级差距被压缩为线性差距，这才使得渐近等分成为可能。</span>
+</p>
+
+<h3 id="s45177097">典型集是最优的吗？——不可减性定理 <span class="tag-key">重点</span></h3>
+<p><strong>定理</strong>：设 $0 < \sigma \le \epsilon$，若集合 $B^{(n)} \subseteq \mathcal{X}^n$ 满足 $|B^{(n)}| \le 2^{n(H(X)-\sigma)}$，则：
+$$p(X^n \in B^{(n)}) \le 2^{-n(\sigma - \epsilon)} \to 0, \quad n \to \infty$$
+</p>
+<p><strong>证明思路</strong>：将 $B^{(n)}$ 分成 $B^{(n)} \cap A_\epsilon^{(n)}$ 和 $B^{(n)} \cap (X^n \setminus A_\epsilon^{(n)})$ 两部分：
+<ul>
+  <li>第二部分概率：$p(X^n \notin A_\epsilon^{(n)}) \to 0$</li>
+  <li>第一部分概率：$\sum_{x^n \in B^{(n)} \cap A_\epsilon^{(n)}} p(x^n) \le |B^{(n)}| \cdot 2^{-n(H(X)-\epsilon)} \le 2^{n(H(X)-\sigma)} \cdot 2^{-n(H(X)-\epsilon)} = 2^{-n(\sigma-\epsilon)} \to 0$</li>
+</ul>
+</p>
+<p><span class="exp">此定理说明：任何比典型集小指数量级的集合（大小 $< 2^{nH(X)}$），其覆盖的概率都趋向于 0。因此典型集大小 $2^{nH(X)}$ 是无损压缩的"最优"下界。</span></p>
+<blockquote>易错：此定理要求 $\sigma > \epsilon$（集合比典型集真正指数级更小），若 $\sigma \le \epsilon$ 则结论不成立。</blockquote>
+
+<h2 id="s50199849">模块六：定长信源编码定理</h2>
+
+<h3 id="s63229250">定长编码方案 <span class="tag-must">必考</span></h3>
+<p><strong>编码方案</strong>（利用典型集 $A_\epsilon^{(n)}$）：</p>
+<ul>
+  <li><strong>典型序列</strong>：前缀 $1$ + 用索引标记（共 $n(H(X)+\epsilon) + 1$ bit）</li>
+  <li><strong>非典型序列</strong>：前缀 $0$ + 不做处理（直接拷贝）</li>
+</ul>
+<p><strong>译码方案</strong>：</p>
+<ul>
+  <li>前缀 $1$：在典型集索引表中查找还原</li>
+  <li>前缀 $0$：直接拷贝</li>
+</ul>
+<p><strong>误差概率</strong>：$p(\text{错误}) = p(X^n \notin A_\epsilon^{(n)}) \to 0$（非典型集序列误差，但概率趋向 0）</p>
+
+<h3 id="s88270160">信源定长编码定理 <span class="tag-must">必考</span></h3>
+<p>设 $S_\delta^{(n)} \subseteq \mathcal{X}^n$ 为满足误差 $\delta$（即 $p(X^n \in S_\delta) \ge 1-\delta$）的最小集合。对任意 $\epsilon > 0$ 和 $0 < \delta < 1$，存在 $n_0$，当 $n > n_0$ 时：
+$$\boxed{\left|\frac{1}{n}\log_2 |S_\delta^{(n)}| - H(X)\right| < \epsilon}$$
+即最优编码长度 $\frac{1}{n}\log|S_\delta| \to H(X)$。
+</p>
+<p><strong>上界证明</strong>：取 $S_\delta = A_\epsilon^{(n)}$（典型集），则 $|A_\epsilon^{(n)}| \le 2^{n(H(X)+\epsilon)}$，故 $\frac{1}{n}\log|S_\delta| \le H(X) + \epsilon$。</p>
+<p><strong>下界证明</strong>：若 $|S_\delta| \le 2^{n(H(X)-\epsilon)}$，则由不可减性定理（取 $\sigma = \epsilon$），$p(X^n \in S_\delta) \to 0$，与 $p(X^n \in S_\delta) \ge 1-\delta$ 矛盾（$\delta < 1$）。故必须 $|S_\delta| > 2^{n(H(X)-\epsilon)}$，即 $\frac{1}{n}\log|S_\delta| > H(X) - \epsilon$。</p>
+<blockquote>易错：信源编码定理中 $H(X)$ 是每符号的编码长度下界；总编码长度下界为 $nH(X)$ bit。等号当且仅当 $p(X)$ 是均匀分布（$H(X) = \log|\mathcal{X}|$）时总长度等于 $n\log|\mathcal{X}|$，无压缩空间。</blockquote>
+
+<h3 id="s44087646">Shannon 第一定理的意义 <span class="tag-key">重点</span></h3>
+<table border="1" cellpadding="6" cellspacing="0" style="border-collapse:collapse;width:100%">
+  <thead><tr style="background:#e8f4fd"><th>定理方向</th><th>内容</th><th>工具</th></tr></thead>
+  <tbody>
+    <tr><td>可达性（上界）</td><td>存在编码使得码率 $\to H(X)$</td><td>典型集编码方案</td></tr>
+    <tr><td>逆定理（下界）</td><td>任何码率 $< H(X)$ 的编码误差趋向 1</td><td>不可减性定理</td></tr>
+    <tr><td>结论</td><td>信源无损压缩的极限码率 = $H(X)$</td><td>AEP 核心结论</td></tr>
+  </tbody>
+</table>
+
+<h2 id="s88507845">模块七：扩展——非 i.i.d. 情形</h2>
+
+<h3 id="s36245064">熵率与 SMB 定理 <span class="tag-info">了解</span></h3>
+<p>对 i.i.d. 信源，AEP 直接由大数定理推导。对<strong>非 i.i.d.</strong> 信源（如马尔可夫链），AEP 仍然成立，但需要 Shannon-McMillan-Breiman（SMB）定理：
+$$\frac{1}{n}\log\frac{1}{p(X^n)} \xrightarrow{P} \bar{H} = \lim_{n\to\infty}\frac{H(X^n)}{n} \quad \text{（熵率）}$$
+</p>
+<p><strong>熵率</strong>（Entropy Rate）$\bar{H}$ 推广了单符号熵 $H(X)$，是描述信源"平均不确定性"的基本量，将在 Lecture 6（马尔可夫链熵率）中详细讨论。</p>
+<blockquote>易错：非 i.i.d. 情形下 $H(X^n) \ne nH(X)$，不能简单相加；对于马尔可夫链，熵率 $\bar{H} = \lim_{n\to\infty} H(X_n | X_1, \ldots, X_{n-1})$（条件熵极限）。</blockquote>
+
+<h2 id="s36874541">本章核心结论速查</h2>
+<table border="1" cellpadding="6" cellspacing="0" style="border-collapse:collapse;width:100%">
+  <thead><tr style="background:#e8f4fd"><th>结论</th><th>数学表达</th><th>条件</th></tr></thead>
+  <tbody>
+    <tr><td>AEP</td><td>$\frac{1}{n}\log\frac{1}{p(X^n)} \xrightarrow{P} H(X)$</td><td>$X_i$ i.i.d.</td></tr>
+    <tr><td>典型序列概率</td><td>$2^{-n(H+\epsilon)} \le p(x^n) \le 2^{-n(H-\epsilon)}$</td><td>$x^n \in A_\epsilon^{(n)}$</td></tr>
+    <tr><td>典型集总概率</td><td>$p(X^n \in A_\epsilon^{(n)}) \to 1$</td><td>$n \to \infty$</td></tr>
+    <tr><td>典型集大小</td><td>$(1-\epsilon)2^{n(H-\epsilon)} \le |A_\epsilon^{(n)}| \le 2^{n(H+\epsilon)}$</td><td>充分大 $n$</td></tr>
+    <tr><td>典型集占比</td><td>$|A_\epsilon^{(n)}|/|\mathcal{X}|^n \approx 2^{-nD_{\mathrm{KL}}(p\|u)}$</td><td>$H = \log|\mathcal{X}| - D_{\mathrm{KL}}$</td></tr>
+    <tr><td>不可减性</td><td>$|B^n| \le 2^{n(H-\sigma)} \Rightarrow p(X^n \in B^n) \to 0$</td><td>$\sigma > 0$</td></tr>
+    <tr><td>定长编码定理</td><td>$\frac{1}{n}\log|S_\delta^{(n)}| \to H(X)$</td><td>误差 $\le \delta$</td></tr>
+  </tbody>
+</table>
+
+
+
+</body>
+</html>

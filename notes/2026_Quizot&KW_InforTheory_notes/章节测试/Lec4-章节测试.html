@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Lecture 4 – 渐近等分性（AEP）</title>
+<script>
+MathJax = {
+  tex: {
+    inlineMath: [['$', '$']],
+    displayMath: [['$$', '$$']]
+  }
+};
+</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js"></script>
+<style>
+/* === ExamPass Shared Styles === */
+/* Paper-like warm background, clean typography, responsive */
+
+:root {
+  --paper: #fdf6e3;
+  --paper-dark: #f5ecd7;
+  --ink: #2c2c2c;
+  --ink-light: #555;
+  --accent: #2563eb;
+  --accent-hover: #1d4ed8;
+  --divider: #d6c8a8;
+  --card-bg: #fef9ef;
+  --card-border: #e8dcc8;
+  --correct: #22c55e;
+  --correct-bg: #f0fdf4;
+  --wrong: #ef4444;
+  --wrong-bg: #fef2f2;
+  --tag-bg: #fef3c7;
+  --tag-text: #92400e;
+  --radius: 6px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: "Microsoft YaHei", "Noto Sans SC", "SimSun", sans-serif;
+  font-size: 12pt; line-height: 1.75; color: var(--ink);
+  max-width: 860px; margin: auto; padding: 24px 20px 60px;
+  background: var(--paper);
+}
+
+@media print {
+  body { font-size: 10.5pt; background: #fff; }
+  .no-print { display: none !important; }
+  h1, h2, h3 { page-break-after: avoid; }
+}
+
+/* ── Header ── */
+#exampass-header {
+  display: flex; justify-content: space-between; align-items: baseline;
+  padding: 6px 0; margin-bottom: 0;
+}
+.header-brand { font-size: 1.2em; font-weight: 700; color: #1a1a2e; letter-spacing: 0.3px; }
+.header-url  { font-size: 0.78em; color: #999; }
+.header-divider { border: none; border-top: 2px solid var(--divider); margin: 4px 0 20px 0; }
+
+/* ── Typography ── */
+h1 { font-size: 1.55em; text-align: center; border-bottom: 2px solid var(--divider); padding-bottom: 8px; margin-top: 0; }
+h2 { font-size: 1.25em; border-bottom: 1px solid var(--divider); padding-bottom: 4px; margin-top: 28px; }
+h3 { font-size: 1.08em; margin-top: 20px; color: var(--ink); }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ── Tables ── */
+table { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 0.95em; }
+td, th { border: 1px solid var(--card-border); padding: 5px 9px; text-align: left; }
+th { background: var(--paper-dark); font-weight: 700; }
+
+/* ── Embedded source images ── */
+.embedded-images {
+  margin: 18px 0 24px;
+}
+.embedded-images-intro {
+  color: var(--ink-light);
+  font-size: 0.95em;
+}
+.embedded-image {
+  margin: 14px 0 18px;
+  padding: 10px;
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  background: var(--card-bg);
+  break-inside: avoid;
+}
+.embedded-image img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+  border: 1px solid var(--divider);
+  background: #fff;
+}
+.embedded-image figcaption {
+  margin-top: 8px;
+  color: var(--ink-light);
+  font-size: 0.92em;
+  line-height: 1.5;
+}
+.embedded-image-note::before {
+  content: " - ";
+}
+
+/* ── Knowledge point vs explanation ── */
+.kp { font-weight: 700; color: var(--ink); }           /* key point: bold dark */
+.exp { font-weight: 400; color: var(--ink-light); }    /* explanation: lighter */
+.exp em, .exp strong { color: var(--ink); }             /* emphasis inside explanation */
+
+/* ── Block elements ── */
+blockquote {
+  border-left: 3px solid #c0392b; background: #fef9ef;
+  padding: 6px 14px; margin: 10px 0; font-size: 0.95em;
+}
+code { background: #f0ede0; padding: 2px 5px; border-radius: 3px; font-size: 0.92em; }
+pre { background: #f0ede0; padding: 10px; border-radius: var(--radius); overflow-x: auto; }
+
+/* ── TOC ── */
+div.toc {
+  background: var(--card-bg); padding: 14px 18px;
+  border: 1px solid var(--card-border); border-radius: var(--radius); margin-bottom: 22px;
+}
+div.toc ul { padding-left: 18px; }
+div.toc li { margin: 3px 0; font-size: 0.95em; }
+
+/* ── Priority tags ── */
+.tag-must   { background: #fee2e2; color: #991b1b; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+.tag-key    { background: #fef3c7; color: #92400e; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+.tag-freq   { background: #dbeafe; color: #1e40af; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+.tag-info   { background: #f0fdf4; color: #166534; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+
+/* === Interactive Test Styles === */
+
+/* ── Score box ── */
+#score-box {
+  display: none; background: var(--paper-dark); color: var(--ink);
+  padding: 16px 20px; border-radius: var(--radius); margin: 14px 0;
+  text-align: center; border: 1px solid var(--card-border);
+}
+#score-box .score-num { font-size: 2.2em; font-weight: 700; }
+#score-box .score-label { font-size: 0.85em; color: var(--ink-light); }
+
+/* ── Question card ── */
+.q-card {
+  background: var(--card-bg); border: 1px solid var(--card-border);
+  border-radius: var(--radius); padding: 12px 14px; margin: 10px 0;
+  transition: all 0.15s;
+}
+.q-card.correct { border-left: 3px solid var(--correct); background: #f7fdf4; }
+.q-card.wrong   { border-left: 3px solid var(--wrong); background: #fef9f9; }
+
+.q-num  { font-weight: 700; font-size: 0.98em; margin-bottom: 4px; }
+.q-text { margin-bottom: 8px; font-size: 0.98em; }
+.q-text pre {
+  background: #f5f5f5; border: 1px solid #ddd; border-radius: 4px;
+  padding: 10px 14px; margin: 8px 0; overflow-x: auto;
+  font-family: 'Consolas', 'Courier New', monospace; font-size: 0.9em;
+  line-height: 1.5; white-space: pre;
+}
+.q-text code {
+  font-family: 'Consolas', 'Courier New', monospace; font-size: 0.9em;
+  background: #f0f0f0; padding: 1px 4px; border-radius: 3px;
+}
+
+/* ── Options (compact) ── */
+.option {
+  display: block; padding: 4px 10px; margin: 3px 0;
+  border: 1px solid var(--card-border); border-radius: 4px;
+  cursor: pointer; transition: all 0.12s; font-size: 0.93em;
+  background: #fefcf5;
+}
+.option:hover            { background: #f0ede0; }
+.option input            { margin-right: 6px; }
+.option.selected         { border-color: var(--accent); background: #eff6ff; }
+.option.correct-answer   { border-color: var(--correct); background: var(--correct-bg); }
+.option.wrong-answer     { border-color: var(--wrong); background: var(--wrong-bg); }
+
+/* ── Textareas (compact) ── */
+.q-textarea {
+  width: 100%; min-height: 56px; border: 1px solid var(--card-border);
+  border-radius: 4px; padding: 6px 10px; font-family: inherit;
+  font-size: 0.93em; background: #fefcf5; resize: vertical;
+}
+.q-textarea:focus { outline: none; border-color: var(--accent); }
+
+/* ── Result after grading ── */
+.result {
+  display: none; margin-top: 8px; padding: 8px 12px;
+  background: #fefcf5; border: 1px solid var(--card-border);
+  border-radius: 4px; font-size: 0.9em; line-height: 1.6;
+}
+.result .badge {
+  display: inline-block; padding: 1px 9px; border-radius: 3px;
+  font-weight: 700; font-size: 0.82em; margin-right: 6px;
+}
+.badge-ok  { background: var(--correct-bg); color: #166534; }
+.badge-no  { background: var(--wrong-bg); color: #991b1b; }
+.badge-ref { background: #dbeafe; color: #1e40af; }
+
+.result .explanation { margin-top: 4px; color: var(--ink); }
+.result .pitfall { color: #b45309; margin-top: 3px; font-size: 0.9em; }
+
+/* ── Grading button ── */
+.grading-bar { text-align: center; margin: 20px 0; }
+.grading-bar button {
+  font-size: 1em; padding: 8px 32px; background: var(--accent);
+  color: #fff; border: none; border-radius: var(--radius);
+  cursor: pointer; font-weight: 600; letter-spacing: 0.3px;
+}
+.grading-bar button:hover     { background: var(--accent-hover); }
+.grading-bar button:disabled  { background: #bbb; cursor: not-allowed; }
+
+/* ── Wrong-question review document ── */
+.wrong-review-box {
+  display: none;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  margin: 18px 0;
+}
+.wrong-review-box h3 {
+  margin-top: 0;
+}
+.wrong-review-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px 0;
+}
+.wrong-review-actions button {
+  font-size: 0.92em;
+  padding: 6px 12px;
+  background: var(--ink);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+.wrong-review-actions button:hover {
+  background: #000;
+}
+#wrong-review-text {
+  width: 100%;
+  min-height: 220px;
+  border: 1px solid var(--card-border);
+  border-radius: 4px;
+  padding: 8px 10px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.84em;
+  line-height: 1.5;
+  background: #fff;
+  resize: vertical;
+}
+
+</style>
+</head>
+<body>
+
+<header id="exampass-header">
+  <div class="header-left"><span class="header-brand">ExamPass Assistant</span></div>
+  <div class="header-right"><span class="header-url">github.com/MIKUZ12/ExamPass-Assistant</span></div>
+</header>
+<hr class="header-divider">
+
+<h1>Lecture 4 – 渐近等分性（AEP）</h1>
+<h2 style="text-align:center">章节测试</h2>
+<p style="text-align:center;color:var(--ink-light);font-size:0.95em">满分100分</p>
+
+<div id="score-box"><div class="score-num" id="score-num">0</div><div class="score-label">总分</div></div>
+<div id="questions-container"></div>
+<div class="grading-bar no-print"><button onclick="gradeAll()" id="grade-btn">提交批改</button></div>
+<div id="wrong-review-box" class="wrong-review-box no-print"></div>
+
+<script>
+var Q = [{"type": "choice", "points": 2, "question": "渐近等分性（AEP）的核心结论是？", "options": ["$p(x^n) \\to 0$，随着 $n \\to \\infty$", "$\\frac{1}{n}\\log\\frac{1}{p(X^n)} \\xrightarrow{P} H(X)$", "$H(X^n) = H(X)$（与序列长度无关）", "$p(X^n \\in A_\\epsilon^{(n)}) \\to 0$"], "answer": 1, "knowledge_point": "AEP定义", "diagnosis_hint": "混淆AEP的内容与其推论", "explanation": "<strong>正确答案</strong>：B<br><br><strong>推理过程</strong>：AEP 即渐近等分性，其核心是每符号平均信息量 $\\frac{1}{n}\\log\\frac{1}{p(X^n)}$ 依概率收敛到单符号熵 $H(X)$，这由大数定理直接推出（$\\frac{1}{n}\\sum \\log\\frac{1}{p(X_i)} \\to \\mathbb{E}[\\log\\frac{1}{p(X)}] = H(X)$）。<br><br><strong>干扰项分析</strong>：A 错（概率趋向 0 是一条序列的行为，AEP 说的是\"平均信息量\"的收敛）；C 错（$H(X^n) = nH(X)$，不等于 $H(X)$）；D 说反了（应该是 $\\to 1$ 不是 $\\to 0$）。<br><br><strong>复盘建议</strong>：AEP 三个字母对应三层意思：渐近（$n\\to\\infty$）、等分（每条典型序列概率近似相等）、性（性质/定理）。核心公式记住 $\\frac{1}{n}\\log\\frac{1}{p(X^n)} \\to H(X)$。", "pitfall": "D 是最常见的陷阱：典型集的总概率趋向于1，不是趋向于0。"}, {"type": "choice", "points": 2, "question": "$\\epsilon$-典型集 $A_\\epsilon^{(n)}$ 的定义是？", "options": ["$\\{x^n : p(x^n) \\ge 2^{-nH(X)}\\}$", "$\\{x^n : \\left|\\frac{1}{n}\\log\\frac{1}{p(x^n)} - H(X)\\right| \\le \\epsilon\\}$", "$\\{x^n : p(x^n) = 2^{-nH(X)}\\}$", "$\\{x^n : H(x^n) \\le H(X) + \\epsilon\\}$"], "answer": 1, "knowledge_point": "ε-典型集定义", "diagnosis_hint": "对典型集的定义记忆模糊", "explanation": "<strong>正确答案</strong>：B<br><br><strong>推理过程</strong>：$\\epsilon$-典型集的定义是序列 $x^n$ 满足\"每符号平均信息量与熵的偏差不超过 $\\epsilon$\"，即 $\\left|\\frac{1}{n}\\log\\frac{1}{p(x^n)} - H(X)\\right| \\le \\epsilon$。这是 AEP 的直接形式化。<br><br><strong>干扰项分析</strong>：A 只有下界（单侧不等式），定义不完整；C 是精确等于 $2^{-nH(X)}$，过于严格，一般不存在这样的序列；D 把序列的\"信息量\" $\\log\\frac{1}{p(x^n)}$ 混淆为 $H(x^n)$，概念错误。<br><br><strong>复盘建议</strong>：典型集定义有两种等价写法：（1）$|\\frac{1}{n}\\log\\frac{1}{p(x^n)} - H| \\le \\epsilon$；（2）$nH-n\\epsilon \\le -\\log p(x^n) \\le nH+n\\epsilon$，后者更易看出概率的上下界。", "pitfall": "典型集的条件是两侧不等式（|偏差| ≤ ε），单侧不等式不是典型集的定义。"}, {"type": "choice", "points": 2, "question": "对于 $\\epsilon$-典型序列 $x^n \\in A_\\epsilon^{(n)}$，其概率满足？", "options": ["$p(x^n) = 2^{-nH(X)}$", "$2^{-n(H(X)+\\epsilon)} \\le p(x^n) \\le 2^{-n(H(X)-\\epsilon)}$", "$p(x^n) \\ge 2^{-n(H(X)+\\epsilon)}$（仅下界）", "$p(x^n) \\le 2^{-nH(X)}$（仅上界）"], "answer": 1, "knowledge_point": "典型序列概率范围", "diagnosis_hint": "记错了概率上下界的形式", "explanation": "<strong>正确答案</strong>：B<br><br><strong>推理过程</strong>：由典型集定义 $n H - n\\epsilon \\le -\\log p(x^n) \\le nH + n\\epsilon$，两端取 $-1$ 倍：$-nH - n\\epsilon \\le \\log p(x^n) \\le -nH + n\\epsilon$，取 $2$ 的幂次（$2^{\\log}$ 是单调递增）：$2^{-n(H+\\epsilon)} \\le p(x^n) \\le 2^{-n(H-\\epsilon)}$。<br><br><strong>关键点</strong>：$-\\log p$ 越大 --> $p$ 越小；上界 $-\\log p \\le nH+n\\epsilon$ --> $p \\ge 2^{-(nH+n\\epsilon)}$（下界）；下界 $-\\log p \\ge nH-n\\epsilon$ --> $p \\le 2^{-(nH-n\\epsilon)}$（上界）。不等号方向要取反。<br><br><strong>复盘建议</strong>：记忆口诀——信息量与概率方向相反。信息量越大（上界），概率越小（下界）；信息量越小（下界），概率越大（上界）。", "pitfall": "概率的下界对应信息量的上界，概率的上界对应信息量的下界——方向相反，最容易搞错。"}, {"type": "choice", "points": 2, "question": "$\\epsilon$-典型集大小 $|A_\\epsilon^{(n)}|$ 的上界是？", "options": ["$2^{n(H(X)-\\epsilon)}$", "$(1-\\epsilon)2^{n(H(X)-\\epsilon)}$", "$2^{n(H(X)+\\epsilon)}$", "$|\\mathcal{X}|^n$"], "answer": 2, "knowledge_point": "典型集大小", "diagnosis_hint": "混淆上界和下界，或者忘记 1-ε 因子的位置", "explanation": "<strong>正确答案</strong>：C<br><br><strong>推理过程</strong>：$1 \\ge \\sum_{x^n \\in A_\\epsilon^{(n)}} p(x^n) \\ge |A_\\epsilon^{(n)}| \\cdot 2^{-n(H+\\epsilon)}$，故 $|A_\\epsilon^{(n)}| \\le 2^{n(H+\\epsilon)}$（上界无 $1-\\epsilon$ 因子，因为全概率 $\\le 1$ 不需要）。<br><br><strong>下界</strong>：$1-\\epsilon \\le \\sum_{A_\\epsilon} p(x^n) \\le |A_\\epsilon^{(n)}| \\cdot 2^{-n(H-\\epsilon)}$，故 $|A_\\epsilon^{(n)}| \\ge (1-\\epsilon)2^{n(H-\\epsilon)}$（下界有 $1-\\epsilon$ 因子）。<br><br><strong>复盘建议</strong>：上界来自\"总概率 $\\le 1$\"，结合典型序列概率 $\\ge 2^{-(nH+n\\epsilon)}$；下界来自\"总概率 $\\ge 1-\\epsilon$\"（AEP 性质二），结合典型序列概率 $\\le 2^{-(nH-n\\epsilon)}$。", "pitfall": "上界是 2^{n(H+ε)}（不带 1-ε），下界是 (1-ε)2^{n(H-ε)}（带 1-ε）。把两个混淆是最常见的错误。"}, {"type": "choice", "points": 2, "question": "对于均匀分布 $p(X) = u(X) = 1/|\\mathcal{X}|$，典型集 $A_\\epsilon^{(n)}$ 的大小约为？", "options": ["$2^{nD_{\\mathrm{KL}}(p\\|u)}$（指数级小于全集）", "$|\\mathcal{X}|^n$（等于全集大小）", "$2^{nH(X)}$（远小于全集）", "$1$（只有一条序列）"], "answer": 1, "knowledge_point": "均匀分布时典型集=全集", "diagnosis_hint": "不清楚均匀分布时典型集的特殊情况", "explanation": "<strong>正确答案</strong>：B<br><br><strong>推理过程</strong>：均匀分布时 $H(X) = \\log|\\mathcal{X}|$，故 $|A_\\epsilon^{(n)}| \\approx 2^{n\\log|\\mathcal{X}|} = |\\mathcal{X}|^n$，典型集约等于全集。直觉：均匀分布中每条序列等可能，没有哪条序列是\"非典型的\"，所以所有序列都典型。<br><br><strong>连接 KL 散度</strong>：典型集占比 $|A_\\epsilon^{(n)}|/|\\mathcal{X}|^n \\approx 2^{-nD_{\\mathrm{KL}}(p\\|u)}$，均匀分布时 $D_{\\mathrm{KL}}(u\\|u)=0$，占比 $= 1$（全集）。<br><br><strong>复盘建议</strong>：均匀分布 --> $H(X)$ 最大 --> 典型集最大 --> 不可压缩。偏离均匀分布越远（$D_{\\mathrm{KL}}$ 越大），典型集越小，可压缩性越强。", "pitfall": "A 选项说的是占比（分式），不是绝对大小；绝对大小是 |X|^n，A 是比例指数。"}, {"type": "choice", "points": 2, "question": "定长编码定理表明，对于 i.i.d. 信源，无损定长编码每符号所需的最优 bit 数趋向于？", "options": ["$\\log|\\mathcal{X}|$（字符集大小的对数）", "$H(X)$（单符号熵）", "$H(X^n)/n^2$", "$0$（可以无限压缩）"], "answer": 1, "knowledge_point": "定长编码定理", "diagnosis_hint": "不清楚编码定理的极限码率", "explanation": "<strong>正确答案</strong>：B<br><br><strong>推理过程</strong>：定长编码定理指出，满足误差 $\\le \\delta$ 的最小码集 $S_\\delta^{(n)}$ 的每符号 bit 数 $\\frac{1}{n}\\log|S_\\delta^{(n)}| \\to H(X)$。这意味着：（1）码率 $> H(X)$ 时，无损编码可实现（典型集编码方案）；（2）码率 $< H(X)$ 时，任何方案的错误率趋向 1（不可减性定理）。<br><br><strong>干扰项分析</strong>：A 是朴素编码（每符号均匀分配），$H(X) \\le \\log|\\mathcal{X}|$；C 无意义；D 不可能，$H(X) > 0$（除非信源退化为确定性）。<br><br><strong>复盘建议</strong>：Shannon 第一定理（信源编码定理）：极限码率 = $H(X)$。Shannon 第二定理（信道编码定理）：极限码率 = $C$（信道容量）。两个定理都是 Shannon 的核心贡献。", "pitfall": "不要把 log|X| 和 H(X) 混淆：log|X| 是均匀分布的熵（最大值），H(X) ≤ log|X|。"}, {"type": "choice", "points": 2, "question": "以下对大数定理在 AEP 中作用的描述，正确的是？", "options": ["大数定理保证 $p(X^n)$ 趋向于均匀分布", "大数定理保证 $\\frac{1}{n}\\sum_{i=1}^n \\log\\frac{1}{p(X_i)}$ 依概率收敛到 $H(X)$", "大数定理保证 $H(X^n) \\to 0$", "大数定理只适用于二项分布"], "answer": 1, "knowledge_point": "大数定理在AEP中的作用", "diagnosis_hint": "不清楚大数定理如何推导出AEP", "explanation": "<strong>正确答案</strong>：B<br><br><strong>推理过程</strong>：AEP 的推导：令 $Y_i = \\log\\frac{1}{p(X_i)}$（i.i.d.，均值 $\\mathbb{E}[Y_i] = H(X)$），则 $\\frac{1}{n}\\log\\frac{1}{p(X^n)} = \\frac{1}{n}\\sum Y_i \\xrightarrow{P} H(X)$（大数定理）。<br><br><strong>干扰项分析</strong>：A 错（大数定理关于均值收敛，不是关于分布收敛；$p(X^n)$ 不趋向均匀）；C 错（$H(X^n) = nH(X) \\to \\infty$，不趋向 0）；D 错（大数定理适用于任意方差有限的 i.i.d. 随机变量）。<br><br><strong>复盘建议</strong>：AEP 的三步推导链：（1）$p(X^n) = \\prod p(X_i)$（独立性）；（2）取对数变乘为加 $\\frac{1}{n}\\sum \\log\\frac{1}{p(X_i)}$；（3）大数定理：求和趋向期望 $H(X)$。", "pitfall": "关键是\"取对数\"这一步，使得乘法变加法，然后才能用大数定理。"}, {"type": "choice", "points": 2, "question": "对于 i.i.d. 信源，$\\epsilon$-典型集占全空间 $\\mathcal{X}^n$ 的比例约为？", "options": ["$H(X)/\\log|\\mathcal{X}|$", "$2^{-nD_{\\mathrm{KL}}(p(X)\\|u(X))}$", "$2^{nH(X)}$", "$1/n$"], "answer": 1, "knowledge_point": "典型集占比与KL散度", "diagnosis_hint": "不清楚典型集占比与KL散度的联系", "explanation": "<strong>正确答案</strong>：B<br><br><strong>推理过程</strong>：$|A_\\epsilon^{(n)}|/|\\mathcal{X}^n| \\approx 2^{nH(X)} / 2^{n\\log|\\mathcal{X}|} = 2^{-n(\\log|\\mathcal{X}| - H(X))} = 2^{-nD_{\\mathrm{KL}}(p\\|u)}$，其中利用了 $\\log|\\mathcal{X}| - H(X) = D_{\\mathrm{KL}}(p\\|u)$（Lecture 3 结论）。<br><br><strong>含义</strong>：KL 散度越大（分布偏离均匀越多），典型集越小（可压缩性越强）；KL = 0（均匀分布）时，典型集 = 全集（不可压缩）。<br><br><strong>复盘建议</strong>：$D_{\\mathrm{KL}}(p\\|u)$ 的信息论意义 = 「从均匀分布压缩的潜力」；典型集占比 $= 2^{-n \\times \\text{潜力}}$，压缩潜力越大，典型集越小。", "pitfall": "B 是比例（指数级小），C 是绝对大小（指数级大）；两者之比 = 2^{n(H - log|X|)} = 2^{-nD_KL}。"}, {"type": "choice", "points": 2, "question": "典型集中，概率最大序列与概率最小序列之比为？", "options": ["$1$（完全等分）", "$2^{2n\\epsilon}$（指数级）", "$2n\\epsilon$（线性级）", "$n^2$（多项式级）"], "answer": 1, "knowledge_point": "渐近等分的精确含义", "diagnosis_hint": "误以为AEP中概率完全相等", "explanation": "<strong>正确答案</strong>：B<br><br><strong>推理过程</strong>：概率最大的典型序列 $p_\\max = 2^{-n(H-\\epsilon)}$，概率最小的典型序列 $p_\\min = 2^{-n(H+\\epsilon)}$，比值为 $p_\\max / p_\\min = 2^{-n(H-\\epsilon)} / 2^{-n(H+\\epsilon)} = 2^{2n\\epsilon}$（指数级）。<br><br><strong>悖论的解释</strong>：尽管概率差距是指数级的，但\"信息量\"（$-\\log p$）的差距只有 $2n\\epsilon$，即线性级。AEP 说的是\"信息量等分\"，而非\"概率等分\"，对数缩放是关键！<br><br><strong>复盘建议</strong>：\"渐近等分性\"的\"等分\"是在对数/信息量空间等分，不是概率空间。这是信息论独特的对数视角。", "pitfall": "AEP 的'等分'是信息量近似相等（差距 ≤ 2nε），不是概率完全相等。概率比是指数级 2^{2nε}，差距很大。"}, {"type": "choice", "points": 2, "question": "不可减性定理说明，如果集合 $B^{(n)}$ 的大小 $|B^{(n)}| \\le 2^{n(H(X)-\\sigma)}$（$\\sigma > 0$），则？", "options": ["$p(X^n \\in B^{(n)}) \\ge 1-\\sigma$，覆盖了大部分概率", "$p(X^n \\in B^{(n)}) \\to 0$，无法覆盖主要概率", "$B^{(n)}$ 就是最优编码集合", "$B^{(n)}$ 与典型集 $A_\\epsilon^{(n)}$ 相同"], "answer": 1, "knowledge_point": "不可减性定理", "diagnosis_hint": "不理解不可减性定理的意义", "explanation": "<strong>正确答案</strong>：B<br><br><strong>推理过程</strong>：若 $|B^{(n)}| < 2^{nH(X)}$（小于典型集数量级），则 $B^{(n)}$ 无法包含足够多的典型序列，导致 $p(X^n \\in B^{(n)}) \\to 0$。这说明任何比典型集小的集合都不能做有效的无损编码集。<br><br><strong>意义</strong>：这是定长编码定理\"下界\"的证明核心——任何码率 $< H(X)$ 的方案都会导致误差概率趋向 1，即 $H(X)$ 是无损编码的极限（不可突破的下界）。<br><br><strong>复盘建议</strong>：不可减性 + 典型集编码方案 = 定长编码定理的完整证明：典型集编码实现了 $H(X)$（可达性），不可减性证明了 $< H(X)$ 不可能（逆定理）。", "pitfall": "不可减性定理说的是'小于典型集的集合不够用'（覆盖概率→0），是下界证明的关键，不是说某个集合'好'。"}, {"type": "tf", "points": 1, "question": "AEP（渐近等分性）是大数定理在随机变量 $\\log\\frac{1}{p(X)}$ 上的直接应用。", "options": [], "answer": true, "knowledge_point": "AEP与大数定理的关系", "diagnosis_hint": "不清楚AEP的推导来源", "explanation": "<strong>正确答案</strong>：正确（√）<br><br><strong>判断边界</strong>：AEP 推导：令 $Y_i = \\log\\frac{1}{p(X_i)}$，则 $Y_i$ i.i.d.，期望 $\\mathbb{E}[Y_i] = H(X)$。由大数定理 $\\frac{1}{n}\\sum Y_i \\to \\mathbb{E}[Y] = H(X)$，即 $\\frac{1}{n}\\log\\frac{1}{p(X^n)} \\to H(X)$，这就是 AEP。整个过程是大数定理的直接应用，区别在于施加到了特殊的随机变量 $\\log\\frac{1}{p(X)}$（信息量）上。<br><br><strong>复盘建议</strong>：AEP 的数学本质 = 大数定理，信息论的美妙在于选择了\"信息量\"这个正确的随机变量，使得大数定理能揭示压缩极限。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "对于 i.i.d. 信源，$H(X^n) = nH(X)$（联合熵等于单符号熵的 $n$ 倍）。", "options": [], "answer": true, "knowledge_point": "i.i.d.的熵相加性", "diagnosis_hint": "不确定独立性能否保证熵相加", "explanation": "<strong>正确答案</strong>：正确（√）<br><br><strong>判断边界</strong>：i.i.d. 意味着 $X_1, \\ldots, X_n$ 独立，$H(X_1, \\ldots, X_n) = \\sum_{i=1}^n H(X_i) = nH(X)$（独立性 --> 联合熵等于各自熵之和）。进一步，$p(X^n) = \\prod p(X_i)$（概率相乘），取 $\\log$ 得到信息量相加，再取期望得到熵相加。<br><br><strong>复盘建议</strong>：记住对偶性：i.i.d. --> 概率相乘 $p(X^n)=\\prod p(X_i)$，熵相加 $H(X^n)=nH(X)$。非独立时 $H(X^n) < nH(X)$（条件减少不确定性）。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "$\\epsilon$-典型集中每条序列的概率完全相等，均为 $2^{-nH(X)}$。", "options": [], "answer": false, "knowledge_point": "典型序列概率范围", "diagnosis_hint": "误解'等分'为'完全等于'", "explanation": "<strong>正确答案</strong>：错误（×）<br><br><strong>判断边界</strong>：典型集中每条序列的概率满足 $2^{-n(H+\\epsilon)} \\le p(x^n) \\le 2^{-n(H-\\epsilon)}$，是一个范围，并非精确等于 $2^{-nH}$。最大与最小概率之比可达 $2^{2n\\epsilon}$（指数级差距）。\"渐近等分\"指的是信息量近似相等（偏差 $\\le n\\epsilon$），而非概率完全相等。<br><br><strong>复盘建议</strong>：\"渐近等分性\"是在信息量（对数）空间的近似等分，不是概率空间的等分。对数将指数级差距压缩为线性差距，这才使得'近似等分'成为有意义的陈述。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "当 $n$ 足够大时，所有 $\\mathcal{X}^n$ 中序列的绝大多数（按序列数量）都是典型序列。", "options": [], "answer": false, "knowledge_point": "典型集数量与典型集概率的区别", "diagnosis_hint": "混淆'典型集包含大多数概率'与'典型集包含大多数序列'", "explanation": "<strong>正确答案</strong>：错误（×）<br><br><strong>判断边界</strong>：典型集包含的概率趋向 1（性质二），但典型集的序列数量 $|A_\\epsilon^{(n)}| \\approx 2^{nH(X)}$ 远小于全集 $|\\mathcal{X}^n| = 2^{n\\log|\\mathcal{X}|}$（比例 $\\approx 2^{-nD_{\\mathrm{KL}}}$）。当 $p \\ne u$（非均匀分布）时，绝大多数序列（按数量）都是非典型的，但这些非典型序列的总概率趋向 0。<br><br><strong>关键区分</strong>：典型集 = 少量序列（数量少）但高概率（概率总和趋向 1）。非典型集 = 大量序列（数量多）但低概率（概率总和趋向 0）。这正是数据压缩的基础：只需编码少量典型序列。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "定长信源编码定理说明，只要码率大于 $H(X)$，就可以实现几乎无损压缩（误差概率趋向 0）。", "options": [], "answer": true, "knowledge_point": "定长编码定理可达性", "diagnosis_hint": "不确定'码率 > H(X)'是否足以保证无损", "explanation": "<strong>正确答案</strong>：正确（√）<br><br><strong>判断边界</strong>：当码率 $R > H(X)$ 时，典型集编码方案有效：选取误差 $\\epsilon < R - H(X)$，用 $n(H(X)+\\epsilon) < nR$ bit 编码典型集（共 $\\le 2^{n(H+\\epsilon)}$ 条序列），误差概率 $= p(X^n \\notin A_\\epsilon^{(n)}) \\to 0$（AEP 性质二）。故码率 $> H(X)$ 时可达几乎无损。<br><br><strong>逆方向</strong>：码率 $< H(X)$ 时，由不可减性定理，误差概率趋向 1（无法无损）。两方向合起来就是定长编码定理：极限码率 $= H(X)$。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "典型集的总概率趋向于 1，意味着典型集中的序列数量占 $\\mathcal{X}^n$ 的多数。", "options": [], "answer": false, "knowledge_point": "概率集中与序列数量集中的区别", "diagnosis_hint": "混淆概率集中与序列数量集中", "explanation": "<strong>正确答案</strong>：错误（×）<br><br><strong>判断边界</strong>：典型集总概率趋向 1（概率集中），但序列数量 $|A_\\epsilon^{(n)}|/|\\mathcal{X}^n| = 2^{-nD_{\\mathrm{KL}}(p\\|u)} \\to 0$（当 $p \\ne u$ 时，序列数量占比指数级趋向 0）。两者方向相反：概率集中于少数序列（典型集），大多数序列（非典型集）的总概率趋向 0。这是 AEP 的核心，也是数据压缩的物理基础。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "AEP 只适用于独立同分布（i.i.d.）信源，对马尔可夫链等非独立信源不成立。", "options": [], "answer": false, "knowledge_point": "AEP的适用范围", "diagnosis_hint": "误以为AEP只限于i.i.d.情形", "explanation": "<strong>正确答案</strong>：错误（×）<br><br><strong>判断边界</strong>：对于非 i.i.d. 的平稳遍历信源（如马尔可夫链），Shannon-McMillan-Breiman（SMB）定理给出了 AEP 的广义版本：$\\frac{1}{n}\\log\\frac{1}{p(X^n)} \\xrightarrow{P} \\bar{H}$（熵率）。因此 AEP 在更广义的意义下对非 i.i.d. 信源也成立，只是 $H(X)$ 需替换为熵率 $\\bar{H}$。<br><br><strong>复盘建议</strong>：i.i.d. 情形用大数定理推；非 i.i.d. 情形用 SMB 定理。两种情形都有 AEP，但适用的定理不同。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "对于二项分布（0-1 分布，1 出现概率为 $p$），长度为 $n$ 的典型序列中 1 出现的次数集中在 $np$ 附近。", "options": [], "answer": true, "knowledge_point": "二项分布与AEP", "diagnosis_hint": "不清楚AEP如何应用到二项分布", "explanation": "<strong>正确答案</strong>：正确（√）<br><br><strong>判断边界</strong>：对于 Bernoulli($p$) 信源，$H(X) = -p\\log p - (1-p)\\log(1-p)$，AEP 表明典型序列满足 $p(x^n) \\approx 2^{-nH(X)}$。令 $k$ 为 1 出现的次数，$p(x^n) = p^k(1-p)^{n-k}$，典型序列要求 $p^k(1-p)^{n-k} \\approx 2^{-nH(X)} = p^{np}(1-p)^{n(1-p)}$，故 $k \\approx np = \\mathbb{E}[\\text{1的次数}]$，即 1 出现的次数集中在期望值附近（大数定理）。<br><br><strong>复盘建议</strong>：二项分布 AEP 的直觉 = 大数定理：长序列中各符号出现频率趋向其概率，所以 1 出现次数趋向 $np$。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "定长编码定理中，满足误差 $\\le \\delta$ 的最小集合 $S_\\delta^{(n)}$ 的大小精确等于典型集 $A_\\epsilon^{(n)}$ 的大小。", "options": [], "answer": false, "knowledge_point": "最小覆盖集与典型集的关系", "diagnosis_hint": "误以为最优集合就是典型集", "explanation": "<strong>正确答案</strong>：错误（×）<br><br><strong>判断边界</strong>：$S_\\delta^{(n)}$ 是满足误差 $\\le \\delta$ 的「最小」集合，定长编码定理说的是 $\\frac{1}{n}\\log|S_\\delta^{(n)}| \\to H(X)$，即对数大小趋向同一极限，但具体大小不一定等于典型集。典型集 $A_\\epsilon^{(n)}$ 是一个满足误差条件的集合（不一定是最小的），用于定理的可达性证明（上界），但最小集合 $S_\\delta$ 可能比 $A_\\epsilon$ 更小。关键是它们的「对数大小每 $n$」趋向同一极限 $H(X)$。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "在切比雪夫不等式 $p(|X - \\mu| \\ge \\epsilon) \\le \\frac{\\sigma^2}{\\epsilon^2}$ 中，方差 $\\sigma^2$ 有限是使用该不等式的必要条件。", "options": [], "answer": true, "knowledge_point": "切比雪夫不等式条件", "diagnosis_hint": "忽略切比雪夫不等式的适用条件", "explanation": "<strong>正确答案</strong>：正确（√）<br><br><strong>判断边界</strong>：切比雪夫不等式 $p(|X-\\mu| \\ge \\epsilon) \\le \\sigma^2/\\epsilon^2$ 的推导依赖方差 $\\sigma^2 = \\mathbb{E}[(X-\\mu)^2]$ 存在（有限）。若 $\\sigma^2 = \\infty$，不等式右边为 $\\infty$，无意义。在 AEP 应用中，随机变量 $Y = \\log\\frac{1}{p(X)}$ 需要满足 $\\mathrm{Var}(Y) < \\infty$ 才能用切比雪夫不等式证明大数定理，这是 AEP 的隐含前提条件（通常满足）。<br><br><strong>复盘建议</strong>：大数定理（弱）通常要求有限方差（切比雪夫路线）或有限均值（其他证明路线）。在信息论中通常假设信源的熵有限，保证相关条件成立。", "pitfall": ""}, {"type": "short", "points": 6, "question": "证明 $\\epsilon$-典型集大小的上界：$|A_\\epsilon^{(n)}| \\le 2^{n(H(X)+\\epsilon)}$。", "options": [], "answer": null, "knowledge_point": "典型集大小上界证明", "diagnosis_hint": "不知道如何从概率归一化推出大小上界", "explanation": "<strong>参考答案</strong>（6分）：<br><br><strong>利用概率归一化</strong>（2分）：<br>由概率归一化 $\\sum_{x^n \\in \\mathcal{X}^n} p(x^n) = 1$，特别地：<br>$$1 \\ge \\sum_{x^n \\in A_\\epsilon^{(n)}} p(x^n)$$<br><br><strong>利用典型序列概率下界</strong>（2分）：<br>对任意 $x^n \\in A_\\epsilon^{(n)}$，由典型集定义，$p(x^n) \\ge 2^{-n(H(X)+\\epsilon)}$，故：<br>$$1 \\ge \\sum_{x^n \\in A_\\epsilon^{(n)}} p(x^n) \\ge \\sum_{x^n \\in A_\\epsilon^{(n)}} 2^{-n(H(X)+\\epsilon)} = |A_\\epsilon^{(n)}| \\cdot 2^{-n(H(X)+\\epsilon)}$$<br><br><strong>整理得上界</strong>（2分）：<br>$$|A_\\epsilon^{(n)}| \\le 2^{n(H(X)+\\epsilon)} \\quad \\blacksquare$$", "pitfall": "上界证明从'总概率 ≤ 1'出发，结合'典型序列概率 ≥ 2^{-(nH+nε)}'（下界），推出序列数量 ≤ 2^{n(H+ε)}。方向：概率下界 + 总概率 ≤ 1 --> 数量上界。"}, {"type": "short", "points": 6, "question": "证明 $\\epsilon$-典型集大小的下界：$|A_\\epsilon^{(n)}| \\ge (1-\\epsilon) 2^{n(H(X)-\\epsilon)}$（对充分大的 $n$）。", "options": [], "answer": null, "knowledge_point": "典型集大小下界证明", "diagnosis_hint": "不知道如何从总概率趋向1推出大小下界", "explanation": "<strong>参考答案</strong>（6分）：<br><br><strong>利用典型集总概率</strong>（2分）：<br>由 AEP（性质二），对任意 $\\epsilon > 0$，存在 $n_0$ 使得 $n > n_0$ 时：<br>$$p(X^n \\in A_\\epsilon^{(n)}) = \\sum_{x^n \\in A_\\epsilon^{(n)}} p(x^n) \\ge 1 - \\epsilon$$<br><br><strong>利用典型序列概率上界</strong>（2分）：<br>对任意 $x^n \\in A_\\epsilon^{(n)}$，$p(x^n) \\le 2^{-n(H(X)-\\epsilon)}$，故：<br>$$1 - \\epsilon \\le \\sum_{x^n \\in A_\\epsilon^{(n)}} p(x^n) \\le |A_\\epsilon^{(n)}| \\cdot 2^{-n(H(X)-\\epsilon)}$$<br><br><strong>整理得下界</strong>（2分）：<br>$$|A_\\epsilon^{(n)}| \\ge (1-\\epsilon) 2^{n(H(X)-\\epsilon)} \\quad \\blacksquare$$", "pitfall": "下界证明从'总概率 ≥ 1-ε'出发（需要 AEP 性质二！），结合'典型序列概率 ≤ 2^{-(nH-nε)}'（上界），推出数量下界 ≥ (1-ε)2^{n(H-ε)}。"}, {"type": "short", "points": 6, "question": "用 AEP 的三条性质说明如何构造长度为 $n(H(X)+\\epsilon)+1$ bit 的定长无损编码方案，并分析误差概率。", "options": [], "answer": null, "knowledge_point": "典型集编码方案", "diagnosis_hint": "不清楚如何利用典型集设计编码", "explanation": "<strong>参考答案</strong>（6分）：<br><br><strong>编码方案设计</strong>（3分）：<br>（1）取典型集 $A_\\epsilon^{(n)}$，对所有 $2^{n(H+\\epsilon)}$ 条（或更少）典型序列按编号建立索引表。<br>（2）<strong>典型序列编码</strong>：前缀 $1$ + 索引（共 $n(H+\\epsilon)+1$ bit）；<br>（3）<strong>非典型序列编码</strong>：前缀 $0$ + 原序列（可以是 $n\\log|\\mathcal{X}|+1$ bit 或任意固定长码）。<br><br><strong>码长分析</strong>（1分）：<br>典型序列数量 $|A_\\epsilon^{(n)}| \\le 2^{n(H+\\epsilon)}$，故索引需要 $\\le n(H+\\epsilon)$ bit，加 1 bit 前缀共 $n(H+\\epsilon)+1$ bit，不超过给定码长。$\\checkmark$<br><br><strong>误差概率分析</strong>（2分）：<br>译码错误当且仅当序列 $X^n$ 非典型（非典型序列被前缀 $0$ 标记，无法正确还原）：<br>$$P_e = p(X^n \\notin A_\\epsilon^{(n)}) \\to 0 \\quad (n \\to \\infty)$$<br>（由 AEP 性质二：$p(X^n \\in A_\\epsilon^{(n)}) \\to 1$）。$\\blacksquare$", "pitfall": "码长计算：典型集共 ≤ 2^{n(H+ε)} 条，索引需要 ≤ n(H+ε) bit，加1位前缀 = n(H+ε)+1 bit。误差 = 非典型序列概率 → 0。"}, {"type": "short", "points": 6, "question": "证明不可减性定理：设 $\\sigma > \\epsilon > 0$，若集合 $B^{(n)} \\subseteq \\mathcal{X}^n$ 满足 $|B^{(n)}| \\le 2^{n(H(X)-\\sigma)}$，则 $p(X^n \\in B^{(n)}) \\to 0$（$n \\to \\infty$）。", "options": [], "answer": null, "knowledge_point": "不可减性定理证明", "diagnosis_hint": "不清楚如何分拆集合证明", "explanation": "<strong>参考答案</strong>（6分）：<br><br><strong>分解集合</strong>（1分）：<br>$$p(X^n \\in B^{(n)}) = p(X^n \\in B^{(n)} \\cap A_\\epsilon^{(n)}) + p(X^n \\in B^{(n)} \\cap (\\mathcal{X}^n \\setminus A_\\epsilon^{(n)}))$$<br><br><strong>处理第二项</strong>（2分）：<br>$$p(X^n \\in B^{(n)} \\cap (\\mathcal{X}^n \\setminus A_\\epsilon^{(n)})) \\le p(X^n \\notin A_\\epsilon^{(n)}) \\to 0 \\quad (\\text{由 AEP 性质二})$$<br><br><strong>处理第一项</strong>（3分）：<br>$$p(X^n \\in B^{(n)} \\cap A_\\epsilon^{(n)}) = \\sum_{x^n \\in B^{(n)} \\cap A_\\epsilon^{(n)}} p(x^n)$$<br>对 $x^n \\in A_\\epsilon^{(n)}$，有 $p(x^n) \\le 2^{-n(H-\\epsilon)}$（典型序列概率上界），且 $|B^{(n)} \\cap A_\\epsilon^{(n)}| \\le |B^{(n)}| \\le 2^{n(H-\\sigma)}$，故：<br>$$p(X^n \\in B^{(n)} \\cap A_\\epsilon^{(n)}) \\le 2^{n(H-\\sigma)} \\cdot 2^{-n(H-\\epsilon)} = 2^{-n(\\sigma-\\epsilon)} \\to 0 \\quad (\\text{因为} \\sigma > \\epsilon)$$<br><br><strong>总结</strong>：两项均趋向 0，故 $p(X^n \\in B^{(n)}) \\to 0$。$\\blacksquare$", "pitfall": "证明的关键是'分拆'：将 B 分为 B∩A_ε 和 B∩(X^n-A_ε) 两部分，分别用'典型集概率上界'和'AEP性质二'处理。必须要求 σ > ε 才能使指数 -(σ-ε) < 0。"}, {"type": "essay", "points": 8, "question": "请从以下三个角度解释 $\\epsilon$-典型集的意义：（1）数学定义；（2）信源序列的直觉理解；（3）与数据压缩的联系。请结合具体例子（如二项分布）说明。", "options": [], "answer": null, "knowledge_point": "典型集的三重理解", "diagnosis_hint": "只会写定义，不能联系直觉和压缩", "explanation": "<strong>参考答案</strong>（8分）：<br><br><strong>（1）数学定义</strong>（2分）：<br>$$A_\\epsilon^{(n)} = \\left\\{x^n \\in \\mathcal{X}^n : \\left|\\frac{1}{n}\\log\\frac{1}{p(x^n)} - H(X)\\right| \\le \\epsilon\\right\\}$$<br>即每符号平均信息量与理论熵 $H(X)$ 的偏差不超过 $\\epsilon$ 的序列集合。等价地，$2^{-n(H+\\epsilon)} \\le p(x^n) \\le 2^{-n(H-\\epsilon)}$。<br><br><strong>（2）直觉理解</strong>（3分）：<br>以二项分布（0-1 信源，$p(1) = p$）为例：一个长度为 $n$ 的典型序列中，1 出现的次数集中在 $np$ 附近（$\\pm n\\epsilon$ 的范围内，由大数定理保证）。这样的序列并不罕见——AEP 告诉我们，以高概率随机生成的序列都是典型的。具体地，$k = np$ 次 1 的序列概率为 $p^{np}(1-p)^{n(1-p)} = 2^{-nH(X)}$，与典型序列概率一致。<br><strong>直觉</strong>：典型集 = 最有可能出现的那些序列（概率集中但各自概率小），非典型集 = 极端罕见的序列（如全 0 或全 1）。<br><br><strong>（3）数据压缩的联系</strong>（3分）：<br>典型集大小 $|A_\\epsilon^{(n)}| \\approx 2^{nH(X)}$，只需 $n H(X)$ bit 即可区分所有典型序列（每条典型序列用索引编码），而 AEP 性质二保证这 $2^{nH(X)}$ 条序列涵盖了几乎全部概率（误差 $\\to 0$）。对比朴素编码需要 $n\\log|\\mathcal{X}|$ bit（覆盖全集），典型集编码节省了 $n D_{\\mathrm{KL}}(p\\|u)$ bit，压缩率直接由 KL 散度决定。", "pitfall": "三个角度要都答到：数学定义（精确）、直觉（用具体例子）、压缩联系（典型集大小 = 2^{nH}，需要 nH bit）。只写定义不给满分。"}, {"type": "essay", "points": 8, "question": "请完整叙述并证明定长信源编码定理（Shannon 第一定理）：对于 i.i.d. 信源，满足误差 $\\le \\delta$ 的最小覆盖集 $S_\\delta^{(n)}$ 满足 $\\frac{1}{n}\\log|S_\\delta^{(n)}| \\to H(X)$。请分别证明上界（可达性）和下界（逆定理）。", "options": [], "answer": null, "knowledge_point": "定长编码定理完整证明", "diagnosis_hint": "只知道结论，不会分别证明上界和下界", "explanation": "<strong>参考答案</strong>（8分）：<br><br><strong>定理表述</strong>（1分）：对任意 $\\epsilon > 0$，$0 < \\delta < 1$，存在 $n_0$，当 $n > n_0$ 时，$\\left|\\frac{1}{n}\\log|S_\\delta^{(n)}| - H(X)\\right| < \\epsilon$，即 $H(X) - \\epsilon < \\frac{1}{n}\\log|S_\\delta^{(n)}| < H(X) + \\epsilon$。<br><br><strong>上界证明（可达性）</strong>（3分）：<br>取典型集 $A_\\epsilon^{(n)}$（$\\epsilon < \\delta$ 或任意 $\\epsilon > 0$）。由 AEP 性质二，充分大的 $n$ 时：$p(X^n \\in A_\\epsilon^{(n)}) \\ge 1 - \\epsilon \\ge 1 - \\delta$，故 $A_\\epsilon^{(n)}$ 是一个满足误差 $\\le \\delta$ 的覆盖集。又由定义 $S_\\delta^{(n)}$ 是最小覆盖集，故 $|S_\\delta^{(n)}| \\le |A_\\epsilon^{(n)}| \\le 2^{n(H+\\epsilon)}$，从而：<br>$$\\frac{1}{n}\\log|S_\\delta^{(n)}| \\le H(X) + \\epsilon$$<br><br><strong>下界证明（逆定理）</strong>（4分）：<br>对任意满足误差 $\\le \\delta$（即 $p(X^n \\in S_\\delta) \\ge 1-\\delta > 0$）的覆盖集 $S_\\delta^{(n)}$，假设 $|S_\\delta^{(n)}| \\le 2^{n(H-\\epsilon)}$（下界猜测），则由不可减性定理（取 $\\sigma = \\epsilon$），充分大的 $n$ 时：<br>$$p(X^n \\in S_\\delta^{(n)}) \\le 2^{-n(\\sigma-\\epsilon')} \\to 0$$（其中取 $\\epsilon' < \\sigma = \\epsilon$）<br>这与 $p(X^n \\in S_\\delta^{(n)}) \\ge 1 - \\delta > 0$ 矛盾（对充分大 $n$）。故 $|S_\\delta^{(n)}| > 2^{n(H-\\epsilon)}$，即：<br>$$\\frac{1}{n}\\log|S_\\delta^{(n)}| > H(X) - \\epsilon$$<br><br>上下界合并：$\\frac{1}{n}\\log|S_\\delta| \\to H(X)$。$\\blacksquare$", "pitfall": "上界用'典型集是满足误差条件的集合'（可达），下界用'不可减性定理'（逆）。两个方向的证明工具不同，需要分开处理。"}, {"type": "essay", "points": 10, "question": "本章（Lecture 4）建立了 AEP，Lecture 3 建立了不等式工具体系。请讨论：（1）AEP 如何连接了'单符号信息论'（Lecture 2/3）和'长序列信息论'；（2）典型集大小 $2^{nH(X)}$ 与 KL 散度之间的关系；（3）如果信源不是 i.i.d.，AEP 还成立吗？会有哪些改变？", "options": [], "answer": null, "knowledge_point": "AEP的地位与推广", "diagnosis_hint": "只回答了单点知识，没有建立联系", "explanation": "<strong>参考答案</strong>（10分）：<br><br><strong>（1）AEP 连接单符号与长序列</strong>（4分）：<br>Lecture 2/3 研究单符号：$H(X)$、$D_{\\mathrm{KL}}(p\\|q)$、$I(X;Y)$ 等，这些是对单次试验的描述。AEP 是从单符号到长序列的\"桥\"：<br><ul><li>i.i.d. + 大数定理 --> $\\frac{1}{n}\\log\\frac{1}{p(X^n)} \\to H(X)$（2分）</li><li>单符号熵 $H(X)$ 变成了长序列压缩率的极限：一次符号的不确定性决定了 $n$ 次序列的最优编码长度（1分）</li><li>AEP 使得信息论从\"理论\"走向\"算法\"——典型集编码就是可操作的压缩算法（1分）</li></ul><br><strong>（2）典型集大小与 KL 散度</strong>（3分）：<br>$\\frac{|A_\\epsilon^{(n)}|}{|\\mathcal{X}^n|} \\approx 2^{-nD_{\\mathrm{KL}}(p(X)\\|u(X))}$（1分）<br>其中 $D_{\\mathrm{KL}}(p\\|u) = \\log|\\mathcal{X}| - H(X)$（Lecture 3 结论）（1分）。直觉：KL 散度越大（$p$ 偏离均匀越多），典型集越小（可压缩性越强）；KL = 0（均匀分布）时典型集 = 全集（不可压缩）。这把\"熵 = 不可压缩性\"和\"KL = 可压缩性\"统一在一个公式中（1分）。<br><br><strong>（3）非 i.i.d. 情形</strong>（3分）：<br>对平稳遍历信源（如马尔可夫链），Shannon-McMillan-Breiman（SMB）定理给出广义 AEP：$\\frac{1}{n}\\log\\frac{1}{p(X^n)} \\xrightarrow{P} \\bar{H}$（熵率）（1分）。<br>主要改变：<ul><li>$H(X)$ 替换为熵率 $\\bar{H} = \\lim_{n\\to\\infty}\\frac{H(X^n)}{n}$（非独立时 $H(X^n) \\ne nH(X)$）（1分）</li><li>典型集定义和大小公式形式不变，$H(X)$ 改为 $\\bar{H}$；定长编码定理极限码率变为 $\\bar{H}$（1分）</li></ul>", "pitfall": "三个子问题都要答全，每题4/3/3分，漏掉任何一个都会损失分数。第三问要提到SMB定理和熵率的概念。"}, {"type": "comprehensive", "points": 20, "question": "设信源 $X$ 服从分布 $p(0) = 0.8$，$p(1) = 0.2$（二元非均匀分布），取序列长度 $n = 100$，$\\epsilon = 0.1$。\n\n请计算和分析：\n(1) 计算单符号熵 $H(X)$（保留3位小数，以 bit 为单位）（3分）\n(2) 给出 $\\epsilon$-典型集的定义，并计算典型集中典型序列的概率范围（上下界）（4分）\n(3) 计算典型集大小 $|A_\\epsilon^{(n)}|$ 的上界和下界（取 $\\epsilon' = 0.1$）（4分）\n(4) 一个长度 100 的序列中 1 恰好出现 $k$ 次时，其概率为 $0.8^{100-k} \\cdot 0.2^k$。计算 $k = 20$（期望值）时序列的概率，并与典型序列概率范围对比，说明 $k=20$ 时是否为典型序列（4分）\n(5) 说明定长编码方案的码长，并与朴素编码（每符号 1 bit 均匀编码）相比，压缩了多少 bit？（5分）", "options": [], "answer": null, "knowledge_point": "AEP数值综合应用", "diagnosis_hint": "计算典型序列概率时分不清上下界方向，或计算压缩节省时比较对象不正确", "explanation": "<strong>完整参考答案</strong>（20分）：<br><br>\n\n<strong>(1) 计算 $H(X)$</strong>（3分）：<br>\n$$H(X) = -0.8\\log_2 0.8 - 0.2\\log_2 0.2$$\n$$= -0.8 \\times (-0.322) - 0.2 \\times (-2.322)$$\n$$= 0.258 + 0.464 = \\boxed{0.722 \\text{ bit}}$$<br>\n\n<strong>(2) 典型集定义与概率范围</strong>（4分）：<br>\n<strong>定义</strong>（1分）：$A_\\epsilon^{(n)} = \\{x^n \\in \\mathcal{X}^n : |\\frac{1}{n}\\log\\frac{1}{p(x^n)} - H(X)| \\le \\epsilon\\}$<br>\n<strong>概率范围</strong>（3分）：$n=100$，$\\epsilon=0.1$，$H(X)=0.722$<br>\n$$\\text{下界：} p(x^n) \\ge 2^{-n(H+\\epsilon)} = 2^{-100 \\times 0.822} = 2^{-82.2}$$\n$$\\text{上界：} p(x^n) \\le 2^{-n(H-\\epsilon)} = 2^{-100 \\times 0.622} = 2^{-62.2}$$\n即 $2^{-82.2} \\le p(x^n) \\le 2^{-62.2}$（注意指数越大，概率越小）。$\\checkmark$<br>\n\n<strong>(3) 典型集大小上下界</strong>（4分）：<br>\n$$\\text{上界：} |A_\\epsilon^{(n)}| \\le 2^{n(H+\\epsilon)} = 2^{100 \\times 0.822} = 2^{82.2} \\approx 2.08 \\times 10^{24}$$\n$$\\text{下界：} |A_\\epsilon^{(n)}| \\ge (1-\\epsilon)2^{n(H-\\epsilon)} = 0.9 \\times 2^{100 \\times 0.622} = 0.9 \\times 2^{62.2} \\approx 0.9 \\times 5.98 \\times 10^{18} \\approx 5.4 \\times 10^{18}$$\n（$\\epsilon' = 0.1$ 对应 $1-\\epsilon' = 0.9$）<br>\n\n对比全集大小 $2^{100}$（共 $2^{100} \\approx 1.27 \\times 10^{30}$ 条序列），典型集只占约 $2^{-100 \\times D_{\\mathrm{KL}}(p\\|u)} = 2^{-100 \\times (1-0.722)} = 2^{-27.8} \\approx 4.6 \\times 10^{-9}$，即约十亿分之四！<br>\n\n<strong>(4) $k=20$ 时的典型性验证</strong>（4分）：<br>\n$k=20$ 时序列概率 $p = 0.8^{80} \\cdot 0.2^{20}$（2分）：<br>\n$$\\log_2 p = 80\\log_2 0.8 + 20\\log_2 0.2 = 80 \\times (-0.322) + 20 \\times (-2.322)$$\n$$= -25.76 + (-46.44) = -72.2$$\n$$\\Rightarrow \\frac{1}{n}\\log\\frac{1}{p} = \\frac{72.2}{100} = 0.722 = H(X)$$\n（2分）$|0.722 - H(X)| = |0.722 - 0.722| = 0 \\le \\epsilon = 0.1$，故 $k=20$ 的序列是 $\\epsilon$-典型序列。$\\checkmark$<br>（注：$k=20 = np = 100 \\times 0.2$ 是期望次数，典型序列的\"代表\"。）<br>\n\n<strong>(5) 定长编码码长与压缩分析</strong>（5分）：<br>\n<strong>典型集编码码长</strong>（2分）：$n(H+\\epsilon)+1 = 100 \\times 0.822 + 1 = 82.2 + 1 = 83.2$，取整为 $\\boxed{84}$ bit。<br>\n<strong>朴素编码码长</strong>（1分）：每符号 1 bit，$n = 100$ bit。<br>\n<strong>压缩节省</strong>（2分）：节省 $100 - 84 = 16$ bit（约 16% 压缩率）。理论最优节省为 $n(\\log|\\mathcal{X}| - H(X)) = 100 \\times (1 - 0.722) = 27.8$ bit（$D_{\\mathrm{KL}} \\times n$），实际编码因加了 $n\\epsilon = 10$ bit 余量，所以节省少一些。随着 $n \\to \\infty$ 且 $\\epsilon \\to 0$，理论最优节省趋向 $nD_{\\mathrm{KL}} = 27.8n/100$ bit/symbol。", "pitfall": "（4）关键：log p(x^n) = k·log(0.2) + (n-k)·log(0.8)，取负并除以n得每符号信息量，对比H(X)即可。（5）朴素编码是 n bit（不是 n·log|X| bit，因为|X|=2，log_2(2)=1 bit）。"}];
+var LABELS = {"page_title": "章节测试", "section": {"choice": "一、选择题", "tf": "二、判断题", "short": "三、简答题", "essay": "四、问答题", "comprehensive": "五、综合题"}, "section_order": ["choice", "tf", "short", "essay", "comprehensive"], "points_suffix": "分", "true_label": "正确", "false_label": "错误", "placeholder": "在此作答...", "pitfall_prefix": "易错提醒：", "correct_label": "正确", "wrong_label": "错误", "answer_prefix": "正确答案：", "reference_label": "参考答案", "graded_label": "已批改", "grade_button": "提交批改", "unanswered_label": "未作答", "wrong_review_title": "错题分析文档", "wrong_review_intro": "本次收录 __COUNT__ 道客观题错题。可以下载 Markdown 文档，或复制整段内容交给模型做错因分析和二次学习规划。", "no_wrong_questions": "本次客观题没有错题。主观题请对照参考答案自行复盘。", "download_wrong_review": "下载错题文档", "copy_wrong_review_prompt": "复制错题分析 Prompt", "score_label": "总分", "duration_prefix": "满分 100 分 | 建议 ", "duration_suffix": " 分钟 | 选择答案后点击提交批改"};
+var WRONG_REVIEW_PROMPT = "";
+var LAST_WRONG_REVIEW = '';
+
+function pointsOf(q) {
+  return q.points || q.score || 0;
+}
+
+function stripHtml(html) {
+  var div = document.createElement('div');
+  div.innerHTML = html || '';
+  return (div.textContent || div.innerText || '').replace(/\s+/g, ' ').trim();
+}
+
+// Convert Markdown fenced code blocks (```lang\n...\n```) and inline `code`
+// to <pre><code> / <code> HTML, then convert \n to <br> for plain text lines.
+function formatQuestion(text) {
+  if (!text) return '';
+  // 1. Replace fenced code blocks: ```lang\ncode\n```
+  text = text.replace(/```(\w*)\n([\s\S]*?)```/g, function(_, lang, code) {
+    var escaped = code
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+    var cls = lang ? ' class="language-' + lang + '"' : '';
+    return '<pre><code' + cls + '>' + escaped + '</code></pre>';
+  });
+  // 2. Replace inline backtick `code`
+  text = text.replace(/`([^`\n]+)`/g, function(_, code) {
+    var escaped = code.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    return '<code>' + escaped + '</code>';
+  });
+  // 3. Convert remaining \n to <br> (outside pre blocks already handled above)
+  // Split on <pre>...</pre> so we don't double-process code blocks
+  var parts = text.split(/(<pre>[\s\S]*?<\/pre>)/);
+  for (var i = 0; i < parts.length; i++) {
+    if (i % 2 === 0) {
+      parts[i] = parts[i].replace(/\n/g, '<br>');
+    }
+  }
+  return parts.join('');
+}
+
+function answerText(q, value) {
+  if (value === null || value === undefined || value === '') return LABELS.unanswered_label;
+  var idx = parseInt(value);
+  if (q.type === 'choice') {
+    return String.fromCharCode(65 + idx) + '. ' + ((q.options && q.options[idx]) ? stripHtml(q.options[idx]) : '');
+  }
+  if (q.type === 'tf') {
+    return idx === 0 ? LABELS.true_label : LABELS.false_label;
+  }
+  return String(value);
+}
+
+function normalizedAnswer(q) {
+  if (q.type === 'tf') {
+    if (q.answer === LABELS.true_label || q.answer === true || q.answer === 'true') return 0;
+    if (q.answer === LABELS.false_label || q.answer === false || q.answer === 'false') return 1;
+  }
+  return parseInt(q.answer);
+}
+
+function questionTypeLabel(type) {
+  return LABELS.section[type] || type;
+}
+
+function build(){
+  var container = document.getElementById('questions-container');
+  if (!container) { console.error('ExamPass: questions-container not found'); return; }
+  var h = '';
+  var sec = '';
+  var titles = LABELS.section;
+
+  for (var i = 0; i < Q.length; i++) {
+    var q = Q[i];
+    var s = q.type;
+    if (s !== sec) {
+      sec = s;
+      if (titles[s]) {
+        h += '<h3>' + titles[s] + '</h3>';
+      }
+    }
+
+    var qid = 'q' + i;
+    h += '<div class="q-card" id="card-' + qid + '">';
+    h += '<div class="q-num">' + (i+1) + '. (' + pointsOf(q) + ' ' + LABELS.points_suffix + ')</div>';
+    h += '<div class="q-text">' + formatQuestion(q.question) + '</div>';
+
+    if (q.type === 'choice') {
+      var opts = q.options || [];
+      for (var j = 0; j < opts.length; j++) {
+        h += '<label class="option" id="opt-' + qid + '-' + j + '" onclick="sel(\'' + qid + '\',' + j + ')">';
+        h += '<input type="radio" name="' + qid + '" value="' + j + '">' + String.fromCharCode(65+j) + '. ' + opts[j] + '</label>';
+      }
+    } else if (q.type === 'tf') {
+      h += '<label class="option" id="opt-' + qid + '-0" onclick="sel(\'' + qid + '\',0)">';
+      h += '<input type="radio" name="' + qid + '" value="0">' + LABELS.true_label + '</label>';
+      h += '<label class="option" id="opt-' + qid + '-1" onclick="sel(\'' + qid + '\',1)">';
+      h += '<input type="radio" name="' + qid + '" value="1">' + LABELS.false_label + '</label>';
+    } else {
+      h += '<textarea class="q-textarea" id="text-' + qid + '" placeholder="' + LABELS.placeholder + '" rows="3"></textarea>';
+    }
+
+    h += '<div class="result" id="result-' + qid + '">';
+    h += '<span class="badge" id="badge-' + qid + '"></span><span id="correct-' + qid + '"></span>';
+    h += '<div class="explanation">' + q.explanation + '</div>';
+    if (q.pitfall) {
+      h += '<div class="pitfall">' + LABELS.pitfall_prefix + q.pitfall + '</div>';
+    }
+    h += '</div></div>';
+  }
+
+  container.innerHTML = h;
+
+  // Re-render MathJax for dynamically inserted formulas
+  if (window.MathJax && MathJax.typesetPromise) {
+    MathJax.typesetPromise([container]).catch(function(err) {
+      console.error('MathJax typeset error:', err);
+    });
+  }
+}
+
+document.addEventListener('DOMContentLoaded', build);
+if (document.readyState === 'interactive' || document.readyState === 'complete') {
+  build();
+}
+
+function sel(qid, idx) {
+  var prefix = 'opt-' + qid + '-';
+  var all = document.querySelectorAll('[id^="' + prefix + '"]');
+  for (var i = 0; i < all.length; i++) {
+    all[i].classList.remove('selected');
+  }
+  var target = document.getElementById('opt-' + qid + '-' + idx);
+  if (target) {
+    target.classList.add('selected');
+  }
+  var radio = document.querySelector('input[name="' + qid + '"][value="' + idx + '"]');
+  if (radio) {
+    radio.checked = true;
+  }
+}
+
+function gradeAll() {
+  var score = 0;
+  var wrongItems = [];
+  for (var i = 0; i < Q.length; i++) {
+    var q = Q[i];
+    var qid = 'q' + i;
+    var card = document.getElementById('card-' + qid);
+    var result = document.getElementById('result-' + qid);
+    var badge = document.getElementById('badge-' + qid);
+    var correctEl = document.getElementById('correct-' + qid);
+    if (!card || !result) continue;
+
+    result.style.display = 'block';
+
+    if (q.type === 'choice' || q.type === 'tf') {
+      var radio = document.querySelector('input[name="' + qid + '"]:checked');
+      var correctIndex = normalizedAnswer(q);
+      if (radio && parseInt(radio.value) === correctIndex) {
+        score += pointsOf(q);
+        card.classList.add('correct');
+        badge.className = 'badge badge-ok';
+        badge.textContent = LABELS.correct_label;
+        correctEl.innerHTML = '';
+        var correctOpt = document.getElementById('opt-' + qid + '-' + correctIndex);
+        if (correctOpt) correctOpt.classList.add('correct-answer');
+      } else {
+        card.classList.add('wrong');
+        badge.className = 'badge badge-no';
+        badge.textContent = LABELS.wrong_label;
+        var ansText = answerText(q, correctIndex);
+        correctEl.innerHTML = LABELS.answer_prefix + ansText;
+        if (radio) {
+          var wrongOpt = document.getElementById('opt-' + qid + '-' + radio.value);
+          if (wrongOpt) wrongOpt.classList.add('wrong-answer');
+        }
+        var correctOpt = document.getElementById('opt-' + qid + '-' + correctIndex);
+        if (correctOpt) correctOpt.classList.add('correct-answer');
+        wrongItems.push({
+          number: i + 1,
+          type: questionTypeLabel(q.type),
+          points: pointsOf(q),
+          question: stripHtml(q.question),
+          options: (q.options || []).map(stripHtml),
+          userAnswer: answerText(q, radio ? radio.value : null),
+          correctAnswer: ansText,
+          explanation: stripHtml(q.explanation),
+          pitfall: stripHtml(q.pitfall || ''),
+          knowledgePoint: stripHtml(q.knowledge_point || q.knowledgePoint || '')
+        });
+      }
+    } else {
+      card.classList.add('correct');
+      badge.className = 'badge badge-ref';
+      badge.textContent = LABELS.reference_label;
+    }
+  }
+
+  var sb = document.getElementById('score-box');
+  if (sb) {
+    sb.style.display = 'block';
+    document.getElementById('score-num').textContent = score;
+    sb.scrollIntoView({behavior:'smooth'});
+  }
+
+  var opts = document.querySelectorAll('.option');
+  for (var i = 0; i < opts.length; i++) opts[i].style.pointerEvents = 'none';
+  var tas = document.querySelectorAll('.q-textarea');
+  for (var i = 0; i < tas.length; i++) tas[i].disabled = true;
+
+  var btn = document.getElementById('grade-btn');
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = LABELS.graded_label;
+  }
+
+  buildWrongReview(wrongItems);
+
+  // Re-render MathJax for revealed explanations
+  if (window.MathJax && MathJax.typesetPromise) {
+    MathJax.typesetPromise().catch(function(err) {
+      console.error('MathJax typeset error:', err);
+    });
+  }
+}
+
+function buildWrongReview(wrongItems) {
+  var box = document.getElementById('wrong-review-box');
+  if (!box) return;
+
+  LAST_WRONG_REVIEW = renderWrongReviewMarkdown(wrongItems);
+
+  if (!wrongItems.length) {
+    box.style.display = 'block';
+    box.innerHTML = '<h3>' + LABELS.wrong_review_title + '</h3><p>' + LABELS.no_wrong_questions + '</p>';
+    return;
+  }
+
+  box.style.display = 'block';
+  box.innerHTML = [
+    '<h3>' + LABELS.wrong_review_title + '</h3>',
+    '<p>' + LABELS.wrong_review_intro.replace('__COUNT__', wrongItems.length) + '</p>',
+    '<div class="wrong-review-actions">',
+    '<button type="button" onclick="downloadWrongReview()">' + LABELS.download_wrong_review + '</button>',
+    '<button type="button" onclick="copyWrongReviewPrompt()">' + LABELS.copy_wrong_review_prompt + '</button>',
+    '</div>',
+    '<textarea id="wrong-review-text" readonly rows="12">' + LAST_WRONG_REVIEW.replace(/&/g, '&amp;').replace(/</g, '&lt;') + '</textarea>'
+  ].join('');
+}
+
+function renderWrongReviewMarkdown(wrongItems) {
+  var now = new Date().toLocaleString();
+  var lines = [];
+
+  lines.push('# ExamPass 错题分析文档');
+  lines.push('');
+  lines.push('- 生成时间：' + now);
+  lines.push('- 错题数量：' + wrongItems.length);
+  lines.push('');
+  lines.push('## 给模型的错题分析 Prompt');
+  lines.push('');
+  if (WRONG_REVIEW_PROMPT) {
+    lines.push(WRONG_REVIEW_PROMPT);
+  } else {
+    lines.push('请根据下面的错题记录，分析我的错因，并给出继续学习方案。要求：');
+    lines.push('1. 按知识模块归类错题，不要只逐题复述答案；');
+    lines.push('2. 判断每道题错在概念定义、公式推导、图表理解、条件适用、计算步骤、概念混淆还是审题；');
+    lines.push('3. 对涉及公式或推导的错题，补全从前提到结论的推导链条，不能跳步；');
+    lines.push('4. 对选择题，解释我选错选项为什么有迷惑性，以及正确选项和错误选项的关键边界；');
+    lines.push('5. 给出需要回看课件的具体知识点、图表、公式和页/章节线索；');
+    lines.push('6. 最后生成一份二次学习清单和 5 道针对这些薄弱点的进阶训练题。');
+  }
+  lines.push('');
+  lines.push('## 错题记录');
+  lines.push('');
+
+  if (!wrongItems.length) {
+    lines.push('本次没有客观题错题。');
+    return lines.join('\n');
+  }
+
+  for (var i = 0; i < wrongItems.length; i++) {
+    var item = wrongItems[i];
+    lines.push('### 错题 ' + (i + 1) + '：第 ' + item.number + ' 题');
+    lines.push('');
+    lines.push('- 题型：' + item.type);
+    lines.push('- 分值：' + item.points);
+    lines.push('- 题干：' + item.question);
+    if (item.options.length) {
+      lines.push('- 选项：');
+      for (var j = 0; j < item.options.length; j++) {
+        lines.push('  - ' + String.fromCharCode(65 + j) + '. ' + item.options[j]);
+      }
+    }
+    lines.push('- 我的答案：' + item.userAnswer);
+    lines.push('- 正确答案：' + item.correctAnswer);
+    lines.push('- 解析：' + item.explanation);
+    if (item.pitfall) lines.push('- 易错点：' + item.pitfall);
+    if (item.knowledgePoint) lines.push('- 对应知识点：' + item.knowledgePoint);
+    lines.push('');
+  }
+
+  return lines.join('\n');
+}
+
+function downloadWrongReview() {
+  if (!LAST_WRONG_REVIEW) return;
+  var blob = new Blob([LAST_WRONG_REVIEW], {type: 'text/markdown;charset=utf-8'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = '错题分析文档.md';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function copyWrongReviewPrompt() {
+  var text = LAST_WRONG_REVIEW || '';
+  if (!text) return;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text);
+  } else {
+    var ta = document.getElementById('wrong-review-text');
+    if (ta) {
+      ta.focus();
+      ta.select();
+      document.execCommand('copy');
+    }
+  }
+}
+
+</script>
+</body>
+</html>

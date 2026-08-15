@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>模块二 · 信源编码 / 数据压缩</title>
+<script>
+MathJax = { tex: { inlineMath: [['$','$'],['\\(','\\)']], displayMath: [['$$','$$'],['\\[','\\]']] }, svg: { fontCache: 'global' } };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<style>
+:root{
+  --bg:#0f1419; --card:#1a212b; --card2:#222b37; --ink:#e6edf3; --muted:#9aa7b4;
+  --line:#2d3845; --accent:#4ea1ff; --pf:#ff6b6b; --ca:#ffb04e; --co:#5ed98a; --warn:#ffd166;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;line-height:1.85;font-size:17px}
+.wrap{max-width:860px;margin:0 auto;padding:0 22px 120px}
+header{position:sticky;top:0;z-index:50;background:rgba(15,20,25,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:14px 22px}
+header .inner{max-width:860px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+header h1{font-size:18px;margin:0}
+header .nav a{color:var(--muted);text-decoration:none;font-size:13px;margin-left:14px}
+header .nav a:hover{color:var(--accent)}
+h2{margin:54px 0 6px;font-size:25px;padding-top:18px;border-top:2px solid var(--line)}
+h2 .tag{font-size:13px;font-weight:600;color:var(--muted);margin-left:8px}
+h3{margin:34px 0 8px;font-size:20px;color:#cfe3ff}
+h4{margin:22px 0 6px;font-size:17px;color:var(--warn)}
+p{margin:10px 0}
+.lead{color:var(--muted);font-size:16px;margin:6px 0 22px}
+.box{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 20px;margin:18px 0}
+.box.intuition{border-left:4px solid var(--accent)}
+.box.key{border-left:4px solid var(--co);background:#16241c}
+.box.proof{border-left:4px solid var(--pf);background:#241718}
+.box.warn{border-left:4px solid var(--warn);background:#231f12}
+.box.ex{border-left:4px solid var(--ca);background:#241e14}
+.box .label{font-weight:700;font-size:13px;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px}
+.box.intuition .label{color:var(--accent)}
+.box.key .label{color:var(--co)}
+.box.proof .label{color:var(--pf)}
+.box.warn .label{color:var(--warn)}
+.box.ex .label{color:var(--ca)}
+.formula{overflow-x:auto;overflow-y:hidden}
+.step{margin:8px 0 8px 4px;padding-left:14px;border-left:2px solid var(--line)}
+.intro{background:var(--card2);border-radius:12px;padding:22px 24px;margin:24px 0}
+.toc{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 22px;margin:22px 0}
+.toc a{color:var(--accent);text-decoration:none}
+.toc a:hover{text-decoration:underline}
+.toc ul{margin:6px 0;padding-left:20px}
+.toc li{margin:3px 0}
+table{border-collapse:collapse;width:100%;margin:14px 0;font-size:15px}
+th,td{border:1px solid var(--line);padding:8px 11px;text-align:left}
+th{background:var(--card2);color:#cfe3ff}
+code{background:#0b0f14;padding:1px 6px;border-radius:5px;font-size:14px;color:#ffd9a0}
+.muted{color:var(--muted)}
+strong{color:#fff}
+.tip{font-size:14px;color:var(--muted);margin-top:6px}
+.back{display:inline-block;margin-top:8px;margin-right:18px;color:var(--accent);text-decoration:none;font-size:14px}
+hr{border:none;border-top:1px dashed var(--line);margin:30px 0}
+.qa{background:#13202b;border:1px solid var(--line);border-radius:10px;padding:14px 18px;margin:14px 0}
+.qa .q{color:var(--warn);font-weight:600}
+.must{display:inline-block;background:var(--pf);color:#2a0d0d;font-size:12px;font-weight:700;padding:1px 8px;border-radius:6px;vertical-align:middle;margin-left:6px}
+</style>
+</head>
+<body>
+<header><div class="inner">
+  <h1>模块二 · 信源编码 / 数据压缩</h1>
+  <div class="nav">
+    <a href="#l4">L4 典型集/AEP</a>
+    <a href="#l6">L6 熵率</a>
+    <a href="#l7">L7 Kraft</a>
+    <a href="#l8">L8 Huffman</a>
+    <a href="#l9">L9 DPI/Fano</a>
+    <a href="信息论复习.html">← 总览</a>
+  </div>
+</div></header>
+
+<div class="wrap">
+
+<div class="intro">
+<p style="margin-top:0"><strong>这一模块回答一个问题：一段数据最少能压到多少？</strong> 答案是熵 $H$。整条主线是：</p>
+<p style="margin:8px 0"><strong>L4</strong>（为什么 $H$ 是极限：典型集 / AEP）→ <strong>L7</strong>（怎么造出接近 $H$ 的码：Kraft、变长码）→ <strong>L8</strong>（造出最优码：Huffman）。<br>
+旁支：<strong>L6</strong>（有记忆信源的极限是熵率）、<strong>L9</strong>（数据处理不等式 DPI、Fano —— 这俩是模块三反向证明的工具）。</p>
+<p style="margin-bottom:0">本模块含<strong>三个必考证明</strong>：<span class="must">AEP/典型集</span><span class="must">变长编码定理</span><span class="must">Huffman 最优性</span>。下面对它们用最细的步骤拆开讲。</p>
+</div>
+
+<div class="toc">
+<strong>本页目录</strong>
+<ul>
+<li><a href="#l4">L4　AEP 与典型集 <span class="must">必考</span></a></li>
+<li><a href="#l6">L6　熵率与马尔可夫链</a></li>
+<li><a href="#l7">L7　Kraft 不等式与变长编码定理 <span class="must">必考</span></a></li>
+<li><a href="#l8">L8　Huffman 编码及其最优性 <span class="must">必考</span></a></li>
+<li><a href="#l9">L9　数据处理不等式与 Fano 不等式</a></li>
+<li><a href="#cheat">速查 + 自测</a></li>
+</ul>
+</div>
+
+<!-- ============= L4 ============= -->
+<h2 id="l4">L4　AEP 与典型集 <span class="must">必考</span></h2>
+<p class="lead">关键词：大数定律 → 典型集 → 渐近均分 → 压缩极限 $H$</p>
+
+<div class="box intuition">
+<span class="label">一句话主旨</span>
+<p style="margin:0">独立重复 $n$ 次一个信源，几乎所有"会真实出现"的长序列，它们的概率都<strong>差不多大</strong>（都约等于 $2^{-nH}$），而且这样的序列总数大约只有 $2^{nH}$ 个。<strong>所以只要给这 $2^{nH}$ 个序列编号，每个用 $nH$ 个 bit 就够了 → 平均每符号 $H$ bit。这就是"熵是压缩极限"的硬核理由。</strong></p>
+</div>
+
+<h3>4.1 铺垫：大数定律（LLN）</h3>
+<p>独立同分布 $X_1,\dots,X_n$，样本均值会收敛到真实期望：$\frac1n\sum_i X_i\to\mathbb E[X]$（依概率）。直觉就是"抛硬币次数多了，正面比例趋近 1/2"。AEP 就是把 LLN 用在一个特别的量上——自信息。</p>
+
+<div class="box ex">
+<span class="label">切比雪夫不等式（LLN 的证明工具）</span>
+<p style="margin:0">$P(|Y-\mathbb EY|\ge\varepsilon)\le \dfrac{\operatorname{Var}(Y)}{\varepsilon^2}$。取 $Y=\frac1n\sum X_i$，方差随 $n$ 缩小为 $\sigma^2/n\to0$，于是偏离期望的概率 → 0。这就是（弱）大数定律。</p>
+</div>
+
+<h3>4.2 AEP 定理本身 <span class="must">必考证明</span></h3>
+<div class="box proof">
+<span class="label">★ AEP（渐近均分性）—— 会默写</span>
+<p style="margin-top:0"><strong>陈述：</strong>若 $X_1,X_2,\dots$ i.i.d. $\sim p(x)$，则
+$$-\frac1n\log p(X_1,X_2,\dots,X_n)\ \xrightarrow{\ \text{依概率}\ }\ H(X).$$</p>
+<p><strong>证明（其实只有两步，核心就是"对自信息用大数定律"）：</strong></p>
+<div class="step">
+<p style="margin-top:0"><strong>第 1 步——把联合概率拆成连乘（用独立性）。</strong> 因为独立，
+$$p(X_1,\dots,X_n)=\prod_{i=1}^n p(X_i).$$
+取 $-\frac1n\log$：
+$$-\frac1n\log p(X_1,\dots,X_n)=-\frac1n\sum_{i=1}^n\log p(X_i).$$</p>
+<p><strong>第 2 步——这正是一堆 i.i.d. 随机变量的平均，套大数定律。</strong> 令 $Z_i=-\log p(X_i)$，它们 i.i.d.，期望是
+$$\mathbb E[Z_i]=\mathbb E[-\log p(X_i)]=-\sum_x p(x)\log p(x)=H(X).$$
+由大数定律，$\frac1n\sum_i Z_i\to\mathbb E[Z_i]=H(X)$。证毕。$\blacksquare$</p>
+</div>
+<p style="margin-bottom:0" class="tip">考试要点：① 用独立性把 log 概率拆成求和；② 认出这是自信息的样本平均；③ 套 LLN 收敛到 $H$。三句话就是满分骨架。</p>
+</div>
+
+<h3>4.3 典型集 $A_\varepsilon^{(n)}$ <span class="must">必考</span></h3>
+<p>AEP 说 $-\frac1n\log p(x^n)\approx H$。把"满足这个近似"的序列收集起来，就是<strong>典型集</strong>。</p>
+
+<div class="box key">
+<span class="label">典型集定义</span>
+<div class="formula">$$ A_\varepsilon^{(n)}=\Big\{x^n:\ \Big|-\tfrac1n\log p(x^n)-H(X)\Big|\le\varepsilon\Big\} $$</div>
+<p style="margin-bottom:0">等价地说，$x^n\in A_\varepsilon^{(n)}$ ⟺ 它的概率被夹在
+$$2^{-n(H+\varepsilon)}\ \le\ p(x^n)\ \le\ 2^{-n(H-\varepsilon)}.$$
+<strong>典型序列的概率都差不多大（≈ $2^{-nH}$）——这就是"均分"的含义。</strong></p>
+</div>
+
+<div class="box proof">
+<span class="label">★ 典型集的三条性质（必考，常考第 2、3 条的大小界）</span>
+<p style="margin-top:0"><strong>性质 1（几乎必然落入）：</strong> 当 $n$ 充分大，$P\big(A_\varepsilon^{(n)}\big)>1-\varepsilon$。<br>
+<span class="muted">证：典型集定义就是 $|{-}\frac1n\log p-H|\le\varepsilon$，由 AEP 这事件的概率 →1。</span></p>
+
+<p><strong>性质 2（大小上界）：</strong> $\big|A_\varepsilon^{(n)}\big|\le 2^{n(H+\varepsilon)}$。</p>
+<div class="step">
+<p style="margin:0">证：总概率不超过 1，而每个典型序列概率 $\ge2^{-n(H+\varepsilon)}$：
+$$1\ \ge\ \sum_{x^n\in A_\varepsilon^{(n)}}p(x^n)\ \ge\ \sum_{x^n\in A_\varepsilon^{(n)}}2^{-n(H+\varepsilon)}=\big|A_\varepsilon^{(n)}\big|\cdot 2^{-n(H+\varepsilon)}.$$
+移项即得 $|A_\varepsilon^{(n)}|\le2^{n(H+\varepsilon)}$。</p>
+</div>
+
+<p><strong>性质 3（大小下界）：</strong> $\big|A_\varepsilon^{(n)}\big|\ge(1-\varepsilon)\,2^{n(H-\varepsilon)}$，对大 $n$ 成立。</p>
+<div class="step">
+<p style="margin:0">证：由性质 1，$1-\varepsilon<P(A_\varepsilon^{(n)})=\sum_{A}p(x^n)\le\sum_{A}2^{-n(H-\varepsilon)}=|A|\cdot2^{-n(H-\varepsilon)}$。移项即得。</p>
+</div>
+<p style="margin-bottom:0" class="tip"><strong>记忆法：上界配下概率界、下界配上概率界。</strong> 两个大小界合起来：$|A_\varepsilon^{(n)}|\approx2^{nH}$。</p>
+</div>
+
+<div class="box warn">
+<span class="label">两个最容易卡住的细节（一定要弄清）</span>
+
+<p style="margin-top:0"><strong>① $P\big(A_\varepsilon^{(n)}\big)$ 到底是谁的概率？——它是 $P\big(X^n\in A_\varepsilon^{(n)}\big)$ 的简写。</strong></p>
+<div class="step">
+<p style="margin:0">$A_\varepsilon^{(n)}$ 是一个<strong>序列的集合</strong>。"一个集合的概率"指的是：随机抽出来的那条长序列 $X^n$ <strong>落进这个集合</strong>的概率，算法是把集合里每条序列的概率<strong>加起来</strong>：
+$$P\big(A_\varepsilon^{(n)}\big)\ :=\ P\big(X^n\in A_\varepsilon^{(n)}\big)\ =\!\!\sum_{x^n\in A_\varepsilon^{(n)}}\!\! p(x^n).$$
+它为什么趋于 1？因为"$X^n\in A_\varepsilon^{(n)}$"和"$\big|-\tfrac1n\log p(X^n)-H\big|\le\varepsilon$"是<strong>同一个事件</strong>（一个用集合描述、一个用不等式描述）：
+$$P\big(A_\varepsilon^{(n)}\big)=P\Big(\big|-\tfrac1n\log p(X^n)-H\big|\le\varepsilon\Big)\ \xrightarrow[\text{AEP}]{\,n\to\infty\,}\ 1.$$
+所以 $n$ 充分大时 $P\big(A_\varepsilon^{(n)}\big)>1-\varepsilon$，这正是性质 1。</p>
+</div>
+
+<p><strong>② 性质 3 里的 $1-\varepsilon$ 是哪来的？——直接搬自性质 1。</strong></p>
+<div class="step">
+<p style="margin:0">把下界推导的整条链摊开看，每一项的来历标在下面：
+$$\underbrace{1-\varepsilon}_{\text{性质 1}}\ <\ \underbrace{P\big(A_\varepsilon^{(n)}\big)}_{\text{细节①}}\ =\!\!\sum_{x^n\in A_\varepsilon^{(n)}}\!\! p(x^n)\ \le\!\!\sum_{x^n\in A_\varepsilon^{(n)}}\!\! 2^{-n(H-\varepsilon)}\ =\ \big|A_\varepsilon^{(n)}\big|\cdot 2^{-n(H-\varepsilon)}.$$</p>
+<table style="margin-top:10px">
+<tr><th>这一步</th><th>用了什么</th></tr>
+<tr><td>最左 $1-\varepsilon<P(A_\varepsilon^{(n)})$</td><td><strong>性质 1</strong>（典型集发生的概率 $>1-\varepsilon$）</td></tr>
+<tr><td>$P=\sum p(x^n)$</td><td>细节 ① ：集合概率 = 各序列概率之和</td></tr>
+<tr><td>$p(x^n)\le 2^{-n(H-\varepsilon)}$</td><td><strong>典型集定义</strong>的概率上界</td></tr>
+<tr><td>合并成 $|A|\cdot 2^{-n(H-\varepsilon)}$</td><td>集合里共 $|A|$ 项，每项同一上界</td></tr>
+</table>
+<p style="margin:10px 0 0">两边乘 $2^{n(H-\varepsilon)}$ 即得 $\big|A_\varepsilon^{(n)}\big|>(1-\varepsilon)\,2^{n(H-\varepsilon)}$。<strong>所以 $1-\varepsilon$ 不是凭空出现的，它就是"典型集发生概率"这个下界被原样搬了下来。</strong></p>
+</div>
+<p style="margin-bottom:0" class="tip">对照：性质 2（上界）的起点是"总概率 $\le1$"，性质 3（下界）的起点是"典型集概率 $>1-\varepsilon$"。一个用 $1$、一个用 $1-\varepsilon$——这就是"上界配下概率界、下界配上概率界"的具体含义。</p>
+</div>
+
+<h3 id="avg2all">4.4 关键一环：为什么"平均接近 $H$"能升级成"整体生效"</h3>
+<p>这是 L4 通往 L7 之间最容易似懂非懂的一步。变长码只给出<strong>期望</strong>码长 $H\le L<H+1$——但期望是统计量，"平均好"不等于"每次都好"。凭什么典型集能把它升级成"几乎所有情况都生效"的硬保证？答案藏在 $-\log p$ 的两条性质里。</p>
+
+<div class="box intuition">
+<span class="label">先说清你该有的疑虑（它是对的）</span>
+<p style="margin:0">取码长 $\ell_i=-\log p_i$，确实有 $L=\sum_i p_i(-\log p_i)=H$。但这只是<strong>期望</strong>：常见符号码短、罕见符号码长，单符号码长的方差可以很大。所以单符号情形只能给到 $H\le L<H+1$，那个 $+1$ 消不掉。<strong>"平均 = H"这一句，本身并不保证每次都接近 H。</strong></p>
+</div>
+
+<div class="box key">
+<span class="label">$-\log p$ 的两条性质</span>
+<p style="margin-top:0"><strong>性质 A —— 期望等于熵（决定"集中到哪")：</strong>
+$$\mathbb E[-\log p(X)]=H.$$</p>
+<p style="margin-bottom:0"><strong>性质 B —— 对独立符号可加（决定"能不能用大数定律")：</strong> 因为 $\log$ 把连乘变成相加，
+$$-\log p(x^n)=-\log\prod_{i=1}^n p(x_i)=\sum_{i=1}^n\big(-\log p(x_i)\big).$$
+于是一整块的码长 $\ell(X^n)=-\log p(X^n)$ <strong>就是一堆 i.i.d. 随机变量的和</strong>。</p>
+</div>
+
+<div class="box proof">
+<span class="label">可加性 ⟹ 集中 ⟹ 整体生效</span>
+<div class="step">
+<p style="margin-top:0"><strong>① 和服从大数定律。</strong> 把块码长除以 $n$，正是样本平均：
+$$\frac1n\ell(X^n)=-\frac1n\log p(X^n)\ \xrightarrow[\text{LLN}]{n\to\infty}\ \mathbb E[-\log p(X_1)]=H.$$</p>
+<p><strong>② 方差被 $n$ 摊平（集中的定量原因）。</strong>
+$$\operatorname{Var}\!\Big(-\tfrac1n\log p(X^n)\Big)=\frac1n\operatorname{Var}\big(-\log p(X_1)\big)\ \xrightarrow{n\to\infty}\ 0.$$
+单符号时方差是个固定正数（码长忽长忽短，只有"平均"意义）；分块后方差 $\to0$，<strong>每符号码长不再只是"平均接近 $H$"，而是"以概率趋于 1 地几乎处处接近 $H$"。</strong></p>
+<p style="margin-bottom:0"><strong>③ 这个"几乎处处接近 $H$"的事件，就是典型集。</strong> 典型集定义 $\big|-\frac1n\log p(x^n)-H\big|\le\varepsilon$ 说的正是"实际码长 ≈ 平均码长 $nH$"，而性质一保证 $P(\text{典型})\to1$。所以<strong>几乎全部概率质量都落在"实际码长 ≈ $nH$"的序列上——平均就成了几乎所有情况下的真实行为。</strong></p>
+</div>
+</div>
+
+<div class="box warn">
+<span class="label">一句话记住这条逻辑链</span>
+<table style="margin-top:6px">
+<tr><th>性质</th><th>作用</th></tr>
+<tr><td>$\mathbb E[-\log p(X)]=H$</td><td>决定码长<strong>集中到哪里</strong>（熵）</td></tr>
+<tr><td>$-\log p(x^n)=\sum_i-\log p(x_i)$（<strong>可加性</strong>）</td><td>把码长变成 i.i.d. 之和，<strong>才能用大数定律</strong></td></tr>
+<tr><td>两者合起来 ⟹ 方差/$n\to0$（<strong>集中</strong>）</td><td>把"期望 = H"升级成"几乎处处 ≈ H" = 典型集 = 整体生效</td></tr>
+</table>
+<p style="margin-bottom:0">所以"$-\log p$ 满足了什么性质"的精准回答是：<strong>它的期望等于熵、且对独立符号可加；可加性让它服从大数定律而产生<u>集中</u>效应——集中正是把"平均"变成"整体"的钥匙。</strong> 没有可加性（log 的功劳），就只剩冷冰冰的期望，跨不过"统计意义"那道坎。</p>
+</div>
+
+<h3>4.5 信源定长编码定理（典型集的直接应用）</h3>
+<div class="box key">
+<span class="label">结论</span>
+<p style="margin:0">既然"真正会出现的"序列只有约 $2^{nH}$ 个，给它们编号需要 $\log_2(2^{nH})=nH$ 个 bit，即<strong>平均每符号 $H$ bit</strong>。</p>
+<ul style="margin:8px 0 0">
+<li><strong>可达（正向）</strong>：每符号用 $H+\varepsilon$ bit 编码，错误概率（落到非典型集）→0。</li>
+<li><strong>不可逾越（逆向）</strong>：若每符号 &lt;$H-\varepsilon$ bit，码字不够给典型序列编号，错误概率 →1。</li>
+</ul>
+<p style="margin-bottom:0" class="tip">这是"$H$ 是无损压缩的极限"的严格表述，也是后面信道定理"用典型集计数"思路的母版。</p>
+</div>
+
+<div class="box intuition">
+<span class="label">了解：SMB 定理 + 经验分布（AEP 的推广）</span>
+<p style="margin:0"><strong>AEP 假设 i.i.d.；SMB（Shannon–McMillan–Breiman）定理</strong>把它推广到<strong>平稳遍历</strong>信源（允许有记忆，如马氏链）：
+$$-\tfrac1n\log p(X_1,\dots,X_n)\ \xrightarrow{\text{a.s.}}\ H(\mathcal X)\quad(\text{熵率}).$$
+就是说"渐近均分"在有记忆信源里照样成立，只是极限从 $H(X)$ 换成熵率 $H(\mathcal X)$，于是典型集、定长编码那一整套结论都能搬过去。</p>
+<p style="margin-bottom:0"><strong>经验分布（type）</strong>：长序列里各符号出现的<strong>实际频率</strong>。遍历性保证经验分布 $\to$ 真实分布，这正是 SMB / 强典型集成立的根基（也呼应模块三率失真要用"强典型集控制经验分布"）。老师标注为"了解"，知道这层关系即可，不要求证明。</p>
+</div>
+
+<!-- ============= L6 ============= -->
+<h2 id="l6">L6　熵率与马尔可夫链 <span class="tag">概念 + 计算</span></h2>
+<p class="lead">关键词：有记忆信源、每符号的平均熵、平稳分布</p>
+
+<div class="box intuition">
+<span class="label">为什么需要熵率</span>
+<p style="margin:0">前面假设符号 i.i.d.（无记忆）。但真实信源（中文、音乐）前后相关：知道"信息"二字后，下一个字是"论"的概率很高。<strong>熵率 $H(\mathcal X)$ 就是"考虑了所有历史相关性之后，平均每个符号还剩多少不确定性 / 信息"。</strong> 中文的熵率远低于把每个字当独立来算。</p>
+</div>
+
+<div class="box key">
+<span class="label">熵率两种等价定义</span>
+<div class="formula">$$ H(\mathcal X)=\lim_{n\to\infty}\frac1n H(X_1,\dots,X_n)\qquad(\text{平均口径}) $$</div>
+<div class="formula">$$ H'(\mathcal X)=\lim_{n\to\infty}H(X_n\mid X_{n-1},\dots,X_1)\qquad(\text{条件口径}) $$</div>
+<p style="margin-bottom:0">对<strong>平稳过程</strong>两者相等。条件口径直觉更好：知道全部过去，下一个符号平均带来多少新信息。</p>
+</div>
+
+<h3>马尔可夫链基础（看不懂求解方法？先补这里）</h3>
+
+<div class="box intuition">
+<span class="label">① 什么是马尔可夫链 —— "未来只看现在，不看过去"</span>
+<p style="margin:0">一串随机变量 $X_1,X_2,\dots$，取值在有限个<strong>状态</strong>里（比如 $\{0,1\}$ 或 $\{$晴,雨$\}$）。它是马氏链，意思是<strong>下一步只依赖当前状态，与更早的历史无关</strong>：
+$$P(X_{n+1}\mid X_n,X_{n-1},\dots,X_1)=P(X_{n+1}\mid X_n).$$
+天气就是好例子：明天下不下雨主要看今天，不太需要翻一个月前的记录。<strong>这条"无记忆"性质后面会让熵率公式只用到"前一个状态"，大大简化计算。</strong></p>
+</div>
+
+<div class="box key">
+<span class="label">② 转移矩阵 $P$ 怎么读</span>
+<p style="margin-top:0">把"从状态 $i$ 一步走到状态 $j$ 的概率"$p_{ij}=P(X_{n+1}=j\mid X_n=i)$ 排成方阵：</p>
+<div class="formula">$$ P=\begin{pmatrix}p_{00}&p_{01}\\ p_{10}&p_{11}\end{pmatrix}\quad\text{例如}\quad P=\begin{pmatrix}0.9&0.1\\ 0.5&0.5\end{pmatrix} $$</div>
+<ul style="margin:8px 0 0">
+<li><strong>第 $i$ 行</strong> = "从状态 $i$ 出发去各处的概率"。读这一行：上例第 0 行 $(0.9,0.1)$ 表示"今天状态 0，明天 90% 还在 0、10% 去 1"。</li>
+<li><strong>每一行加起来必须 = 1</strong>（从 $i$ 出发，总得去某个地方）。<span class="muted">列不一定加到 1。</span></li>
+<li>这样的矩阵叫<strong>随机矩阵</strong>。检查题目给的矩阵时，先确认"每行和为 1"，没错才能往下算。</li>
+</ul>
+</div>
+
+<div class="box key">
+<span class="label">③ 状态怎么随时间演化：行向量 × 矩阵</span>
+<p style="margin-top:0">设当前各状态概率写成<strong>行向量</strong> $\mu=(\mu_0,\mu_1,\dots)$（$\mu_i$ = 此刻在状态 $i$ 的概率）。走一步后的分布就是
+$$\mu^{(\text{下一步})}=\mu P.$$
+走 $n$ 步就是 $\mu P^n$。<span class="muted">（记成"行向量左乘矩阵"，跟转移矩阵每行是出发概率正好对应。）</span></p>
+</div>
+
+<div class="box key">
+<span class="label">④ 平稳分布 $\pi$ —— 求解方法的核心</span>
+<p style="margin-top:0"><strong>定义：</strong>一个分布 $\pi$ 如果<strong>走一步之后不变</strong>，就叫平稳分布：
+$$\pi P=\pi,\qquad \sum_i\pi_i=1,\qquad \pi_i\ge0.$$</p>
+<p><strong>直觉：</strong>系统跑很久以后，"在各状态停留的比例"会稳定下来，不再随时间变——那个稳定比例就是 $\pi$。$\pi_i$ 可理解为"长期来看有 $\pi_i$ 的时间待在状态 $i$"。</p>
+<p style="margin-bottom:0"><strong>怎么解（手算套路）：</strong> $\pi P=\pi$ 是一组线性方程，<strong>但它们线性相关（少一个独立方程），必须配上归一化 $\sum_i\pi_i=1$ 才能定出唯一解。</strong> 标准步骤：把 $\pi P=\pi$ 写成分量方程 → 用其中一个解出各 $\pi_i$ 的比例关系 → 代入 $\sum\pi_i=1$ 定出具体数值。下面例子会一步步演示。</p>
+</div>
+
+<div class="box warn">
+<span class="label">⑤ 什么时候平稳分布唯一、且系统一定收敛到它</span>
+<p style="margin:0">两个条件（本课的题基本都满足，了解即可）：</p>
+<ul style="margin:6px 0 0">
+<li><strong>不可约（irreducible）</strong>：任意状态都能（经若干步）到达任意状态，整张图是连通的。</li>
+<li><strong>非周期（aperiodic）</strong>：回到某状态的步数不被某个固定周期锁死（有自环就一定非周期）。</li>
+</ul>
+<p style="margin-bottom:0" class="tip">满足这两条 ⟹ 平稳分布<strong>存在且唯一</strong>，且无论从哪开始 $\mu P^n\to\pi$。这就是为什么熵率能用唯一的 $\pi$ 算出来。</p>
+</div>
+
+<div class="box key">
+<span class="label">⑥ 稳态分布的"特征值"视角（老师提到的特征值计算）</span>
+<p style="margin-top:0">$\pi P=\pi$ 换个说法就是：<strong>$\pi$ 是转移矩阵 $P$ 对应特征值 $\lambda=1$ 的左特征向量</strong>（再归一化）。</p>
+<ul style="margin:6px 0 0">
+<li>随机矩阵的最大特征值<strong>必为 1</strong>（Perron–Frobenius），其左特征向量就是 $\pi$。</li>
+<li>所以求稳态有两条等价路：<strong>(a)</strong> 解线性方程组 $\pi P=\pi,\sum\pi_i=1$（手算首选）；<strong>(b)</strong> 求 $P^{\mathsf T}$ 关于 $\lambda=1$ 的特征向量再归一化。</li>
+<li>其余特征值 $|\lambda_i|<1$ 决定<strong>收敛速度</strong>：$\mu P^n\to\pi$ 的快慢由第二大特征值 $|\lambda_2|$ 控制（$|\lambda_2|$ 越小收敛越快）。</li>
+</ul>
+</div>
+
+<div class="box warn">
+<span class="label">⑦ 平稳遍历性（老师列为判断题）</span>
+<p style="margin-top:0"><strong>遍历（ergodic）</strong>的意思：<strong>"时间平均 = 空间平均"</strong>——沿一条样本轨迹跑很久统计出的频率，等于平稳分布 $\pi$ 给的概率。这正是 AEP / SMB 能用到有记忆信源的前提。</p>
+<p style="margin-bottom:0"><strong>判断法则（必背）：有限状态马氏链，<u>不可约 + 非周期 ⟹ 平稳遍历</u></strong>（存在唯一 $\pi$，且时间平均收敛到 $\pi$）。
+<ul style="margin:6px 0 0">
+<li><strong>不可约</strong>：状态图强连通（任意状态可达任意状态）。</li>
+<li><strong>非周期</strong>：状态返回步数的最大公约数为 1（<strong>有任一自环 $p_{ii}>0$ 就自动非周期</strong>，最常用的判据）。</li>
+</ul></p>
+</div>
+
+<h3>马尔可夫链的熵率（必会算）</h3>
+
+<div class="box intuition">
+<span class="label">为什么熵率就是"用 π 加权的条件熵"</span>
+<p style="margin:0">熵率的条件口径是 $H(X_n\mid X_{n-1},\dots)$。<strong>马氏性</strong>让"全部历史"塌缩成"只看前一个状态"：$H(X_n\mid X_{n-1},\dots)=H(X_n\mid X_{n-1})$。而平稳时，前一个状态 $X_{n-1}$ 的分布就是 $\pi$，所以对它求平均就是用 $\pi$ 加权。这就是下面三步公式的来历。</p>
+</div>
+
+<div class="box key">
+<span class="label">三步求法</span>
+<p style="margin-top:0">给定状态转移矩阵 $P=[p_{ij}]$（从状态 $i$ 到 $j$ 的概率）：</p>
+<div class="step">
+<p style="margin:0"><strong>① 求平稳分布 $\pi$：</strong> 解 $\pi P=\pi$ 且 $\sum_i\pi_i=1$。（$\pi$ 是系统长期停留在各状态的比例。）<br>
+<strong>② 对每个状态算"出发熵"：</strong> $H(\text{从 }i\text{ 出发})=-\sum_j p_{ij}\log p_{ij}$。<br>
+<strong>③ 用 $\pi$ 加权平均：</strong>
+$$H(\mathcal X)=\sum_i \pi_i\Big(-\sum_j p_{ij}\log p_{ij}\Big).$$</p>
+</div>
+<p style="margin-bottom:0" class="tip">本质就是"条件熵 $H(X_{n}\mid X_{n-1})$ 在平稳分布下的平均"。马氏性让条件只依赖前一个状态，所以不用追溯更早历史。</p>
+</div>
+
+<div class="box ex">
+<span class="label">完整算一遍（带数字，跟着走一遍就会了）</span>
+<p style="margin-top:0">状态 $\{0,1\}$，转移矩阵 $P=\begin{pmatrix}0.9&0.1\\ 0.5&0.5\end{pmatrix}$（即 $0\!\to\!1$ 概率 $0.1$、$1\!\to\!0$ 概率 $0.5$）。</p>
+
+<p style="margin:10px 0 2px"><strong>第 1 步：解平稳分布 $\pi=(\pi_0,\pi_1)$。</strong></p>
+<div class="step">
+<p style="margin:0">写出 $\pi P=\pi$ 的两个分量方程（行向量乘矩阵，按列收集）：
+$$\pi_0=0.9\,\pi_0+0.5\,\pi_1,\qquad \pi_1=0.1\,\pi_0+0.5\,\pi_1.$$
+取第一个：$\pi_0-0.9\pi_0=0.5\pi_1\Rightarrow0.1\pi_0=0.5\pi_1\Rightarrow\pi_0=5\pi_1$。<br>
+<span class="muted">（第二个方程会给出同样的关系——这就是"方程相关、需要归一化"的体现。）</span><br>
+代入归一化 $\pi_0+\pi_1=1$：$5\pi_1+\pi_1=1\Rightarrow\pi_1=\tfrac16,\ \pi_0=\tfrac56$。
+$$\boxed{\ \pi=\big(\tfrac56,\ \tfrac16\big)\ }$$
+意思：长期看 $5/6$ 时间待在状态 0。</p>
+</div>
+
+<p style="margin:10px 0 2px"><strong>第 2 步：每个状态算"出发熵"（用对应行）。</strong></p>
+<div class="step">
+<p style="margin:0">状态 0 行是 $(0.9,0.1)$：$H_0=H(0.1)=-0.9\log_2 0.9-0.1\log_2 0.1\approx0.469$ bit。<br>
+状态 1 行是 $(0.5,0.5)$：$H_1=H(0.5)=1$ bit。</p>
+</div>
+
+<p style="margin:10px 0 2px"><strong>第 3 步：用 $\pi$ 加权平均。</strong></p>
+<div class="step">
+<p style="margin:0">
+$$H(\mathcal X)=\pi_0 H_0+\pi_1 H_1=\tfrac56(0.469)+\tfrac16(1)\approx0.391+0.167=0.558\text{ bit/符号}.$$</p>
+</div>
+<p style="margin-bottom:0" class="tip">对照：若把这个信源当成 i.i.d.（忽略相关性），每符号熵会是 $H(\pi_1)=H(1/6)\approx0.65$ bit，比熵率 $0.558$ 大——<strong>这量化了"相关性帮我们省下的信息"</strong>，也印证了 $H(\mathcal X)\le H(X)$。</p>
+</div>
+
+<div class="box ex">
+<span class="label">通用两状态公式（套公式题）</span>
+<p style="margin:0">状态 $\{0,1\}$，$0\!\to\!1$ 概率 $\alpha$、$1\!\to\!0$ 概率 $\beta$。同样方法解得 $\pi=\big(\frac{\beta}{\alpha+\beta},\frac{\alpha}{\alpha+\beta}\big)$，熵率
+$$H(\mathcal X)=\frac{\beta}{\alpha+\beta}H(\alpha)+\frac{\alpha}{\alpha+\beta}H(\beta),$$
+$H(\cdot)$ 是二元熵函数。把上例 $\alpha=0.1,\beta=0.5$ 代入可验证得同样的 $0.558$。</p>
+</div>
+
+<!-- ============= L7 ============= -->
+<h2 id="l7">L7　Kraft 不等式与变长编码定理 <span class="must">必考</span></h2>
+<p class="lead">关键词：前缀码、码长能多短、$H\le L<H+1$</p>
+
+<h3>7.1 前缀码与 Kraft 不等式</h3>
+<div class="box intuition">
+<span class="label">前缀码是什么、为什么要它</span>
+<p style="margin:0"><strong>前缀码（prefix / 即时码）</strong>：没有任何码字是另一个码字的前缀。好处是<strong>边收边译、无需分隔符</strong>：收到 <code>0</code> 就知道是某个字，不会和 <code>01</code> 混。代价是码字不能太短——这正是 Kraft 不等式刻画的约束。</p>
+</div>
+
+<div class="box key">
+<span class="label">Kraft–McMillan 不等式</span>
+<p style="margin-top:0">在 $D$ 元字母表上，存在码长为 $\ell_1,\dots,\ell_m$ 的前缀码 ⟺
+$$\sum_{i=1}^m D^{-\ell_i}\le 1.$$
+（本课多用二元 $D=2$，即 $\sum 2^{-\ell_i}\le1$。）</p>
+<p style="margin-bottom:0">McMillan 进一步说：连<strong>唯一可译码</strong>也逃不过这个不等式。所以"码字短"和"能译码"之间，Kraft 就是那道墙。</p>
+</div>
+
+<div class="box proof">
+<span class="label">Kraft 必要性的证明思路（码树法，常考）</span>
+<p style="margin:0">把二元码字画成<strong>满二叉树</strong>的叶子，深度 = 码长 $\ell_i$。前缀条件 ⟺ 没有码字是另一个的祖先 ⟺ 各码字占据<strong>互不重叠</strong>的子树。一个深度 $\ell_i$ 的节点，"占用"了整棵树（深度 $\ell_{\max}$）里 $2^{\ell_{\max}-\ell_i}$ 个叶子。互不重叠 ⟹ 总占用不超过全部叶子 $2^{\ell_{\max}}$：
+$$\sum_i 2^{\ell_{\max}-\ell_i}\le2^{\ell_{\max}}\ \Longrightarrow\ \sum_i 2^{-\ell_i}\le1.$$</p>
+</div>
+
+<h3>7.2 最优码长与变长编码定理 <span class="must">必考证明</span></h3>
+<div class="box intuition">
+<span class="label">直觉：常见的字给短码，罕见的字给长码</span>
+<p style="margin:0">理想码长应是 $\ell_i=-\log p_i$（概率大→码短）。这样平均码长正好 = 熵。但 $-\log p_i$ 不一定是整数，取整会带来最多 1 bit 的浪费 → 定理里那个 "$<H+1$"。</p>
+</div>
+
+<div class="box proof">
+<span class="label">★ 变长编码定理：$H(X)\le L^*<H(X)+1$ —— 会默写</span>
+<p style="margin-top:0">$L^*$ 是最优前缀码的最小平均码长 $L=\sum_i p_i\ell_i$。分两半证。</p>
+
+<p><strong>下界 $L\ge H$（任何前缀码都逃不掉，用 Kraft + Gibbs）：</strong></p>
+<div class="step">
+<p style="margin:0">令 $q_i=\dfrac{2^{-\ell_i}}{\sum_j 2^{-\ell_j}}$（这是一个合法分布），记 $c=\sum_j2^{-\ell_j}\le1$（Kraft）。则
+$$L-H=\sum_i p_i\ell_i+\sum_i p_i\log p_i=\sum_i p_i\log\frac{p_i}{2^{-\ell_i}}=\sum_i p_i\log\frac{p_i}{q_i}-\log c=D(p\Vert q)-\log c.$$
+因为 $D(p\Vert q)\ge0$（Gibbs）且 $-\log c\ge0$（$c\le1$），所以 $L-H\ge0$，即 $L\ge H$。<strong>等号 ⟺ $p_i=2^{-\ell_i}$（概率都是 2 的幂，叫 dyadic 分布）。</strong></p>
+</div>
+
+<p><strong>上界 $L^*<H+1$（构造 Shannon 码达到）：</strong></p>
+<div class="step">
+<p style="margin:0">取码长 $\ell_i=\lceil-\log p_i\rceil$（向上取整）。先验证它满足 Kraft：$\ell_i\ge-\log p_i\Rightarrow2^{-\ell_i}\le p_i\Rightarrow\sum_i2^{-\ell_i}\le\sum_i p_i=1$。✓ 所以这样的前缀码存在。再估平均码长：$\ell_i<-\log p_i+1$，故
+$$L=\sum_i p_i\ell_i<\sum_i p_i(-\log p_i+1)=H+1.$$
+最优码只会更短：$L^*\le L<H+1$。$\blacksquare$</p>
+</div>
+<p style="margin-bottom:0" class="tip"><strong>消掉那 1 bit 的办法：分块编码。</strong> 把 $n$ 个符号打包一起编码，浪费的 1 bit 被 $n$ 个符号分摊，每符号码长 $\to H$。这把变长码和 L4 的渐近极限连了起来。</p>
+</div>
+
+<!-- ============= L8 ============= -->
+<h2 id="l8">L8　Huffman 编码及其最优性 <span class="must">必考</span></h2>
+<p class="lead">关键词：自底向上合并、贪心、可证明最优</p>
+
+<h3>8.1 构造方法（必须会手算）</h3>
+<div class="box key">
+<span class="label">Huffman 算法</span>
+<div class="step">
+<p style="margin:0"><strong>①</strong> 把所有符号按概率列出。<br>
+<strong>②</strong> 取出<strong>概率最小的两个</strong>，合并成一个新节点，概率为两者之和，两条边分别标 0 和 1。<br>
+<strong>③</strong> 把新节点放回，重复 ②，直到只剩一个根节点。<br>
+<strong>④</strong> 从根到叶读边上的 0/1，就是每个符号的码字。</p>
+</div>
+</div>
+
+<div class="box ex">
+<span class="label">手算示例</span>
+<p style="margin:0">概率 $\{0.4,0.2,0.2,0.1,0.1\}$。<br>
+合并两个 0.1 → 0.2；现在 $\{0.4,0.2,0.2,0.2\}$。<br>
+合并两个 0.2 → 0.4；现在 $\{0.4,0.4,0.2\}$。<br>
+合并 0.4+0.2 → 0.6；现在 $\{0.6,0.4\}$ → 合并成 1.0。<br>
+读码得平均码长 $L=2.2$ bit，而 $H\approx2.12$ bit，非常接近极限。<strong>考试这类手算题几乎必出，务必练熟。</strong></p>
+<p style="margin-bottom:0" class="tip">小技巧：合并时新节点放在并列同概率节点的哪一侧，会影响具体码字但不影响最优平均码长。</p>
+</div>
+
+<h3>8.2 最优性证明 <span class="must">必考证明</span></h3>
+<div class="box intuition">
+<span class="label">证明的灵魂：两个引理 + 归纳</span>
+<p style="margin:0">直接证"Huffman 全局最优"很难。技巧是：先证<strong>最优码必然具备的两条结构性质</strong>（引理 1、2），说明 Huffman 的"合并最小两个"恰好符合这些性质；再用<strong>对符号数归纳</strong>，把 $m$ 个符号的问题缩成 $m-1$ 个的问题。</p>
+</div>
+
+<div class="box proof">
+<span class="label">★ 引理 1：最优前缀码满足"概率大→码长短"</span>
+<p style="margin:0">若 $p_i>p_j$，则最优码必有 $\ell_i\le\ell_j$。<br>
+<span class="muted">证（反证/交换论证）：若反过来 $\ell_i>\ell_j$，把两个码字对调，平均码长变化 $\Delta=(p_i\ell_j+p_j\ell_i)-(p_i\ell_i+p_j\ell_j)=(p_i-p_j)(\ell_j-\ell_i)<0$，得到更短的码，与"最优"矛盾。</span></p>
+</div>
+
+<div class="box proof">
+<span class="label">★ 引理 2：最优码中，最小的两个概率码字可取成"最长且仅在最后一位不同的兄弟"</span>
+<p style="margin:0">在最优码的码树里，<strong>最深的叶子一定成对出现</strong>（否则把单身的最深叶子往上提一层，仍满足前缀条件、码更短，矛盾）。由引理 1，两个最小概率符号在最深层。可以把它们安排成同一父节点的两个子节点（兄弟），只差最后一位。<strong>这正是 Huffman 第一步"合并最小两个"在做的事。</strong></p>
+</div>
+
+<div class="box proof">
+<span class="label">★ 主证明：归纳法</span>
+<p style="margin-top:0">设符号集 $U$ 有 $m$ 个符号。把两个最小概率 $p_{m-1},p_m$ 合并成一个超符号，概率 $p_{m-1}+p_m$，得到只含 $m-1$ 个符号的新信源 $V$。</p>
+<div class="step">
+<p style="margin:0"><strong>关键的码长关系：</strong> 在合并后的码里，超符号码长为 $\ell$，则在原码里这两个符号码长都是 $\ell+1$。于是两套码的平均码长差是一个<strong>固定常数</strong>：
+$$L(U)=L(V)+(p_{m-1}+p_m).$$
+这个差与"怎么编"无关——它只来自"把超符号拆成两个、各加一位"。</p>
+<p style="margin:8px 0 0"><strong>归纳推进：</strong> 因为差是常数，<strong>"$U$ 的码最优" ⟺ "$V$ 的码最优"</strong>。假设 Huffman 对 $m-1$ 个符号最优（归纳假设），那么它对 $m$ 个符号也最优。$m=2$ 时显然最优（一个 0 一个 1）。由归纳法，Huffman 对任意 $m$ 最优。$\blacksquare$</p>
+</div>
+<p style="margin-bottom:0" class="tip"><strong>背诵骨架：</strong>① 引理1（大概率短码，交换论证）→ ② 引理2（最小两个是最深兄弟）→ ③ 合并降一维、码长差为常数 $p_{m-1}+p_m$ → ④ 对符号数归纳。这就是满分答案的四个台阶。</p>
+</div>
+
+<!-- ============= L9 ============= -->
+<h2 id="l9">L9　数据处理不等式与 Fano 不等式 <span class="tag">概念 + 工具</span></h2>
+<p class="lead">关键词：处理不会增信息、错误概率的下界 —— 模块三反向证明的弹药</p>
+
+<h3>9.1 数据处理不等式 DPI</h3>
+<div class="box key">
+<span class="label">陈述</span>
+<p style="margin-top:0">若马尔可夫链 $X\to Y\to Z$（即给定 $Y$ 后 $Z$ 与 $X$ 无关），则
+$$I(X;Z)\ \le\ I(X;Y).$$</p>
+<p style="margin-bottom:0"><strong>大白话：对数据做任何（确定或随机的）处理，都不会凭空增加它关于原始信息的互信息。</strong> 你只能丢信息，不能造信息。$Z$ 是对 $Y$ 的加工，它对 $X$ 知道的不可能比 $Y$ 更多。</p>
+</div>
+<div class="box ex">
+<span class="label">证明一行（链式法则展开互信息两次）</span>
+<p style="margin:0">$I(X;Y,Z)=I(X;Z)+I(X;Y\mid Z)=I(X;Y)+I(X;Z\mid Y)$。由马氏性 $I(X;Z\mid Y)=0$，又 $I(X;Y\mid Z)\ge0$，所以 $I(X;Z)\le I(X;Y)$。</p>
+</div>
+
+<h3>9.2 Fano 不等式（反向定理的核心弹药）<span class="must">模块三要用</span></h3>
+<div class="box intuition">
+<span class="label">Fano 在说什么</span>
+<p style="margin:0">想从观测 $Y$ 猜出 $X$，给出估计 $\hat X$，错误概率 $P_e=P(\hat X\ne X)$。<strong>Fano 把"还剩多少不确定性 $H(X\mid Y)$"翻译成"你至少会犯多少错 $P_e$"：残留的不确定性越大，错误率下界越高。</strong> 如果 $H(X\mid Y)$ 不为 0，你就不可能零错误。</p>
+</div>
+<div class="box key">
+<span class="label">Fano 不等式</span>
+<div class="formula">$$ H(X\mid Y)\ \le\ H(P_e)+P_e\log(|\mathcal X|-1) $$</div>
+<p style="margin-bottom:0">常用的弱化版（够用）：$P_e\ \ge\ \dfrac{H(X\mid Y)-1}{\log|\mathcal X|}$。<strong>用途：模块三证"码率 &gt; 信道容量则必然出错"的逆定理时，就是用 Fano 把 $H(X\mid Y)$ 下界翻成错误概率下界。</strong></p>
+</div>
+
+<div class="box intuition">
+<span class="label">引申：Fano 与 Fisher 信息（老师提到）</span>
+<p style="margin:0">Fano 是"<strong>离散估计</strong>错误概率的下界"。把它推广到<strong>连续参数估计</strong>，对应物就是 <strong>Fisher 信息 $J(\theta)$</strong> 与 <strong>Cramér–Rao 下界</strong>：任何无偏估计的方差 $\ge 1/J(\theta)$。</p>
+<ul style="margin:6px 0 0">
+<li><strong>Fisher 信息</strong>：$J(\theta)=\mathbb E\big[\big(\tfrac{\partial}{\partial\theta}\log f(X;\theta)\big)^2\big]$，衡量"数据里关于参数 $\theta$ 的信息量"。</li>
+<li>类比：<strong>Fano（"残留不确定性 ⟹ 错误概率下界"）↔ Cramér–Rao（"Fisher 信息 ⟹ 估计方差下界"）</strong>。两者都是"信息不够 → 必然估不准"。</li>
+<li>关系式：$J(\theta)$ 也等于 KL 散度的二阶曲率——KL 在 $\theta$ 处的局部二次近似系数就是 Fisher 信息。</li>
+</ul>
+</div>
+
+<h3>9.3 指数族与充分统计量（老师列为判断题）</h3>
+<div class="box key">
+<span class="label">充分统计量 = "把数据压缩到不丢参数信息"</span>
+<p style="margin-top:0"><strong>充分统计量</strong> $T(X)$：知道了 $T(X)$，原始数据 $X$ 就不再含额外的关于参数 $\theta$ 的信息。信息论刻画：$\theta\to T(X)\to X$ 构成马氏链，且 <strong>$I(\theta;X)=I(\theta;T(X))$</strong>（DPI 取等——压缩没丢参数信息）。</p>
+<p style="margin-bottom:0"><strong>判断法（因子分解定理）：</strong> $T(X)$ 充分 ⟺ 似然能分解成 $f(x;\theta)=g\big(T(x),\theta\big)\,h(x)$（一项只通过 $T$ 依赖 $\theta$，另一项与 $\theta$ 无关）。</p>
+</div>
+<div class="box ex">
+<span class="label">指数族：充分统计量一眼看出</span>
+<p style="margin:0"><strong>指数族</strong>分布形如
+$$f(x;\theta)=h(x)\,\exp\!\big(\theta\cdot T(x)-A(\theta)\big).$$
+<strong>指数里乘在 $\theta$ 上的那个 $T(x)$ 就是充分统计量。</strong> 例：① 高斯（已知方差）→ $T(x)=\sum x_i$（样本和）；② 伯努利 → $T=\sum x_i$（成功次数）；③ 泊松 → $T=\sum x_i$。判断题套路：把密度写成指数族标准形，读出 $T(x)$ 即可。</p>
+</div>
+
+<hr>
+<!-- ============= cheat ============= -->
+<h2 id="cheat">速查 + 自测 <span class="tag">考前 5 分钟</span></h2>
+
+<div class="box key">
+<span class="label">本模块速查</span>
+<table>
+<tr><th>结论</th><th>公式 / 要点</th></tr>
+<tr><td>AEP</td><td>$-\frac1n\log p(X^n)\to H$（对自信息用 LLN）</td></tr>
+<tr><td>典型集概率</td><td>$2^{-n(H+\varepsilon)}\le p(x^n)\le2^{-n(H-\varepsilon)}$</td></tr>
+<tr><td>典型集大小</td><td>$(1-\varepsilon)2^{n(H-\varepsilon)}\le|A_\varepsilon^{(n)}|\le2^{n(H+\varepsilon)}$</td></tr>
+<tr><td>Kraft</td><td>前缀码存在 ⟺ $\sum2^{-\ell_i}\le1$</td></tr>
+<tr><td>变长编码定理</td><td>$H\le L^*<H+1$（下界 Gibbs，上界 Shannon 码取整）</td></tr>
+<tr><td>最优码长</td><td>$\ell_i=\lceil-\log p_i\rceil$</td></tr>
+<tr><td>Huffman</td><td>合并最小两个；最优；$L(U)=L(V)+(p_{m-1}+p_m)$</td></tr>
+<tr><td>熵率（马氏）</td><td>$H=\sum_i\pi_i(-\sum_j p_{ij}\log p_{ij})$</td></tr>
+<tr><td>DPI</td><td>$X\to Y\to Z\Rightarrow I(X;Z)\le I(X;Y)$</td></tr>
+<tr><td>Fano</td><td>$H(X\mid Y)\le H(P_e)+P_e\log(|\mathcal X|-1)$</td></tr>
+</table>
+</div>
+
+<div class="qa">
+<p class="q">自测 1：AEP 证明的核心一步是什么？</p>
+<p class="muted">答：用独立性把 $-\frac1n\log p(X^n)$ 写成 $\frac1n\sum(-\log p(X_i))$，认出它是自信息的样本平均，套大数定律收敛到 $H$。</p>
+</div>
+<div class="qa">
+<p class="q">自测 2：典型集大小上界怎么来的？</p>
+<p class="muted">答：总概率 ≤1，每个典型序列概率 ≥$2^{-n(H+\varepsilon)}$，相除得 $|A|\le2^{n(H+\varepsilon)}$。</p>
+</div>
+<div class="qa">
+<p class="q">自测 3：变长编码定理下界 $L\ge H$ 用哪两个工具？</p>
+<p class="muted">答：Kraft（$\sum2^{-\ell_i}\le1$）+ Gibbs（$D(p\Vert q)\ge0$）。把 $L-H$ 凑成 $D(p\Vert q)-\log c$ 两项都非负。</p>
+</div>
+<div class="qa">
+<p class="q">自测 4：Huffman 最优性归纳的"那个常数"是什么？</p>
+<p class="muted">答：合并最小两个符号后，$L(U)=L(V)+(p_{m-1}+p_m)$，这个差与编码方式无关，所以 $U$ 最优 ⟺ $V$ 最优，归纳成立。</p>
+</div>
+
+<a class="back" href="模块一_基础工具.html">← 模块一：基础工具</a>
+<a class="back" href="信息论复习.html">总览页</a>
+<a class="back" href="模块三_信道编码.html">模块三：信道编码 →</a>
+
+</div>
+</body>
+</html>

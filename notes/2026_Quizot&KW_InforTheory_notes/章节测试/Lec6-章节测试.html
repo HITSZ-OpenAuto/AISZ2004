@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Lecture 6 – 平稳马尔可夫信源</title>
+<script>
+MathJax = {
+  tex: {
+    inlineMath: [['$', '$']],
+    displayMath: [['$$', '$$']]
+  }
+};
+</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js"></script>
+<style>
+/* === ExamPass Shared Styles === */
+/* Paper-like warm background, clean typography, responsive */
+
+:root {
+  --paper: #fdf6e3;
+  --paper-dark: #f5ecd7;
+  --ink: #2c2c2c;
+  --ink-light: #555;
+  --accent: #2563eb;
+  --accent-hover: #1d4ed8;
+  --divider: #d6c8a8;
+  --card-bg: #fef9ef;
+  --card-border: #e8dcc8;
+  --correct: #22c55e;
+  --correct-bg: #f0fdf4;
+  --wrong: #ef4444;
+  --wrong-bg: #fef2f2;
+  --tag-bg: #fef3c7;
+  --tag-text: #92400e;
+  --radius: 6px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: "Microsoft YaHei", "Noto Sans SC", "SimSun", sans-serif;
+  font-size: 12pt; line-height: 1.75; color: var(--ink);
+  max-width: 860px; margin: auto; padding: 24px 20px 60px;
+  background: var(--paper);
+}
+
+@media print {
+  body { font-size: 10.5pt; background: #fff; }
+  .no-print { display: none !important; }
+  h1, h2, h3 { page-break-after: avoid; }
+}
+
+/* ── Header ── */
+#exampass-header {
+  display: flex; justify-content: space-between; align-items: baseline;
+  padding: 6px 0; margin-bottom: 0;
+}
+.header-brand { font-size: 1.2em; font-weight: 700; color: #1a1a2e; letter-spacing: 0.3px; }
+.header-url  { font-size: 0.78em; color: #999; }
+.header-divider { border: none; border-top: 2px solid var(--divider); margin: 4px 0 20px 0; }
+
+/* ── Typography ── */
+h1 { font-size: 1.55em; text-align: center; border-bottom: 2px solid var(--divider); padding-bottom: 8px; margin-top: 0; }
+h2 { font-size: 1.25em; border-bottom: 1px solid var(--divider); padding-bottom: 4px; margin-top: 28px; }
+h3 { font-size: 1.08em; margin-top: 20px; color: var(--ink); }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ── Tables ── */
+table { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 0.95em; }
+td, th { border: 1px solid var(--card-border); padding: 5px 9px; text-align: left; }
+th { background: var(--paper-dark); font-weight: 700; }
+
+/* ── Embedded source images ── */
+.embedded-images {
+  margin: 18px 0 24px;
+}
+.embedded-images-intro {
+  color: var(--ink-light);
+  font-size: 0.95em;
+}
+.embedded-image {
+  margin: 14px 0 18px;
+  padding: 10px;
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  background: var(--card-bg);
+  break-inside: avoid;
+}
+.embedded-image img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+  border: 1px solid var(--divider);
+  background: #fff;
+}
+.embedded-image figcaption {
+  margin-top: 8px;
+  color: var(--ink-light);
+  font-size: 0.92em;
+  line-height: 1.5;
+}
+.embedded-image-note::before {
+  content: " - ";
+}
+
+/* ── Knowledge point vs explanation ── */
+.kp { font-weight: 700; color: var(--ink); }           /* key point: bold dark */
+.exp { font-weight: 400; color: var(--ink-light); }    /* explanation: lighter */
+.exp em, .exp strong { color: var(--ink); }             /* emphasis inside explanation */
+
+/* ── Block elements ── */
+blockquote {
+  border-left: 3px solid #c0392b; background: #fef9ef;
+  padding: 6px 14px; margin: 10px 0; font-size: 0.95em;
+}
+code { background: #f0ede0; padding: 2px 5px; border-radius: 3px; font-size: 0.92em; }
+pre { background: #f0ede0; padding: 10px; border-radius: var(--radius); overflow-x: auto; }
+
+/* ── TOC ── */
+div.toc {
+  background: var(--card-bg); padding: 14px 18px;
+  border: 1px solid var(--card-border); border-radius: var(--radius); margin-bottom: 22px;
+}
+div.toc ul { padding-left: 18px; }
+div.toc li { margin: 3px 0; font-size: 0.95em; }
+
+/* ── Priority tags ── */
+.tag-must   { background: #fee2e2; color: #991b1b; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+.tag-key    { background: #fef3c7; color: #92400e; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+.tag-freq   { background: #dbeafe; color: #1e40af; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+.tag-info   { background: #f0fdf4; color: #166534; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+
+/* === Interactive Test Styles === */
+
+/* ── Score box ── */
+#score-box {
+  display: none; background: var(--paper-dark); color: var(--ink);
+  padding: 16px 20px; border-radius: var(--radius); margin: 14px 0;
+  text-align: center; border: 1px solid var(--card-border);
+}
+#score-box .score-num { font-size: 2.2em; font-weight: 700; }
+#score-box .score-label { font-size: 0.85em; color: var(--ink-light); }
+
+/* ── Question card ── */
+.q-card {
+  background: var(--card-bg); border: 1px solid var(--card-border);
+  border-radius: var(--radius); padding: 12px 14px; margin: 10px 0;
+  transition: all 0.15s;
+}
+.q-card.correct { border-left: 3px solid var(--correct); background: #f7fdf4; }
+.q-card.wrong   { border-left: 3px solid var(--wrong); background: #fef9f9; }
+
+.q-num  { font-weight: 700; font-size: 0.98em; margin-bottom: 4px; }
+.q-text { margin-bottom: 8px; font-size: 0.98em; }
+.q-text pre {
+  background: #f5f5f5; border: 1px solid #ddd; border-radius: 4px;
+  padding: 10px 14px; margin: 8px 0; overflow-x: auto;
+  font-family: 'Consolas', 'Courier New', monospace; font-size: 0.9em;
+  line-height: 1.5; white-space: pre;
+}
+.q-text code {
+  font-family: 'Consolas', 'Courier New', monospace; font-size: 0.9em;
+  background: #f0f0f0; padding: 1px 4px; border-radius: 3px;
+}
+
+/* ── Options (compact) ── */
+.option {
+  display: block; padding: 4px 10px; margin: 3px 0;
+  border: 1px solid var(--card-border); border-radius: 4px;
+  cursor: pointer; transition: all 0.12s; font-size: 0.93em;
+  background: #fefcf5;
+}
+.option:hover            { background: #f0ede0; }
+.option input            { margin-right: 6px; }
+.option.selected         { border-color: var(--accent); background: #eff6ff; }
+.option.correct-answer   { border-color: var(--correct); background: var(--correct-bg); }
+.option.wrong-answer     { border-color: var(--wrong); background: var(--wrong-bg); }
+
+/* ── Textareas (compact) ── */
+.q-textarea {
+  width: 100%; min-height: 56px; border: 1px solid var(--card-border);
+  border-radius: 4px; padding: 6px 10px; font-family: inherit;
+  font-size: 0.93em; background: #fefcf5; resize: vertical;
+}
+.q-textarea:focus { outline: none; border-color: var(--accent); }
+
+/* ── Result after grading ── */
+.result {
+  display: none; margin-top: 8px; padding: 8px 12px;
+  background: #fefcf5; border: 1px solid var(--card-border);
+  border-radius: 4px; font-size: 0.9em; line-height: 1.6;
+}
+.result .badge {
+  display: inline-block; padding: 1px 9px; border-radius: 3px;
+  font-weight: 700; font-size: 0.82em; margin-right: 6px;
+}
+.badge-ok  { background: var(--correct-bg); color: #166534; }
+.badge-no  { background: var(--wrong-bg); color: #991b1b; }
+.badge-ref { background: #dbeafe; color: #1e40af; }
+
+.result .explanation { margin-top: 4px; color: var(--ink); }
+.result .pitfall { color: #b45309; margin-top: 3px; font-size: 0.9em; }
+
+/* ── Grading button ── */
+.grading-bar { text-align: center; margin: 20px 0; }
+.grading-bar button {
+  font-size: 1em; padding: 8px 32px; background: var(--accent);
+  color: #fff; border: none; border-radius: var(--radius);
+  cursor: pointer; font-weight: 600; letter-spacing: 0.3px;
+}
+.grading-bar button:hover     { background: var(--accent-hover); }
+.grading-bar button:disabled  { background: #bbb; cursor: not-allowed; }
+
+/* ── Wrong-question review document ── */
+.wrong-review-box {
+  display: none;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  margin: 18px 0;
+}
+.wrong-review-box h3 {
+  margin-top: 0;
+}
+.wrong-review-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px 0;
+}
+.wrong-review-actions button {
+  font-size: 0.92em;
+  padding: 6px 12px;
+  background: var(--ink);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+.wrong-review-actions button:hover {
+  background: #000;
+}
+#wrong-review-text {
+  width: 100%;
+  min-height: 220px;
+  border: 1px solid var(--card-border);
+  border-radius: 4px;
+  padding: 8px 10px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.84em;
+  line-height: 1.5;
+  background: #fff;
+  resize: vertical;
+}
+
+</style>
+</head>
+<body>
+
+<header id="exampass-header">
+  <div class="header-left"><span class="header-brand">ExamPass Assistant</span></div>
+  <div class="header-right"><span class="header-url">github.com/MIKUZ12/ExamPass-Assistant</span></div>
+</header>
+<hr class="header-divider">
+
+<h1>Lecture 6 – 平稳马尔可夫信源</h1>
+<h2 style="text-align:center">章节测试</h2>
+<p style="text-align:center;color:var(--ink-light);font-size:0.95em">满分100分</p>
+
+<div id="score-box"><div class="score-num" id="score-num">0</div><div class="score-label">总分</div></div>
+<div id="questions-container"></div>
+<div class="grading-bar no-print"><button onclick="gradeAll()" id="grade-btn">提交批改</button></div>
+<div id="wrong-review-box" class="wrong-review-box no-print"></div>
+
+<script>
+var Q = [{"type": "choice", "points": 2, "question": "马尔可夫过程的定义性质是？", "options": ["各随机变量相互独立", "当前状态只与前一状态有关：$p(X_n\\mid X_{n-1},\\ldots,X_1)=p(X_n\\mid X_{n-1})$", "联合分布具有时间不变性", "符号集有限"], "answer": 1, "knowledge_point": "马尔可夫过程定义", "diagnosis_hint": "混淆马尔可夫性与独立性，或与平稳性", "explanation": "<strong>正确答案</strong>：B<br><br><strong>推理过程</strong>：马尔可夫性（memoryless property）是指给定当前，未来与过去条件独立，即条件分布只依赖前一步。A（独立）比马尔可夫性更强，C（平稳性）是另一个独立条件。", "pitfall": "马尔可夫 ≠ 独立，马尔可夫 ≠ 平稳"}, {"type": "choice", "points": 2, "question": "设状态转移矩阵 $P$，$P_{ij}=p(X_0=s_j\\mid X_{-1}=s_i)$，则 $P$ 满足什么约束？", "options": ["每列元素之和为1", "每行元素之和为1", "矩阵对称（$P_{ij}=P_{ji}$）", "所有元素相等"], "answer": 1, "knowledge_point": "状态转移矩阵性质", "diagnosis_hint": "混淆行归一与列归一", "explanation": "<strong>正确答案</strong>：B<br><br><strong>推理过程</strong>：$P_{ij}$ 是从 $s_i$ 出发的条件概率，$\\sum_j P_{ij}=\\sum_j p(X_0=s_j\\mid X_{-1}=s_i)=1$，即行和为1（行随机矩阵）。", "pitfall": "记住：行 = 从哪来，列 = 到哪去；行和=1"}, {"type": "choice", "points": 2, "question": "稳态分布 $\\mu$ 满足什么方程？", "options": ["$P\\mu = \\mu$（矩阵乘列向量）", "$\\mu P = \\mu$（行向量乘矩阵）", "$\\mu P^T = \\mu$", "$\\mu = \\mu^2$"], "answer": 1, "knowledge_point": "稳态分布定义", "diagnosis_hint": "混淆行向量和列向量乘法方向", "explanation": "<strong>正确答案</strong>：B<br><br><strong>推理过程</strong>：$\\mu$ 是概率行向量，转移一步后 $\\mu P$，要求分布不变即 $\\mu P=\\mu$。若写成列向量则是 $P^T\\mu=\\mu$。", "pitfall": "PPT 用行向量：$p_{X_0}=p_{X_{-1}}P$，所以稳态条件是行向量等式 $\\mu P=\\mu$"}, {"type": "choice", "points": 2, "question": "细致平衡条件（$\\mu_i P_{ij}=\\mu_j P_{ji}$）对稳态分布而言是？", "options": ["必要且充分条件", "充分条件，但不是必要条件", "必要条件，但不是充分条件", "既非必要也非充分"], "answer": 1, "knowledge_point": "细致平衡条件", "diagnosis_hint": "误以为细致平衡是充要条件", "explanation": "<strong>正确答案</strong>：B<br><br><strong>推理过程</strong>：若细致平衡成立，则 $\\sum_i\\mu_i P_{ij}=\\sum_i\\mu_j P_{ji}=\\mu_j$，即 $\\mu P=\\mu$（充分性）。但存在不满足细致平衡的稳态分布（如有向三元环 $s_1\\to s_2\\to s_3\\to s_1$）。", "pitfall": "细致平衡只是充分条件"}, {"type": "choice", "points": 2, "question": "平稳马尔可夫信源的熵率公式为？", "options": ["$-\\sum_{i}\\mu_i\\log\\mu_i$（稳态分布的熵）", "$-\\sum_{i,j}\\mu_i P_{ij}\\log P_{ij}$", "$H(X_1)$（第一个符号的熵）", "$\\frac{1}{n}H(X^n)$（固定 $n$）"], "answer": 1, "knowledge_point": "马尔可夫信源熵率公式", "diagnosis_hint": "将稳态分布的熵与熵率混淆", "explanation": "<strong>正确答案</strong>：B<br><br><strong>推理过程</strong>：$H(\\mathcal{X})=H(X_0\\mid X_{-1})=\\sum_i\\mu_i H(X_0\\mid X_{-1}=s_i)=-\\sum_{i,j}\\mu_i P_{ij}\\log P_{ij}$。选项A是稳态分布的熵 $H(\\mu)$，通常大于熵率。", "pitfall": "熵率 $\\neq$ 稳态分布的熵，前者是条件熵"}, {"type": "choice", "points": 2, "question": "不可约性（Irreducibility）的定义是？", "options": ["转移矩阵所有元素均为正", "对所有状态对 $(i,j)$，存在正整数 $N$ 使 $[P^N]_{ij}>0$", "所有状态的周期为1", "转移矩阵可逆"], "answer": 1, "knowledge_point": "不可约性定义", "diagnosis_hint": "混淆不可约性与所有元素为正", "explanation": "<strong>正确答案</strong>：B<br><br><strong>推理过程</strong>：不可约性要求每对状态之间存在有向路径（可经多步到达），不要求一步可达（$P$ 元素为正）。A 是比不可约性更强的条件（primitive 矩阵）。", "pitfall": "不可约不等于 $P$ 所有元素为正，只需 $P^N$ 某步可达"}, {"type": "choice", "points": 2, "question": "在不可约马尔可夫链中，以下关于各状态周期的描述正确的是？", "options": ["各状态周期可以不同", "所有状态拥有相同的周期", "所有状态的周期都等于状态数", "只有初始状态有周期，其余无意义"], "answer": 1, "knowledge_point": "不可约链各状态周期", "diagnosis_hint": "不了解不可约链中周期一致性", "explanation": "<strong>正确答案</strong>：B<br><br><strong>推理过程</strong>：在不可约链中，对任意两个状态 $i,j$，若 $i$ 的周期为 $d$，则 $j$ 的周期也为 $d$（通过构造 $i\\to j\\to i$ 回路可证）。因此只需检查一个状态的周期。", "pitfall": ""}, {"type": "choice", "points": 2, "question": "判断不可约马尔可夫链是否非周期（aperiodic）的实用方法是？", "options": ["检验转移矩阵的行列式是否为1", "检验是否存在某对角元 $P_{ii}>0$（即转移图有自环）", "检验所有 $P_{ij}$ 是否相等", "检验稳态分布是否均匀"], "answer": 1, "knowledge_point": "非周期性实用判定", "diagnosis_hint": "", "explanation": "<strong>正确答案</strong>：B<br><br><strong>推理过程</strong>：若 $P_{ii}>0$，则存在长度为1的回环，故 $d(i)=\\gcd\\{1,\\ldots\\}=1$。在不可约链中所有状态周期相同，故整个链非周期。只需检查一个状态（或找一个自环）。", "pitfall": "自环（$P_{ii}>0$）是非周期的充分条件"}, {"type": "choice", "points": 2, "question": "有向三元环 $s_1\\to s_2\\to s_3\\to s_1$（$P_{12}=P_{23}=P_{31}=1$，其余为0），该链的性质是？", "options": ["可约、非周期", "不可约、周期为3（非遍历）", "不可约、非周期（遍历）", "可约、周期为3"], "answer": 1, "knowledge_point": "不可约性与周期性综合判断", "diagnosis_hint": "误以为不可约就是遍历", "explanation": "<strong>正确答案</strong>：B<br><br><strong>推理过程</strong>：三元环中每个状态都能到达其他任意状态（不可约）；但返回初始状态只能在步数为3的倍数时发生，故周期 $d=3\\neq 1$，非遍历。", "pitfall": "不可约 ≠ 遍历，还需要非周期性"}, {"type": "choice", "points": 2, "question": "对于例子中的4状态链（$P_{11}=0.8$），其稳态分布 $\\mu_1$ 等于？", "options": ["$1/4$", "$1/7$", "$5/14$", "$5/7$"], "answer": 2, "knowledge_point": "稳态分布计算", "diagnosis_hint": "未解方程组，直觉猜测均匀分布", "explanation": "<strong>正确答案</strong>：C（$5/14$）<br><br><strong>推理过程</strong>：解 $\\mu P=\\mu$，得 $\\mu_1=\\mu_4=5/14$，$\\mu_2=\\mu_3=1/7$（利用对称性和行列式）。均匀分布 $1/4$ 不满足 $\\mu P=\\mu$。", "pitfall": "不能假设稳态分布均匀"}, {"type": "tf", "points": 1, "question": "马尔可夫链中，若 $X_{n-1}$ 已知，则 $X_n$ 与 $X_{n-2}, X_{n-3}, \\ldots$ 条件独立。", "options": [], "answer": true, "knowledge_point": "马尔可夫性质", "diagnosis_hint": "", "explanation": "<strong>正确答案</strong>：正确（√）<br><br><strong>推理过程</strong>：这正是马尔可夫性的直接含义——给定当前状态，过去所有历史对未来没有额外信息。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "状态转移矩阵 $P$ 的每一列元素之和为1。", "options": [], "answer": false, "knowledge_point": "状态转移矩阵性质", "diagnosis_hint": "行列方向混淆", "explanation": "<strong>正确答案</strong>：错误（×）<br><br><strong>推理过程</strong>：$P_{ij}=p(X_0=s_j\\mid X_{-1}=s_i)$ 是以行 $i$ 为条件的条件概率，每行之和 $\\sum_j P_{ij}=1$。列之和没有约束（一般不等于1）。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "若马尔可夫链的初始分布为稳态分布 $\\mu$，则该链是平稳过程。", "options": [], "answer": true, "knowledge_point": "稳态分布与平稳过程的关系", "diagnosis_hint": "", "explanation": "<strong>正确答案</strong>：正确（√）<br><br><strong>推理过程</strong>：当初始分布 $p_{X_0}=\\mu$ 时，$p_{X_k}=\\mu P^k=\\mu$（稳态分布的不动点性质），任意有限维联合分布时移不变，故过程平稳。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "细致平衡条件（$\\mu_i P_{ij}=\\mu_j P_{ji}$）是稳态分布存在的必要条件。", "options": [], "answer": false, "knowledge_point": "细致平衡条件", "diagnosis_hint": "误以为是充要条件", "explanation": "<strong>正确答案</strong>：错误（×）<br><br><strong>推理过程</strong>：细致平衡只是充分条件。反例：有向三元环 $s_1\\to s_2\\to s_3\\to s_1$，稳态分布为均匀分布（存在），但细致平衡条件 $\\mu_1 P_{12}=\\mu_2 P_{21}$ 化简为 $1/3\\neq 0$，不满足。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "不可约马尔可夫链一定是遍历的。", "options": [], "answer": false, "knowledge_point": "不可约与遍历", "diagnosis_hint": "忘记遍历还需要非周期性", "explanation": "<strong>正确答案</strong>：错误（×）<br><br><strong>推理过程</strong>：不可约保证稳态分布唯一，但任意初始分布要收敛到稳态分布还需要非周期性。有向三元环不可约但周期=3，不是遍历的。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "对不可约链，Perron-Frobenius 定理保证稳态分布存在且唯一，且所有分量严格大于0。", "options": [], "answer": true, "knowledge_point": "Perron-Frobenius 定理", "diagnosis_hint": "", "explanation": "<strong>正确答案</strong>：正确（√）<br><br><strong>推理过程</strong>：不可约性意味着每个状态都可互达，Perron-Frobenius 定理对此类矩阵保证最大特征值为1（重数1），对应的左特征向量（稳态分布）各分量严格为正。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "不可约链中，若存在某状态 $s_i$ 使得 $P_{ii}>0$（自环），则该链非周期。", "options": [], "answer": true, "knowledge_point": "非周期性判定", "diagnosis_hint": "", "explanation": "<strong>正确答案</strong>：正确（√）<br><br><strong>推理过程</strong>：$P_{ii}>0$ 表示存在长度1的回环，故 $d(i)=\\gcd\\{1,\\ldots\\}=1$。在不可约链中所有状态周期相同，故全链非周期。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "平稳马尔可夫信源的熵率 $H(\\mathcal{X}) = H(X_0\\mid X_{-1})$（只条件于前一步），而非 $H(X_0\\mid X_{-\\infty}^{-1})$。", "options": [], "answer": true, "knowledge_point": "马尔可夫性简化熵率", "diagnosis_hint": "不知道马尔可夫性将无穷条件简化为一步条件", "explanation": "<strong>正确答案</strong>：正确（√）<br><br><strong>推理过程</strong>：马尔可夫性保证 $p(X_0\\mid X_{-1},X_{-2},\\ldots)=p(X_0\\mid X_{-1})$，所以 $H(X_0\\mid X_{-\\infty}^{-1})=H(X_0\\mid X_{-1})$，条件历史可截断为仅一步。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "遍历马尔可夫链的熵率等于稳态分布的熵 $H(\\mu) = -\\sum_i \\mu_i\\log\\mu_i$。", "options": [], "answer": false, "knowledge_point": "熵率与稳态分布熵的区别", "diagnosis_hint": "混淆熵率（条件熵）与稳态熵（边缘熵）", "explanation": "<strong>正确答案</strong>：错误（×）<br><br><strong>推理过程</strong>：熵率是条件熵 $H(X_0\\mid X_{-1})$，而稳态分布的熵是边缘熵 $H(\\mu)=H(X_0)$。由条件减少熵：$H(\\mathcal{X})\\leq H(\\mu)$，等号仅当各符号独立。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "若马尔可夫链的状态转移矩阵 $P$ 为对称矩阵（$P_{ij}=P_{ji}$），则均匀分布是其稳态分布。", "options": [], "answer": true, "knowledge_point": "对称链的稳态分布", "diagnosis_hint": "", "explanation": "<strong>正确答案</strong>：正确（√）<br><br><strong>推理过程</strong>：均匀分布 $\\mu_i=1/m$，验证 $\\mu P$：$(\\mu P)_j=\\sum_i(1/m)P_{ij}=(1/m)\\sum_i P_{ji}=(1/m)\\cdot 1=1/m=\\mu_j$（利用 $P$ 对称且列和=1…）。实际上当 $P$ 对称时行和=列和=1，细致平衡自动满足，均匀分布是稳态分布。", "pitfall": ""}, {"type": "short", "points": 6, "question": "证明：若细致平衡条件 $\\mu_i P_{ij}=\\mu_j P_{ji}$ 对所有 $i,j$ 成立，则 $\\mu$ 是稳态分布。", "options": [], "answer": "", "knowledge_point": "细致平衡推导稳态分布", "diagnosis_hint": "", "explanation": "<strong>参考答案</strong>：<br>对任意 $j$：$\\sum_i\\mu_i P_{ij}\\xlongequal{\\text{细致平衡}}\\sum_i\\mu_j P_{ji}=\\mu_j\\sum_i P_{ji}=\\mu_j\\cdot 1=\\mu_j$<br>故 $\\mu P=\\mu$，$\\sum_i\\mu_i=1$，$\\mu_i\\geq 0$，所以 $\\mu$ 是稳态分布。$\\blacksquare$", "pitfall": ""}, {"type": "short", "points": 6, "question": "推导平稳马尔可夫信源熵率公式：从 $H(\\mathcal{X})=H(X_0\\mid X_{-\\infty}^{-1})$ 出发，化简到 $-\\sum_{i,j}\\mu_i P_{ij}\\log P_{ij}$。", "options": [], "answer": "", "knowledge_point": "马尔可夫信源熵率推导", "diagnosis_hint": "", "explanation": "<strong>参考答案</strong>：<br>1. 马尔可夫性：$H(X_0\\mid X_{-\\infty}^{-1})=H(X_0\\mid X_{-1})$<br>2. 按 $X_{-1}$ 展开，代入稳态：$=\\sum_i\\mu_i H(X_0\\mid X_{-1}=s_i)$<br>3. 展开条件熵：$=-\\sum_{i,j}\\mu_i P_{ij}\\log P_{ij}$", "pitfall": ""}, {"type": "short", "points": 6, "question": "陈述有限状态马尔可夫链遍历性的充要条件，并分别举反例说明若缺少其中一个条件会发生什么。", "options": [], "answer": "", "knowledge_point": "遍历性条件", "diagnosis_hint": "", "explanation": "<strong>参考答案</strong>：<br><strong>充要条件</strong>：不可约 + 非周期<br><strong>缺少不可约</strong>：如含吸收态的链，稳态分布不唯一，初始位置决定最终停留。<br><strong>缺少非周期</strong>：二状态链 $s_1\\leftrightarrow s_2$（$P_{12}=P_{21}=1$），周期=2，序列振荡不收敛。", "pitfall": ""}, {"type": "short", "points": 6, "question": "对转移矩阵 $P=\\begin{bmatrix}0.8&0.2\\\\0.4&0.6\\end{bmatrix}$ 的二状态链，求稳态分布 $\\mu$。", "options": [], "answer": "", "knowledge_point": "稳态分布求解", "diagnosis_hint": "", "explanation": "<strong>参考答案</strong>：<br>解 $\\mu P=\\mu$，$\\mu_1+\\mu_2=1$：<br>$0.8\\mu_1+0.4\\mu_2=\\mu_1 \\Rightarrow 0.2\\mu_1=0.4\\mu_2 \\Rightarrow \\mu_1=2\\mu_2$<br>代入归一化：$\\mu_2=1/3,\\;\\mu_1=2/3$", "pitfall": ""}, {"type": "essay", "points": 8, "question": "详细证明：在有限状态不可约马尔可夫链中，所有状态拥有相同的周期（Hint：对任意两状态 $i,j$，构造经过 $i$ 再经过 $j$ 再回到 $i$ 的回路，利用回路长度的 GCD 性质）。", "options": [], "answer": "", "knowledge_point": "不可约链各状态周期一致性证明", "diagnosis_hint": "", "explanation": "<strong>参考答案</strong>（思路）：<br>设 $d(i)$ 为状态 $i$ 的周期。因链不可约，存在路径 $i\\xrightarrow{a}j\\xrightarrow{b}i$（$a+b$ 步）。<br>对 $i\\to i$ 的任意回路（长度 $k\\cdot d(i)$），可构造 $j\\to i\\xrightarrow{k\\cdot d(i)}i\\to j$（长度 $b+k\\cdot d(i)+a$）为 $j$ 的回路，故 $d(j)\\mid\\gcd(a+b,\\; a+b+d(i),\\ldots)$，可证 $d(j)\\mid d(i)$。同理 $d(i)\\mid d(j)$，故 $d(i)=d(j)$。", "pitfall": ""}, {"type": "essay", "points": 8, "question": "对课件中的4状态转移矩阵 $P$，完整推导稳态分布 $\\mu=(5/14,1/7,1/7,5/14)$（写出方程组并求解），并计算熵率的数值结果。", "options": [], "answer": "", "knowledge_point": "稳态分布与熵率综合计算", "diagnosis_hint": "", "explanation": "<strong>参考答案</strong>：<br><strong>稳态分布</strong>：解 $\\mu P=\\mu$，得4个方程（其中1个冗余）加归一化：<br>$\\mu_1=0.8\\mu_1+0.5\\mu_3\\Rightarrow 0.2\\mu_1=0.5\\mu_3$<br>$\\mu_2=0.2\\mu_1+0.5\\mu_3\\Rightarrow\\mu_2=\\mu_3$（代入前式）<br>类似得 $\\mu_4=2.5\\mu_3$，$\\mu_1=2.5\\mu_3$，归一化：$7\\mu_3=1\\Rightarrow\\mu_3=1/7$<br>$\\mu_1=\\mu_4=5/14$，$\\mu_2=\\mu_3=1/7$。<br><strong>熵率</strong>：$H=\\frac{5}{14}H(0.8,0.2)+\\frac{1}{7}\\cdot 1+\\frac{1}{7}\\cdot 1+\\frac{5}{14}H(0.8,0.2)\\approx\\frac{5}{7}\\times 0.722+\\frac{2}{7}\\times 1\\approx 0.80$ bit/符号", "pitfall": ""}, {"type": "essay", "points": 10, "question": "阐述平稳马尔可夫信源与 Lecture5 中一般平稳遍历信源之间的关系。说明：（1）为何平稳马尔可夫信源是平稳过程？（2）遍历性条件在平稳马尔可夫链中的具体形式（不可约+非周期），与一般遍历性定义的对应关系；（3）马尔可夫性如何化简了熵率的计算（对比一般情况 $H(X_0\\mid X_{-\\infty}^{-1})$ 与马尔可夫情况 $H(X_0\\mid X_{-1})$）。", "options": [], "answer": "", "knowledge_point": "平稳马尔可夫信源与一般平稳遍历信源关系", "diagnosis_hint": "", "explanation": "<strong>参考答案</strong>：<br><strong>(1)</strong> 初始分布取稳态分布 $\\mu$ 时，$p_{X_k}=\\mu P^k=\\mu$，时刻边缘不变，且 $p(X_n,\\ldots,X_1)$ 在时移后等于 $p(X_{n+k},\\ldots,X_{1+k})$（因转移概率时不变），故平稳。<br><strong>(2)</strong> 不可约=任意状态互达（保证稳态分布唯一，即 Birkhoff 定理中系综均值唯一确定）；非周期=任意初始分布收敛到稳态（保证时间均值与系综均值相等，即 Birkhoff 遍历定理成立）。两者合在一起等价于一般遍历性定义中的时间平均=空间平均。<br><strong>(3)</strong> 一般情况 $H(X_0\\mid X_{-\\infty}^{-1})$ 需要考虑无穷过去历史，计算复杂。马尔可夫性保证知道 $X_{-1}$ 后更多历史不再提供信息，故 $H(X_0\\mid X_{-\\infty}^{-1})=H(X_0\\mid X_{-1})$，只需1步转移矩阵和稳态分布即可算出熵率，计算大幅简化。", "pitfall": ""}, {"type": "comprehensive", "points": 20, "question": "考虑三状态马尔可夫链，状态空间 $\\{s_1,s_2,s_3\\}$，转移矩阵：\n$$P=\\begin{bmatrix}0.5&0.5&0\\\\0&0.5&0.5\\\\0.5&0&0.5\\end{bmatrix}$$\n(a)（5分）求稳态分布 $\\mu$。\n(b)（5分）验证该链不可约（描述各状态的可达路径）。\n(c)（4分）判断该链是否非周期，并说明理由。\n(d)（6分）若该链遍历，计算熵率 $H(\\mathcal{X})$（$\\log$ 以2为底，$H(0.5,0.5,0)=1$ bit）。", "options": [], "answer": "", "knowledge_point": "平稳马尔可夫信源综合分析", "diagnosis_hint": "", "explanation": "<strong>参考答案</strong>：<br><strong>(a)</strong> 解 $\\mu P=\\mu$：$0.5\\mu_1+0.5\\mu_3=\\mu_1\\Rightarrow\\mu_1=\\mu_3$；$0.5\\mu_1+0.5\\mu_2=\\mu_2\\Rightarrow\\mu_1=\\mu_2$，故 $\\mu=(1/3,1/3,1/3)$。<br><br><strong>(b)</strong> $P_{12},P_{23},P_{31}>0$，构成环 $s_1\\to s_2\\to s_3\\to s_1$，任意两状态互达，不可约。<br><br><strong>(c)</strong> $P_{11}=P_{22}=P_{33}=0.5>0$，存在自环，故非周期（$d=1$）。<br><br><strong>(d)</strong> 不可约+非周期故遍历。$H(\\mathcal{X})=\\frac{1}{3}\\cdot[H(0.5,0.5,0)+H(0,0.5,0.5)+H(0.5,0,0.5)]=\\frac{1}{3}\\cdot(1+1+1)=\\mathbf{1}$ bit/符号。", "pitfall": ""}];
+var LABELS = {"page_title": "章节测试", "section": {"choice": "一、选择题", "tf": "二、判断题", "short": "三、简答题", "essay": "四、问答题", "comprehensive": "五、综合题"}, "section_order": ["choice", "tf", "short", "essay", "comprehensive"], "points_suffix": "分", "true_label": "正确", "false_label": "错误", "placeholder": "在此作答...", "pitfall_prefix": "易错提醒：", "correct_label": "正确", "wrong_label": "错误", "answer_prefix": "正确答案：", "reference_label": "参考答案", "graded_label": "已批改", "grade_button": "提交批改", "unanswered_label": "未作答", "wrong_review_title": "错题分析文档", "wrong_review_intro": "本次收录 __COUNT__ 道客观题错题。可以下载 Markdown 文档，或复制整段内容交给模型做错因分析和二次学习规划。", "no_wrong_questions": "本次客观题没有错题。主观题请对照参考答案自行复盘。", "download_wrong_review": "下载错题文档", "copy_wrong_review_prompt": "复制错题分析 Prompt", "score_label": "总分", "duration_prefix": "满分 100 分 | 建议 ", "duration_suffix": " 分钟 | 选择答案后点击提交批改"};
+var WRONG_REVIEW_PROMPT = "";
+var LAST_WRONG_REVIEW = '';
+
+function pointsOf(q) {
+  return q.points || q.score || 0;
+}
+
+function stripHtml(html) {
+  var div = document.createElement('div');
+  div.innerHTML = html || '';
+  return (div.textContent || div.innerText || '').replace(/\s+/g, ' ').trim();
+}
+
+// Convert Markdown fenced code blocks (```lang\n...\n```) and inline `code`
+// to <pre><code> / <code> HTML, then convert \n to <br> for plain text lines.
+function formatQuestion(text) {
+  if (!text) return '';
+  // 1. Replace fenced code blocks: ```lang\ncode\n```
+  text = text.replace(/```(\w*)\n([\s\S]*?)```/g, function(_, lang, code) {
+    var escaped = code
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+    var cls = lang ? ' class="language-' + lang + '"' : '';
+    return '<pre><code' + cls + '>' + escaped + '</code></pre>';
+  });
+  // 2. Replace inline backtick `code`
+  text = text.replace(/`([^`\n]+)`/g, function(_, code) {
+    var escaped = code.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    return '<code>' + escaped + '</code>';
+  });
+  // 3. Convert remaining \n to <br> (outside pre blocks already handled above)
+  // Split on <pre>...</pre> so we don't double-process code blocks
+  var parts = text.split(/(<pre>[\s\S]*?<\/pre>)/);
+  for (var i = 0; i < parts.length; i++) {
+    if (i % 2 === 0) {
+      parts[i] = parts[i].replace(/\n/g, '<br>');
+    }
+  }
+  return parts.join('');
+}
+
+function answerText(q, value) {
+  if (value === null || value === undefined || value === '') return LABELS.unanswered_label;
+  var idx = parseInt(value);
+  if (q.type === 'choice') {
+    return String.fromCharCode(65 + idx) + '. ' + ((q.options && q.options[idx]) ? stripHtml(q.options[idx]) : '');
+  }
+  if (q.type === 'tf') {
+    return idx === 0 ? LABELS.true_label : LABELS.false_label;
+  }
+  return String(value);
+}
+
+function normalizedAnswer(q) {
+  if (q.type === 'tf') {
+    if (q.answer === LABELS.true_label || q.answer === true || q.answer === 'true') return 0;
+    if (q.answer === LABELS.false_label || q.answer === false || q.answer === 'false') return 1;
+  }
+  return parseInt(q.answer);
+}
+
+function questionTypeLabel(type) {
+  return LABELS.section[type] || type;
+}
+
+function build(){
+  var container = document.getElementById('questions-container');
+  if (!container) { console.error('ExamPass: questions-container not found'); return; }
+  var h = '';
+  var sec = '';
+  var titles = LABELS.section;
+
+  for (var i = 0; i < Q.length; i++) {
+    var q = Q[i];
+    var s = q.type;
+    if (s !== sec) {
+      sec = s;
+      if (titles[s]) {
+        h += '<h3>' + titles[s] + '</h3>';
+      }
+    }
+
+    var qid = 'q' + i;
+    h += '<div class="q-card" id="card-' + qid + '">';
+    h += '<div class="q-num">' + (i+1) + '. (' + pointsOf(q) + ' ' + LABELS.points_suffix + ')</div>';
+    h += '<div class="q-text">' + formatQuestion(q.question) + '</div>';
+
+    if (q.type === 'choice') {
+      var opts = q.options || [];
+      for (var j = 0; j < opts.length; j++) {
+        h += '<label class="option" id="opt-' + qid + '-' + j + '" onclick="sel(\'' + qid + '\',' + j + ')">';
+        h += '<input type="radio" name="' + qid + '" value="' + j + '">' + String.fromCharCode(65+j) + '. ' + opts[j] + '</label>';
+      }
+    } else if (q.type === 'tf') {
+      h += '<label class="option" id="opt-' + qid + '-0" onclick="sel(\'' + qid + '\',0)">';
+      h += '<input type="radio" name="' + qid + '" value="0">' + LABELS.true_label + '</label>';
+      h += '<label class="option" id="opt-' + qid + '-1" onclick="sel(\'' + qid + '\',1)">';
+      h += '<input type="radio" name="' + qid + '" value="1">' + LABELS.false_label + '</label>';
+    } else {
+      h += '<textarea class="q-textarea" id="text-' + qid + '" placeholder="' + LABELS.placeholder + '" rows="3"></textarea>';
+    }
+
+    h += '<div class="result" id="result-' + qid + '">';
+    h += '<span class="badge" id="badge-' + qid + '"></span><span id="correct-' + qid + '"></span>';
+    h += '<div class="explanation">' + q.explanation + '</div>';
+    if (q.pitfall) {
+      h += '<div class="pitfall">' + LABELS.pitfall_prefix + q.pitfall + '</div>';
+    }
+    h += '</div></div>';
+  }
+
+  container.innerHTML = h;
+
+  // Re-render MathJax for dynamically inserted formulas
+  if (window.MathJax && MathJax.typesetPromise) {
+    MathJax.typesetPromise([container]).catch(function(err) {
+      console.error('MathJax typeset error:', err);
+    });
+  }
+}
+
+document.addEventListener('DOMContentLoaded', build);
+if (document.readyState === 'interactive' || document.readyState === 'complete') {
+  build();
+}
+
+function sel(qid, idx) {
+  var prefix = 'opt-' + qid + '-';
+  var all = document.querySelectorAll('[id^="' + prefix + '"]');
+  for (var i = 0; i < all.length; i++) {
+    all[i].classList.remove('selected');
+  }
+  var target = document.getElementById('opt-' + qid + '-' + idx);
+  if (target) {
+    target.classList.add('selected');
+  }
+  var radio = document.querySelector('input[name="' + qid + '"][value="' + idx + '"]');
+  if (radio) {
+    radio.checked = true;
+  }
+}
+
+function gradeAll() {
+  var score = 0;
+  var wrongItems = [];
+  for (var i = 0; i < Q.length; i++) {
+    var q = Q[i];
+    var qid = 'q' + i;
+    var card = document.getElementById('card-' + qid);
+    var result = document.getElementById('result-' + qid);
+    var badge = document.getElementById('badge-' + qid);
+    var correctEl = document.getElementById('correct-' + qid);
+    if (!card || !result) continue;
+
+    result.style.display = 'block';
+
+    if (q.type === 'choice' || q.type === 'tf') {
+      var radio = document.querySelector('input[name="' + qid + '"]:checked');
+      var correctIndex = normalizedAnswer(q);
+      if (radio && parseInt(radio.value) === correctIndex) {
+        score += pointsOf(q);
+        card.classList.add('correct');
+        badge.className = 'badge badge-ok';
+        badge.textContent = LABELS.correct_label;
+        correctEl.innerHTML = '';
+        var correctOpt = document.getElementById('opt-' + qid + '-' + correctIndex);
+        if (correctOpt) correctOpt.classList.add('correct-answer');
+      } else {
+        card.classList.add('wrong');
+        badge.className = 'badge badge-no';
+        badge.textContent = LABELS.wrong_label;
+        var ansText = answerText(q, correctIndex);
+        correctEl.innerHTML = LABELS.answer_prefix + ansText;
+        if (radio) {
+          var wrongOpt = document.getElementById('opt-' + qid + '-' + radio.value);
+          if (wrongOpt) wrongOpt.classList.add('wrong-answer');
+        }
+        var correctOpt = document.getElementById('opt-' + qid + '-' + correctIndex);
+        if (correctOpt) correctOpt.classList.add('correct-answer');
+        wrongItems.push({
+          number: i + 1,
+          type: questionTypeLabel(q.type),
+          points: pointsOf(q),
+          question: stripHtml(q.question),
+          options: (q.options || []).map(stripHtml),
+          userAnswer: answerText(q, radio ? radio.value : null),
+          correctAnswer: ansText,
+          explanation: stripHtml(q.explanation),
+          pitfall: stripHtml(q.pitfall || ''),
+          knowledgePoint: stripHtml(q.knowledge_point || q.knowledgePoint || '')
+        });
+      }
+    } else {
+      card.classList.add('correct');
+      badge.className = 'badge badge-ref';
+      badge.textContent = LABELS.reference_label;
+    }
+  }
+
+  var sb = document.getElementById('score-box');
+  if (sb) {
+    sb.style.display = 'block';
+    document.getElementById('score-num').textContent = score;
+    sb.scrollIntoView({behavior:'smooth'});
+  }
+
+  var opts = document.querySelectorAll('.option');
+  for (var i = 0; i < opts.length; i++) opts[i].style.pointerEvents = 'none';
+  var tas = document.querySelectorAll('.q-textarea');
+  for (var i = 0; i < tas.length; i++) tas[i].disabled = true;
+
+  var btn = document.getElementById('grade-btn');
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = LABELS.graded_label;
+  }
+
+  buildWrongReview(wrongItems);
+
+  // Re-render MathJax for revealed explanations
+  if (window.MathJax && MathJax.typesetPromise) {
+    MathJax.typesetPromise().catch(function(err) {
+      console.error('MathJax typeset error:', err);
+    });
+  }
+}
+
+function buildWrongReview(wrongItems) {
+  var box = document.getElementById('wrong-review-box');
+  if (!box) return;
+
+  LAST_WRONG_REVIEW = renderWrongReviewMarkdown(wrongItems);
+
+  if (!wrongItems.length) {
+    box.style.display = 'block';
+    box.innerHTML = '<h3>' + LABELS.wrong_review_title + '</h3><p>' + LABELS.no_wrong_questions + '</p>';
+    return;
+  }
+
+  box.style.display = 'block';
+  box.innerHTML = [
+    '<h3>' + LABELS.wrong_review_title + '</h3>',
+    '<p>' + LABELS.wrong_review_intro.replace('__COUNT__', wrongItems.length) + '</p>',
+    '<div class="wrong-review-actions">',
+    '<button type="button" onclick="downloadWrongReview()">' + LABELS.download_wrong_review + '</button>',
+    '<button type="button" onclick="copyWrongReviewPrompt()">' + LABELS.copy_wrong_review_prompt + '</button>',
+    '</div>',
+    '<textarea id="wrong-review-text" readonly rows="12">' + LAST_WRONG_REVIEW.replace(/&/g, '&amp;').replace(/</g, '&lt;') + '</textarea>'
+  ].join('');
+}
+
+function renderWrongReviewMarkdown(wrongItems) {
+  var now = new Date().toLocaleString();
+  var lines = [];
+
+  lines.push('# ExamPass 错题分析文档');
+  lines.push('');
+  lines.push('- 生成时间：' + now);
+  lines.push('- 错题数量：' + wrongItems.length);
+  lines.push('');
+  lines.push('## 给模型的错题分析 Prompt');
+  lines.push('');
+  if (WRONG_REVIEW_PROMPT) {
+    lines.push(WRONG_REVIEW_PROMPT);
+  } else {
+    lines.push('请根据下面的错题记录，分析我的错因，并给出继续学习方案。要求：');
+    lines.push('1. 按知识模块归类错题，不要只逐题复述答案；');
+    lines.push('2. 判断每道题错在概念定义、公式推导、图表理解、条件适用、计算步骤、概念混淆还是审题；');
+    lines.push('3. 对涉及公式或推导的错题，补全从前提到结论的推导链条，不能跳步；');
+    lines.push('4. 对选择题，解释我选错选项为什么有迷惑性，以及正确选项和错误选项的关键边界；');
+    lines.push('5. 给出需要回看课件的具体知识点、图表、公式和页/章节线索；');
+    lines.push('6. 最后生成一份二次学习清单和 5 道针对这些薄弱点的进阶训练题。');
+  }
+  lines.push('');
+  lines.push('## 错题记录');
+  lines.push('');
+
+  if (!wrongItems.length) {
+    lines.push('本次没有客观题错题。');
+    return lines.join('\n');
+  }
+
+  for (var i = 0; i < wrongItems.length; i++) {
+    var item = wrongItems[i];
+    lines.push('### 错题 ' + (i + 1) + '：第 ' + item.number + ' 题');
+    lines.push('');
+    lines.push('- 题型：' + item.type);
+    lines.push('- 分值：' + item.points);
+    lines.push('- 题干：' + item.question);
+    if (item.options.length) {
+      lines.push('- 选项：');
+      for (var j = 0; j < item.options.length; j++) {
+        lines.push('  - ' + String.fromCharCode(65 + j) + '. ' + item.options[j]);
+      }
+    }
+    lines.push('- 我的答案：' + item.userAnswer);
+    lines.push('- 正确答案：' + item.correctAnswer);
+    lines.push('- 解析：' + item.explanation);
+    if (item.pitfall) lines.push('- 易错点：' + item.pitfall);
+    if (item.knowledgePoint) lines.push('- 对应知识点：' + item.knowledgePoint);
+    lines.push('');
+  }
+
+  return lines.join('\n');
+}
+
+function downloadWrongReview() {
+  if (!LAST_WRONG_REVIEW) return;
+  var blob = new Blob([LAST_WRONG_REVIEW], {type: 'text/markdown;charset=utf-8'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = '错题分析文档.md';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function copyWrongReviewPrompt() {
+  var text = LAST_WRONG_REVIEW || '';
+  if (!text) return;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text);
+  } else {
+    var ta = document.getElementById('wrong-review-text');
+    if (ta) {
+      ta.focus();
+      ta.select();
+      document.execCommand('copy');
+    }
+  }
+}
+
+</script>
+</body>
+</html>

@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>模块一 · 基础工具（信息度量与不等式）</title>
+<script>
+MathJax = { tex: { inlineMath: [['$','$'],['\\(','\\)']], displayMath: [['$$','$$'],['\\[','\\]']] }, svg: { fontCache: 'global' } };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<style>
+:root{
+  --bg:#0f1419; --card:#1a212b; --card2:#222b37; --ink:#e6edf3; --muted:#9aa7b4;
+  --line:#2d3845; --accent:#4ea1ff; --pf:#ff6b6b; --ca:#ffb04e; --co:#5ed98a;
+  --warn:#ffd166;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;line-height:1.85;font-size:17px}
+.wrap{max-width:860px;margin:0 auto;padding:0 22px 120px}
+header{position:sticky;top:0;z-index:50;background:rgba(15,20,25,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:14px 22px}
+header .inner{max-width:860px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+header h1{font-size:18px;margin:0}
+header .nav a{color:var(--muted);text-decoration:none;font-size:13px;margin-left:14px}
+header .nav a:hover{color:var(--accent)}
+h2{margin:54px 0 6px;font-size:25px;padding-top:18px;border-top:2px solid var(--line)}
+h2 .tag{font-size:13px;font-weight:600;color:var(--muted);margin-left:8px}
+h3{margin:34px 0 8px;font-size:20px;color:#cfe3ff}
+h4{margin:22px 0 6px;font-size:17px;color:var(--warn)}
+p{margin:10px 0}
+.lead{color:var(--muted);font-size:16px;margin:6px 0 22px}
+.box{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 20px;margin:18px 0}
+.box.intuition{border-left:4px solid var(--accent)}
+.box.key{border-left:4px solid var(--co);background:#16241c}
+.box.proof{border-left:4px solid var(--pf);background:#241718}
+.box.warn{border-left:4px solid var(--warn);background:#231f12}
+.box.ex{border-left:4px solid var(--ca);background:#241e14}
+.box .label{font-weight:700;font-size:13px;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px}
+.box.intuition .label{color:var(--accent)}
+.box.key .label{color:var(--co)}
+.box.proof .label{color:var(--pf)}
+.box.warn .label{color:var(--warn)}
+.box.ex .label{color:var(--ca)}
+.formula{overflow-x:auto;overflow-y:hidden}
+.step{margin:8px 0 8px 4px;padding-left:14px;border-left:2px solid var(--line)}
+.intro{background:var(--card2);border-radius:12px;padding:22px 24px;margin:24px 0}
+.toc{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 22px;margin:22px 0}
+.toc a{color:var(--accent);text-decoration:none}
+.toc a:hover{text-decoration:underline}
+.toc ul{margin:6px 0;padding-left:20px}
+.toc li{margin:3px 0}
+table{border-collapse:collapse;width:100%;margin:14px 0;font-size:15px}
+th,td{border:1px solid var(--line);padding:8px 11px;text-align:left}
+th{background:var(--card2);color:#cfe3ff}
+code{background:#0b0f14;padding:1px 6px;border-radius:5px;font-size:14px;color:#ffd9a0}
+.muted{color:var(--muted)}
+strong{color:#fff}
+.tip{font-size:14px;color:var(--muted);margin-top:6px}
+.back{display:inline-block;margin-top:8px;color:var(--accent);text-decoration:none;font-size:14px}
+hr{border:none;border-top:1px dashed var(--line);margin:30px 0}
+.qa{background:#13202b;border:1px solid var(--line);border-radius:10px;padding:14px 18px;margin:14px 0}
+.qa .q{color:var(--warn);font-weight:600}
+</style>
+</head>
+<body>
+<header><div class="inner">
+  <h1>模块一 · 基础工具</h1>
+  <div class="nav">
+    <a href="#s1">信息度量</a>
+    <a href="#s2">熵·条件熵·互信息</a>
+    <a href="#s3">KL散度</a>
+    <a href="#s4">不等式</a>
+    <a href="#s5">凹凸性</a>
+    <a href="信息论复习.html">← 总览</a>
+  </div>
+</div></header>
+
+<div class="wrap">
+
+<div class="intro">
+<p style="margin-top:0"><strong>这一模块是整门课的"语言"。</strong>后面所有定理（AEP、信道容量、率失真）都是用熵、互信息、KL 散度这几个量、外加 Jensen / Log-sum 两个不等式拼出来的。这里看不懂，后面一定卡住。</p>
+<p style="margin-bottom:0">所以这份材料不追求"全"，而追求<strong>让你真的懂每个符号在说什么</strong>。每个概念都先给一句"它到底在量什么"的大白话，再给公式，再给一个能算的小例子。建议配合 <a href="信息论复习.html" style="color:var(--accent)">总览页</a> 的依赖图一起看。</p>
+</div>
+
+<div class="toc">
+<strong>本页目录</strong>
+<ul>
+<li><a href="#s1">1. 自信息：一切的起点（为什么是 −log p）</a></li>
+<li><a href="#s2">2. 熵、联合熵、条件熵、互信息（一张 Venn 图全搞定）</a></li>
+<li><a href="#s3">3. KL 散度与交叉熵（"用错了分布要多付多少代价"）</a></li>
+<li><a href="#s4">4. 三大不等式：Jensen / Log-sum / Gibbs</a></li>
+<li><a href="#s5">5. 凹凸性（为什么后面能"max/min 一定存在"）</a></li>
+<li><a href="#cheat">6. 一页公式速查 + 自测</a></li>
+</ul>
+</div>
+
+<!-- ================= 1 ================= -->
+<h2 id="s1">1. 自信息：一切的起点 <span class="tag">概念</span></h2>
+<p class="lead">关键词：意外程度、−log p、单位 bit</p>
+
+<p>信息论第一个、也是最该想通的问题：<strong>"一件事发生，给了我们多少信息？"</strong></p>
+
+<div class="box intuition">
+<span class="label">直觉</span>
+<p style="margin-top:0">信息量 = <strong>意外程度</strong>。</p>
+<ul style="margin:6px 0">
+<li>"明天太阳从东边升起" —— 概率≈1，毫不意外，<strong>信息量≈0</strong>。</li>
+<li>"明天彩票中头奖" —— 概率极小，极其意外，<strong>信息量极大</strong>。</li>
+</ul>
+<p style="margin-bottom:0">所以信息量应该是概率 $p$ 的<strong>递减</strong>函数：$p$ 越小，信息越大。</p>
+</div>
+
+<p>为什么偏偏选 $-\log p$，而不是 $1/p$ 或别的递减函数？因为我们还要求信息能<strong>"相加"</strong>：两件<strong>独立</strong>的事一起发生，总信息应该等于各自信息之和。</p>
+
+<div class="box key">
+<span class="label">自信息（self-information）</span>
+<div class="formula">$$ I(x) = -\log p(x) = \log\frac{1}{p(x)} $$</div>
+<p>独立事件 $x,y$：$p(x,y)=p(x)p(y)$，于是
+$$I(x,y)=-\log\!\big(p(x)p(y)\big)=-\log p(x)-\log p(y)=I(x)+I(y).$$
+<strong>只有对数</strong>能把"乘法（独立概率相乘）"变成"加法（信息相加）"，这就是 log 的来历。</p>
+<p style="margin-bottom:0"><strong>单位</strong>：log 以 2 为底 → <strong>bit（比特）</strong>；以 e 为底 → nat；以 10 为底 → hartley。本课默认 $\log=\log_2$，单位 bit。</p>
+</div>
+
+<div class="box ex">
+<span class="label">小例子</span>
+<p style="margin-top:0">抛一枚均匀硬币，正面概率 $1/2$。结果"正面"的自信息：
+$$I=-\log_2\tfrac12=1\text{ bit}.$$
+正好对应"一个二进制位能记录的信息"。掷一个均匀骰子，某个点数的自信息 $-\log_2\tfrac16\approx2.58$ bit。</p>
+</div>
+
+<!-- ================= 2 ================= -->
+<h2 id="s2">2. 熵、条件熵、互信息 <span class="tag">概念 + 计算</span></h2>
+<p class="lead">关键词：平均意外、一张 Venn 图、链式法则</p>
+
+<h3 id="ent">2.1 熵 $H(X)$：自信息的平均</h3>
+<p>单次事件的信息是自信息；如果问"这个随机变量 $X$ <strong>平均</strong>带来多少信息 / 有多少不确定性"，就对自信息求期望，这就是<strong>熵</strong>。</p>
+
+<div class="box key">
+<span class="label">熵的定义</span>
+<div class="formula">$$ H(X)=\mathbb E[-\log p(X)]=-\sum_{x} p(x)\log p(x) $$</div>
+<p style="margin-bottom:0">读作"$X$ 的熵"。它<strong>只跟分布有关，跟取值是什么无关</strong>（把骰子点数换成颜色，熵不变）。</p>
+</div>
+
+<div class="box intuition">
+<span class="label">三个看待熵的角度（都对）</span>
+<ul style="margin:6px 0 0">
+<li><strong>不确定性</strong>：结果越难猜，熵越大。</li>
+<li><strong>平均意外</strong>：长期看每次平均收到多少 bit 的"惊讶"。</li>
+<li><strong>压缩极限</strong>（最重要，后面 L4/L7/L8 全靠它）：平均<strong>至少</strong>需要 $H(X)$ 个 bit 才能无损编码 $X$。熵就是压缩的物理下界。</li>
+</ul>
+</div>
+
+<h4>二元熵函数（必须会画）</h4>
+<p>$X$ 只取 0/1，$P(X=1)=p$。则
+$$H(p)=-p\log p-(1-p)\log(1-p).$$</p>
+<div class="box ex">
+<span class="label">记住这条曲线的形状</span>
+<ul style="margin:6px 0 0">
+<li>$p=0$ 或 $p=1$：结果确定，$H=0$（约定 $0\log0=0$）。</li>
+<li>$p=1/2$：最不确定，$H=1$ bit，达到最大。</li>
+<li>曲线是一个<strong>开口向下的拱形</strong>（凹函数），关于 $p=1/2$ 对称。</li>
+</ul>
+<p class="tip">考试常考："$H(X)$ 何时最大？" → 均匀分布时最大，$H=\log|\mathcal X|$。这由后面的 Jensen 不等式保证。</p>
+</div>
+
+<h3 id="joint">2.2 联合熵与条件熵</h3>
+<div class="box key">
+<span class="label">定义</span>
+<p style="margin-top:0"><strong>联合熵</strong>（两个变量一起的总不确定性）：
+$$H(X,Y)=-\sum_{x,y}p(x,y)\log p(x,y).$$</p>
+<p><strong>条件熵</strong>（已知 $Y$ 后，$X$ 还剩多少不确定性）：
+$$H(X\mid Y)=-\sum_{x,y}p(x,y)\log p(x\mid y)=\sum_y p(y)\,H(X\mid Y=y).$$</p>
+<p style="margin-bottom:0" class="tip">注意求和外面用的是<strong>联合分布 $p(x,y)$</strong>，里面 log 用的是<strong>条件分布 $p(x\mid y)$</strong>。这是初学最容易写错的地方。</p>
+</div>
+
+<div class="box intuition">
+<span class="label">条件熵的直觉</span>
+<p style="margin:0">"先告诉你 $Y$，再问你 $X$ 是什么，你平均还有多少不确定？" 如果 $Y$ 完全决定了 $X$，则 $H(X\mid Y)=0$；如果 $Y$ 跟 $X$ 毫无关系，则 $H(X\mid Y)=H(X)$（知道 $Y$ 没帮上忙）。<strong>条件总是让不确定性不增加：$H(X\mid Y)\le H(X)$。</strong></p>
+</div>
+
+<h4>链式法则（Chain Rule）</h4>
+<div class="box key">
+<div class="formula">$$ H(X,Y)=H(X)+H(Y\mid X)=H(Y)+H(X\mid Y) $$</div>
+<p style="margin-bottom:0">大白话：<strong>"两个一起的总信息 = 先看第一个的信息 + 已知第一个后第二个的剩余信息。"</strong> 多变量版本：$H(X_1,\dots,X_n)=\sum_{i}H(X_i\mid X_1,\dots,X_{i-1})$。这条法则在 AEP、信道定理里反复用。</p>
+</div>
+
+<h3 id="mi">2.3 互信息 $I(X;Y)$：核心中的核心</h3>
+<p>互信息回答：<strong>"知道 $Y$，能帮我减少多少关于 $X$ 的不确定性？"</strong> 这正是"通信"的本质——信道把 $X$ 发出去，收到 $Y$，我们到底学到了多少 $X$ 的信息。</p>
+
+<div class="box key">
+<span class="label">互信息的几个等价写法</span>
+<div class="formula">$$ I(X;Y)=H(X)-H(X\mid Y)=H(Y)-H(Y\mid X)=H(X)+H(Y)-H(X,Y) $$</div>
+<div class="formula">$$ I(X;Y)=\sum_{x,y}p(x,y)\log\frac{p(x,y)}{p(x)p(y)} $$</div>
+<p style="margin-bottom:0">最后这个形式说明：<strong>互信息 = 联合分布 $p(x,y)$ 与"独立假设" $p(x)p(y)$ 之间的 KL 散度</strong>（见第 3 节）。所以 $I(X;Y)\ge0$，且 $=0$ 当且仅当 $X,Y$ 独立。</p>
+</div>
+
+<div class="box intuition">
+<span class="label">用一张 Venn 图记住全部关系</span>
+<p style="margin-top:0">把 $H(X)$ 和 $H(Y)$ 想成两个圆：</p>
+<ul style="margin:6px 0">
+<li>两圆的<strong>并集</strong> = 联合熵 $H(X,Y)$</li>
+<li>两圆的<strong>交集</strong> = 互信息 $I(X;Y)$</li>
+<li>$X$ 圆里、不与 $Y$ 重叠的部分 = 条件熵 $H(X\mid Y)$</li>
+<li>$Y$ 圆里、不与 $X$ 重叠的部分 = $H(Y\mid X)$</li>
+</ul>
+<p style="margin-bottom:0">所有恒等式（$H(X)=I(X;Y)+H(X\mid Y)$ 等）都能从这张图"看"出来。<strong>考前把这张图默画一遍，模块一就稳了。</strong></p>
+</div>
+
+<div class="box ex">
+<span class="label">小例子：二元对称信道 BSC</span>
+<p style="margin-top:0">输入 $X\in\{0,1\}$ 均匀，信道以概率 $p$ 翻转比特，输出 $Y$。则
+$$H(Y\mid X)=H(p)\ (\text{每个输入都被翻转概率 }p),\quad H(Y)=1\ (\text{输出也均匀}).$$
+$$I(X;Y)=H(Y)-H(Y\mid X)=1-H(p).$$
+当 $p=0$（无噪声）：$I=1$ bit，全部信息传过去；当 $p=1/2$（纯噪声）：$H(p)=1$，$I=0$，什么也没传到。<strong>这就是后面信道容量的雏形。</strong></p>
+</div>
+
+<!-- ================= 3 ================= -->
+<h2 id="s3">3. KL 散度与交叉熵 <span class="tag">概念</span></h2>
+<p class="lead">关键词：分布之间的"距离"、用错分布的代价、非对称</p>
+
+<div class="box intuition">
+<span class="label">一句话直觉</span>
+<p style="margin:0">真实分布是 $p$，但你<strong>误以为</strong>是 $q$，并按 $q$ 去设计编码。<strong>KL 散度 $D(p\Vert q)$ 就是你因为"用错分布"而每个符号平均多付的 bit 数。</strong> 用对了（$q=p$）就不多付，$D=0$。</p>
+</div>
+
+<div class="box key">
+<span class="label">相对熵 / KL 散度</span>
+<div class="formula">$$ D(p\Vert q)=\sum_x p(x)\log\frac{p(x)}{q(x)} $$</div>
+<p>性质（务必记牢）：</p>
+<ul style="margin:6px 0 0">
+<li><strong>非负</strong>：$D(p\Vert q)\ge0$，等号 ⟺ $p=q$（即第 4 节的 Gibbs 不等式）。</li>
+<li><strong>非对称</strong>：$D(p\Vert q)\ne D(q\Vert p)$ 一般成立，<strong>所以它不是真正的"距离"</strong>，只是个散度。</li>
+<li>可能为 $+\infty$（当某个 $q(x)=0$ 而 $p(x)>0$）。</li>
+</ul>
+</div>
+
+<h4>交叉熵 = 熵 + KL</h4>
+<div class="box key">
+<div class="formula">$$ CE(p|q)=-\sum_x p(x)\log q(x)=\underbrace{H(p)}_{\text{真实最优}}+\underbrace{D(p\Vert q)}_{\text{用错分布的罚款}} $$</div>
+<p style="margin-bottom:0">这就是机器学习里 cross-entropy loss 的来历：最小化交叉熵 = 最小化 $D(p\Vert q)$ = 让模型 $q$ 逼近真实 $p$。信息论和深度学习在这里接上了。</p>
+</div>
+
+<div class="box ex">
+<span class="label">小例子</span>
+<p style="margin:0">真实 $p=(\tfrac12,\tfrac12)$，你以为 $q=(\tfrac14,\tfrac34)$：
+$$D(p\Vert q)=\tfrac12\log\tfrac{1/2}{1/4}+\tfrac12\log\tfrac{1/2}{3/4}=\tfrac12\log2+\tfrac12\log\tfrac23\approx0.5-0.29=0.21\text{ bit}.$$
+即每个符号平均多花 0.21 bit。</p>
+</div>
+
+<!-- ================= 4 ================= -->
+<h2 id="s4">4. 三大不等式 <span class="tag">★ 证明工具</span></h2>
+<p class="lead">关键词：Jensen 是母不等式，其余都是它的孩子</p>
+
+<div class="box warn">
+<span class="label">为什么这节最重要</span>
+<p style="margin:0">信息论的"难度天梯"里，<strong>证明 &gt; 计算 &gt; 概念</strong>。而几乎每个证明的<strong>临门一脚</strong>都是这三个不等式之一。把它们当工具背熟、会用，后面 AEP、信道定理才证得动。</p>
+</div>
+
+<h3 id="jensen">4.1 Jensen 不等式（母不等式）</h3>
+<div class="box key">
+<span class="label">凸函数 / 凹函数</span>
+<p style="margin-top:0"><strong>凸函数（convex，开口向上 ∪）</strong>，如 $x^2$、$-\log x$：函数图像在任意两点连线<strong>下方</strong>。<br>
+<strong>凹函数（concave，开口向下 ∩）</strong>，如 $\log x$、$\sqrt x$：图像在连线<strong>上方</strong>。</p>
+<p style="margin-bottom:0">判据：二阶导 $f''\ge0$ ⟹ 凸；$f''\le0$ ⟹ 凹。例：$(\log x)''=-1/x^2<0$，所以 $\log$ 是<strong>凹</strong>的。</p>
+</div>
+
+<div class="box key">
+<span class="label">Jensen 不等式</span>
+<p style="margin-top:0">$f$ <strong>凸</strong>：$\ \mathbb E[f(X)]\ \ge\ f(\mathbb E[X])$。<br>
+$f$ <strong>凹</strong>：$\ \mathbb E[f(X)]\ \le\ f(\mathbb E[X])$（不等号反向）。</p>
+<p style="margin-bottom:0">等号成立 ⟺ $X$ 是常数（或 $f$ 在 $X$ 的取值范围上是直线）。</p>
+</div>
+
+<div class="box intuition">
+<span class="label">怎么记不等号方向（不靠背）</span>
+<p style="margin:0">凸函数 ∪ 形：先取期望（点落在中间）再算 $f$，会落在曲线<strong>底部</strong>；而"先算各点 $f$ 再平均"会落在连线<strong>上方</strong>。所以"平均的 $f$"≥"$f$ 的平均的位置"，即 $\mathbb E f(X)\ge f(\mathbb E X)$。画个 ∪ 配两个点连线，立刻看出来。</p>
+</div>
+
+<div class="box ex">
+<span class="label">立刻用一次：证明"均匀分布熵最大"</span>
+<div class="step">
+<p style="margin-top:0">设 $|\mathcal X|=M$。用 $\log$ 是凹函数 + Jensen：</p>
+<div class="formula">$$H(X)=\sum_x p(x)\log\frac1{p(x)}=\mathbb E\Big[\log\tfrac1{p(X)}\Big]\overset{\text{Jensen}}{\le}\log\,\mathbb E\Big[\tfrac1{p(X)}\Big]=\log\sum_x p(x)\tfrac1{p(x)}=\log M.$$</div>
+<p style="margin-bottom:0">等号 ⟺ $1/p(x)$ 是常数 ⟺ $p(x)=1/M$ 均匀分布。<strong>结论：$H(X)\le\log M$，均匀时取最大。</strong> 这就是一个"用 Jensen 临门一脚"的完整小证明，体会这个套路。</p>
+</div>
+</div>
+
+<h3 id="logsum">4.2 Log-sum 不等式</h3>
+<div class="box key">
+<span class="label">陈述</span>
+<p style="margin-top:0">对非负数 $a_1,\dots,a_n$ 和 $b_1,\dots,b_n$：
+$$\sum_i a_i\log\frac{a_i}{b_i}\ \ge\ \Big(\sum_i a_i\Big)\log\frac{\sum_i a_i}{\sum_i b_i}.$$
+等号 ⟺ 所有 $a_i/b_i$ 相等。</p>
+<p style="margin-bottom:0" class="tip">它本质是把 Jensen 用在凸函数 $t\log t$ 上。用途：一招证明 <strong>$D(p\Vert q)\ge0$</strong>、证明 KL 的凸性、证明 Huffman 相关性质。</p>
+</div>
+
+<h3 id="gibbs">4.3 Gibbs 不等式（$D\ge0$）—— 信息论的"地基"</h3>
+<div class="box proof">
+<span class="label">★ 必会证明：$D(p\Vert q)\ge0$</span>
+<p style="margin-top:0">这是最该会默写的入门级证明，方法二选一。</p>
+<p><strong>方法 A（Log-sum 一行）</strong>：在 Log-sum 里令 $a_i=p(x_i),\ b_i=q(x_i)$，则
+$$D(p\Vert q)=\sum p\log\tfrac pq\ \ge\ \Big(\sum p\Big)\log\frac{\sum p}{\sum q}=1\cdot\log\frac11=0.$$</p>
+<p><strong>方法 B（Jensen + $\log$ 凹）</strong>，更常考：</p>
+<div class="step">
+<div class="formula">$$-D(p\Vert q)=\sum_x p(x)\log\frac{q(x)}{p(x)}\overset{\text{Jensen, }\log\text{凹}}{\le}\log\sum_x p(x)\frac{q(x)}{p(x)}=\log\sum_x q(x)=\log 1=0.$$</div>
+</div>
+<p style="margin-bottom:0">于是 $-D\le0$，即 $D\ge0$。等号 ⟺ $q(x)/p(x)$ 为常数 ⟺ $p=q$。<strong>由此立刻推出：$I(X;Y)\ge0$、$H(X)\le\log M$、条件减熵 $H(X\mid Y)\le H(X)$——它们全是 $D\ge0$ 的化身。</strong></p>
+</div>
+
+<!-- ================= 5 ================= -->
+<h2 id="s5">5. 凹凸性 <span class="tag">概念，但支撑后面所有"存在最优"</span></h2>
+<p class="lead">关键词：为什么信道容量、率失真"max/min 一定取得到"</p>
+
+<div class="box intuition">
+<span class="label">为什么要关心凹凸</span>
+<p style="margin:0">后面要算<strong>信道容量 $C=\max_{p(x)}I(X;Y)$</strong> 和<strong>率失真 $R(D)=\min I(\hat V;V)$</strong>。如果被优化的函数是凹的（求 max）或凸的（求 min），那么<strong>极值唯一、局部最优即全局最优</strong>，KKT 条件能解出来。凹凸性就是这些"求极值有意义"的保证。</p>
+</div>
+
+<div class="box key">
+<span class="label">需要记住的三条结论</span>
+<table>
+<tr><th>对象</th><th>性质</th><th>怎么用</th></tr>
+<tr><td>$H(p)$ 关于分布 $p$</td><td><strong>凹</strong>（∩）</td><td>所以有唯一最大值（均匀分布）</td></tr>
+<tr><td>$D(p\Vert q)$ 关于 $(p,q)$</td><td><strong>凸</strong>（∪）</td><td>率失真求 min 时好用</td></tr>
+<tr><td>$I(X;Y)$</td><td>固定 $p(y\mid x)$ 时关于 $p(x)$ <strong>凹</strong>；固定 $p(x)$ 时关于 $p(y\mid x)$ <strong>凸</strong></td><td>信道容量 $\max_{p(x)}I$ 是凹函数求 max → 解唯一</td></tr>
+</table>
+<p style="margin-bottom:0" class="tip">"$I$ 对输入分布是凹的"是信道容量能用 KKT 求解的根本原因（L10）。"$I$ 对信道是凸的"则用在率失真（L14）。</p>
+</div>
+
+<hr>
+
+<!-- ================= cheat ================= -->
+<h2 id="cheat">6. 一页公式速查 + 自测 <span class="tag">考前 5 分钟</span></h2>
+
+<div class="box key">
+<span class="label">公式速查</span>
+<table>
+<tr><th>名称</th><th>公式</th><th>记忆点</th></tr>
+<tr><td>自信息</td><td>$I(x)=-\log p(x)$</td><td>越罕见越大</td></tr>
+<tr><td>熵</td><td>$H(X)=-\sum p\log p$</td><td>自信息的平均；压缩下界</td></tr>
+<tr><td>条件熵</td><td>$H(X\mid Y)=-\sum p(x,y)\log p(x\mid y)$</td><td>外面联合、里面条件</td></tr>
+<tr><td>链式法则</td><td>$H(X,Y)=H(X)+H(Y\mid X)$</td><td>先一个再补另一个</td></tr>
+<tr><td>互信息</td><td>$I(X;Y)=H(X)-H(X\mid Y)$</td><td>$Y$ 帮我省下的不确定性</td></tr>
+<tr><td>KL 散度</td><td>$D(p\Vert q)=\sum p\log\frac pq$</td><td>用错分布的罚款；$\ge0$，不对称</td></tr>
+<tr><td>互信息=KL</td><td>$I(X;Y)=D\big(p(x,y)\Vert p(x)p(y)\big)$</td><td>所以 $I\ge0$</td></tr>
+<tr><td>Jensen</td><td>凸 $\mathbb Ef(X)\ge f(\mathbb EX)$</td><td>凹反号</td></tr>
+<tr><td>最大熵</td><td>$H(X)\le\log|\mathcal X|$</td><td>均匀取等</td></tr>
+</table>
+</div>
+
+<div class="qa">
+<p class="q">自测 1：$H(X\mid Y)$ 和 $H(X)$ 谁大？为什么？</p>
+<p class="muted">答：$H(X\mid Y)\le H(X)$。"信息不会有害"——知道 $Y$ 只会减少或不变 $X$ 的不确定性。本质是 $I(X;Y)=H(X)-H(X\mid Y)\ge0$。注意：是<strong>平均</strong>不增；具体某个 $H(X\mid Y=y)$ 可能比 $H(X)$ 大。</p>
+</div>
+<div class="qa">
+<p class="q">自测 2：为什么 KL 散度不能叫"距离"？</p>
+<p class="muted">答：因为不对称（$D(p\Vert q)\ne D(q\Vert p)$），也不满足三角不等式。它只是衡量"从 $q$ 看 $p$ 有多意外"的散度。</p>
+</div>
+<div class="qa">
+<p class="q">自测 3：用一句话证明 $I(X;Y)\ge0$。</p>
+<p class="muted">答：$I(X;Y)=D\big(p(x,y)\Vert p(x)p(y)\big)\ge0$（Gibbs 不等式），等号当且仅当 $X,Y$ 独立。</p>
+</div>
+<div class="qa">
+<p class="q">自测 4：均匀分布熵最大，用哪个工具证？写出关键一步。</p>
+<p class="muted">答：Jensen + $\log$ 凹。关键一步：$H(X)=\mathbb E[\log\frac1{p(X)}]\le\log\mathbb E[\frac1{p(X)}]=\log M$。</p>
+</div>
+
+<a class="back" href="信息论复习.html">← 返回总览页</a>
+<a class="back" href="模块二_信源编码.html">前往模块二：信源编码 →</a>
+
+</div>
+</body>
+</html>
