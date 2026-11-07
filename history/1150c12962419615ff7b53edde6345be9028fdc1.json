@@ -1,0 +1,272 @@
+{
+  ".github/workflows/trigger-workflow.yml": {
+    "size": 552,
+    "time": 1794023057,
+    "hash": "1150c12962419615ff7b53edde6345be9028fdc1"
+  },
+  "LICENSE": {
+    "size": 20844,
+    "time": 1780499771,
+    "hash": "01598ef07d99c6e1580ac5f4a329747ec34183bf"
+  },
+  "README.md": {
+    "size": 4748,
+    "time": 1786823607,
+    "hash": "2c5591b88b89f6d7c76c2bd50222f62314e9a667"
+  },
+  "assignments/.gitkeep": {
+    "size": 0,
+    "time": 1780499771,
+    "hash": "01598ef07d99c6e1580ac5f4a329747ec34183bf"
+  },
+  "exams/.gitkeep": {
+    "size": 0,
+    "time": 1780499771,
+    "hash": "01598ef07d99c6e1580ac5f4a329747ec34183bf"
+  },
+  "exams/2026春_期末回忆版.pdf": {
+    "size": 117495,
+    "time": 1784373617,
+    "hash": "bf88d953d9cfd6989b1edc044dd981e9c722f91d"
+  },
+  "exams/2026春_期末回忆版.tex": {
+    "size": 9491,
+    "time": 1784373617,
+    "hash": "bf88d953d9cfd6989b1edc044dd981e9c722f91d"
+  },
+  "labs/.gitkeep": {
+    "size": 0,
+    "time": 1780499771,
+    "hash": "01598ef07d99c6e1580ac5f4a329747ec34183bf"
+  },
+  "notes/.gitkeep": {
+    "size": 0,
+    "time": 1780499771,
+    "hash": "01598ef07d99c6e1580ac5f4a329747ec34183bf"
+  },
+  "notes/2026_Quizot&KW_InforTheory_notes/README.md": {
+    "size": 1039,
+    "time": 1786823607,
+    "hash": "2c5591b88b89f6d7c76c2bd50222f62314e9a667"
+  },
+  "notes/2026_Quizot&KW_InforTheory_notes/信息论复习.html": {
+    "size": 36551,
+    "time": 1786823607,
+    "hash": "2c5591b88b89f6d7c76c2bd50222f62314e9a667"
+  },
+  "notes/2026_Quizot&KW_InforTheory_notes/信息论疑问解答.html": {
+    "size": 18964,
+    "time": 1786823607,
+    "hash": "2c5591b88b89f6d7c76c2bd50222f62314e9a667"
+  },
+  "notes/2026_Quizot&KW_InforTheory_notes/模块一_基础工具.html": {
+    "size": 22597,
+    "time": 1786823607,
+    "hash": "2c5591b88b89f6d7c76c2bd50222f62314e9a667"
+  },
+  "notes/2026_Quizot&KW_InforTheory_notes/模块三_信道编码.html": {
+    "size": 37979,
+    "time": 1786823607,
+    "hash": "2c5591b88b89f6d7c76c2bd50222f62314e9a667"
+  },
+  "notes/2026_Quizot&KW_InforTheory_notes/模块二_信源编码.html": {
+    "size": 43636,
+    "time": 1786823607,
+    "hash": "2c5591b88b89f6d7c76c2bd50222f62314e9a667"
+  },
+  "notes/2026_Quizot&KW_InforTheory_notes/知识清单/Lec10-知识清单.html": {
+    "size": 16353,
+    "time": 1786823607,
+    "hash": "2c5591b88b89f6d7c76c2bd50222f62314e9a667"
+  },
+  "notes/2026_Quizot&KW_InforTheory_notes/知识清单/Lec11-知识清单.html": {
+    "size": 15630,
+    "time": 1786823607,
+    "hash": "2c5591b88b89f6d7c76c2bd50222f62314e9a667"
+  },
+  "notes/2026_Quizot&KW_InforTheory_notes/知识清单/Lec12-知识清单.html": {
+    "size": 14429,
+    "time": 1786823607,
+    "hash": "2c5591b88b89f6d7c76c2bd50222f62314e9a667"
+  },
+  "notes/2026_Quizot&KW_InforTheory_notes/知识清单/Lec13-知识清单.html": {
+    "size": 14937,
+    "time": 1786823607,
+    "hash": "2c5591b88b89f6d7c76c2bd50222f62314e9a667"
+  },
+  "notes/2026_Quizot&KW_InforTheory_notes/知识清单/Lec14-知识清单.html": {
+    "size": 12780,
+    "time": 1786823607,
+    "hash": "2c5591b88b89f6d7c76c2bd50222f62314e9a667"
+  },
+  "notes/2026_Quizot&KW_InforTheory_notes/知识清单/Lec15-知识清单.html": {
+    "size": 17816,
+    "time": 1786823607,
+    "hash": "2c5591b88b89f6d7c76c2bd50222f62314e9a667"
+  },
+  "notes/2026_Quizot&KW_InforTheory_notes/知识清单/Lec16-知识清单.html": {
+    "size": 12987,
+    "time": 1786823607,
+    "hash": "2c5591b88b89f6d7c76c2bd50222f62314e9a667"
+  },
+  "notes/2026_Quizot&KW_InforTheory_notes/知识清单/Lec2-知识清单.html": {
+    "size": 28061,
+    "time": 1786823607,
+    "hash": "2c5591b88b89f6d7c76c2bd50222f62314e9a667"
+  },
+  "notes/2026_Quizot&KW_InforTheory_notes/知识清单/Lec3-知识清单.html": {
+    "size": 22677,
+    "time": 1786823607,
+    "hash": "2c5591b88b89f6d7c76c2bd50222f62314e9a667"
+  },
+  "notes/2026_Quizot&KW_InforTheory_notes/知识清单/Lec4-知识清单.html": {
+    "size": 21121,
+    "time": 1786823607,
+    "hash": "2c5591b88b89f6d7c76c2bd50222f62314e9a667"
+  },
+  "notes/2026_Quizot&KW_InforTheory_notes/知识清单/Lec5-知识清单.html": {
+    "size": 14445,
+    "time": 1786823607,
+    "hash": "2c5591b88b89f6d7c76c2bd50222f62314e9a667"
+  },
+  "notes/2026_Quizot&KW_InforTheory_notes/知识清单/Lec6-知识清单.html": {
+    "size": 16293,
+    "time": 1786823607,
+    "hash": "2c5591b88b89f6d7c76c2bd50222f62314e9a667"
+  },
+  "notes/2026_Quizot&KW_InforTheory_notes/知识清单/Lec7-知识清单.html": {
+    "size": 17843,
+    "time": 1786823607,
+    "hash": "2c5591b88b89f6d7c76c2bd50222f62314e9a667"
+  },
+  "notes/2026_Quizot&KW_InforTheory_notes/知识清单/Lec8-知识清单.html": {
+    "size": 13226,
+    "time": 1786823607,
+    "hash": "2c5591b88b89f6d7c76c2bd50222f62314e9a667"
+  },
+  "notes/2026_Quizot&KW_InforTheory_notes/知识清单/Lec9-知识清单.html": {
+    "size": 15787,
+    "time": 1786823607,
+    "hash": "2c5591b88b89f6d7c76c2bd50222f62314e9a667"
+  },
+  "notes/2026_Quizot&KW_InforTheory_notes/知识清单/README.md": {
+    "size": 2563,
+    "time": 1786823607,
+    "hash": "2c5591b88b89f6d7c76c2bd50222f62314e9a667"
+  },
+  "notes/2026_Quizot&KW_InforTheory_notes/章节测试/Lec10-章节测试.html": {
+    "size": 39872,
+    "time": 1786823607,
+    "hash": "2c5591b88b89f6d7c76c2bd50222f62314e9a667"
+  },
+  "notes/2026_Quizot&KW_InforTheory_notes/章节测试/Lec11-章节测试.html": {
+    "size": 41393,
+    "time": 1786823607,
+    "hash": "2c5591b88b89f6d7c76c2bd50222f62314e9a667"
+  },
+  "notes/2026_Quizot&KW_InforTheory_notes/章节测试/Lec12-章节测试.html": {
+    "size": 42420,
+    "time": 1786823607,
+    "hash": "2c5591b88b89f6d7c76c2bd50222f62314e9a667"
+  },
+  "notes/2026_Quizot&KW_InforTheory_notes/章节测试/Lec13-章节测试.html": {
+    "size": 42797,
+    "time": 1786823607,
+    "hash": "2c5591b88b89f6d7c76c2bd50222f62314e9a667"
+  },
+  "notes/2026_Quizot&KW_InforTheory_notes/章节测试/Lec14-章节测试.html": {
+    "size": 46194,
+    "time": 1786823607,
+    "hash": "2c5591b88b89f6d7c76c2bd50222f62314e9a667"
+  },
+  "notes/2026_Quizot&KW_InforTheory_notes/章节测试/Lec15-章节测试.html": {
+    "size": 45464,
+    "time": 1786823607,
+    "hash": "2c5591b88b89f6d7c76c2bd50222f62314e9a667"
+  },
+  "notes/2026_Quizot&KW_InforTheory_notes/章节测试/Lec16-章节测试.html": {
+    "size": 40671,
+    "time": 1786823607,
+    "hash": "2c5591b88b89f6d7c76c2bd50222f62314e9a667"
+  },
+  "notes/2026_Quizot&KW_InforTheory_notes/章节测试/Lec2-章节测试.html": {
+    "size": 56116,
+    "time": 1786823607,
+    "hash": "2c5591b88b89f6d7c76c2bd50222f62314e9a667"
+  },
+  "notes/2026_Quizot&KW_InforTheory_notes/章节测试/Lec3-章节测试.html": {
+    "size": 59749,
+    "time": 1786823607,
+    "hash": "2c5591b88b89f6d7c76c2bd50222f62314e9a667"
+  },
+  "notes/2026_Quizot&KW_InforTheory_notes/章节测试/Lec4-章节测试.html": {
+    "size": 63202,
+    "time": 1786823607,
+    "hash": "2c5591b88b89f6d7c76c2bd50222f62314e9a667"
+  },
+  "notes/2026_Quizot&KW_InforTheory_notes/章节测试/Lec5-章节测试.html": {
+    "size": 43137,
+    "time": 1786823607,
+    "hash": "2c5591b88b89f6d7c76c2bd50222f62314e9a667"
+  },
+  "notes/2026_Quizot&KW_InforTheory_notes/章节测试/Lec6-章节测试.html": {
+    "size": 42862,
+    "time": 1786823607,
+    "hash": "2c5591b88b89f6d7c76c2bd50222f62314e9a667"
+  },
+  "notes/2026_Quizot&KW_InforTheory_notes/章节测试/Lec7-章节测试.html": {
+    "size": 39389,
+    "time": 1786823607,
+    "hash": "2c5591b88b89f6d7c76c2bd50222f62314e9a667"
+  },
+  "notes/2026_Quizot&KW_InforTheory_notes/章节测试/Lec8-章节测试.html": {
+    "size": 37786,
+    "time": 1786823607,
+    "hash": "2c5591b88b89f6d7c76c2bd50222f62314e9a667"
+  },
+  "notes/2026_Quizot&KW_InforTheory_notes/章节测试/Lec9-章节测试.html": {
+    "size": 38933,
+    "time": 1786823607,
+    "hash": "2c5591b88b89f6d7c76c2bd50222f62314e9a667"
+  },
+  "notes/2026_Quizot&KW_InforTheory_notes/章节测试/README.md": {
+    "size": 2375,
+    "time": 1786823607,
+    "hash": "2c5591b88b89f6d7c76c2bd50222f62314e9a667"
+  },
+  "notes/2026_aqua_分章节习题集.pdf": {
+    "size": 479554,
+    "time": 1784387184,
+    "hash": "89124762312dc22cc8fcc329790e68dacae707f8"
+  },
+  "notes/2026_aqua_分章节习题集.tex": {
+    "size": 77994,
+    "time": 1784387184,
+    "hash": "89124762312dc22cc8fcc329790e68dacae707f8"
+  },
+  "notes/2026_aqua_笔记.pdf": {
+    "size": 454394,
+    "time": 1784373617,
+    "hash": "bf88d953d9cfd6989b1edc044dd981e9c722f91d"
+  },
+  "notes/2026_aqua_笔记.tex": {
+    "size": 89099,
+    "time": 1784373617,
+    "hash": "bf88d953d9cfd6989b1edc044dd981e9c722f91d"
+  },
+  "notes/2026_wuqinhong_笔记.pdf": {
+    "size": 1520128,
+    "time": 1785644440,
+    "hash": "2c326f10dc88c9591d08247dae73a00592c97f2c"
+  },
+  "readme.toml": {
+    "size": 4622,
+    "time": 1786823607,
+    "hash": "2c5591b88b89f6d7c76c2bd50222f62314e9a667"
+  },
+  "slides/.gitkeep": {
+    "size": 0,
+    "time": 1780499771,
+    "hash": "01598ef07d99c6e1580ac5f4a329747ec34183bf"
+  }
+}
